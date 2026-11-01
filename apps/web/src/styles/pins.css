@@ -1,0 +1,387 @@
+.pins-page {
+  width: min(960px, 100%);
+}
+
+.pins-page a.ui-btn {
+  text-decoration: none;
+}
+
+.pins-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pins-toolbar-main,
+.pins-tools,
+.pins-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pins-tools {
+  flex: 1 1 280px;
+  justify-content: flex-end;
+}
+
+.pins-tools .ui-input {
+  width: min(280px, 100%);
+}
+
+.pins-filter,
+.pins-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.pins-filter-btn {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.pins-filter-btn.is-active {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.pins-filter-btn:hover {
+  background: var(--surface-sunken);
+}
+
+.pins-loading {
+  display: grid;
+  gap: 10px;
+  padding: 8px 0 4px;
+}
+
+.pins-table {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+}
+
+.pins-table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pins-table th,
+.pins-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.pins-table thead th {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.pins-table tbody tr:last-child th,
+.pins-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.pins-name {
+  font-weight: 600;
+}
+
+.pins-name.is-unnamed {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.pins-cid code,
+.pins-type-code,
+.pins-menu-code,
+.pins-menu-cid-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.pins-type-code {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.pins-text-btn {
+  margin-inline-start: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 600;
+  min-height: 40px;
+}
+
+.pins-meta,
+.pins-menu-cid-value,
+.pins-menu-code {
+  display: none;
+}
+
+.pins-actions {
+  width: 1%;
+  text-align: end;
+}
+
+.pins-menu-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.pins-menu {
+  position: absolute;
+  z-index: 5;
+  inset-inline-end: 0;
+  top: calc(100% + 4px);
+  min-width: 220px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  display: grid;
+}
+
+.pins-menu button {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+  text-align: start;
+}
+
+.pins-menu button:hover,
+.pins-menu button:focus-visible {
+  background: var(--surface-sunken);
+}
+
+.pins-menu .is-danger {
+  color: var(--danger);
+}
+
+.pins-jobs {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.pins-jobs h2 {
+  margin: 0 0 10px;
+  font-size: var(--text-md);
+}
+
+.pins-jobs ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.pins-jobs p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.pins-job-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  font-weight: 600;
+}
+
+.pins-job-row span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pins-file progress {
+  width: 100%;
+  height: 6px;
+  margin-top: 8px;
+  accent-color: var(--primary);
+}
+
+.pins-form {
+  display: grid;
+  gap: 14px;
+}
+
+.pins-form p,
+.pins-file p {
+  margin: 0;
+  line-height: var(--leading-body);
+  overflow-wrap: anywhere;
+}
+
+.pins-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.pins-more {
+  margin: 0;
+}
+
+.pins-choice {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.pins-choice label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.pins-choice small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+@media (max-width: 720px) {
+  .pins-toolbar,
+  .pins-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pins-tools .ui-input {
+    width: 100%;
+  }
+
+  .pins-filter,
+  .pins-mode {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .pins-filter {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pins-filter-btn {
+    min-height: 44px;
+    padding: 8px 6px;
+    line-height: 1.2;
+    white-space: normal;
+  }
+
+  .pins-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .pins-table,
+  .pins-table tbody,
+  .pins-table tr,
+  .pins-table th,
+  .pins-table td {
+    display: block;
+    width: auto;
+  }
+
+  .pins-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name actions"
+      "meta meta";
+    gap: 2px 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pins-table tbody tr:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .pins-name-cell { grid-area: name; }
+  .pins-actions { grid-area: actions; align-self: start; }
+  .pins-table .pins-meta {
+    display: block;
+    grid-area: meta;
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+
+  .pins-table .pins-cid,
+  .pins-table .pins-type,
+  .pins-table .pins-size {
+    display: none;
+  }
+
+  .pins-table th,
+  .pins-table td {
+    border: 0;
+    padding: 0;
+  }
+
+  .pins-menu {
+    min-width: min(260px, 78vw);
+  }
+
+  .pins-menu-cid {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    min-height: 40px;
+    padding: 8px 10px;
+    gap: 4px;
+  }
+
+  .pins-menu-cid-value,
+  .pins-menu-code {
+    display: block;
+    color: var(--muted);
+    font-weight: 400;
+    overflow-wrap: anywhere;
+  }
+}

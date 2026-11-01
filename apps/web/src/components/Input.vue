@@ -18,6 +18,7 @@ const props = withDefaults(
     required?: boolean
     showPasswordLabel?: string
     hidePasswordLabel?: string
+    autofocus?: boolean
   }>(),
   {
     type: 'text',
@@ -30,6 +31,7 @@ const props = withDefaults(
     required: false,
     showPasswordLabel: 'Show password',
     hidePasswordLabel: 'Hide password',
+    autofocus: false,
   },
 )
 
@@ -56,6 +58,7 @@ const toggleLabel = computed(() => (visible.value ? props.hidePasswordLabel : pr
         :required="required || undefined"
         :aria-invalid="error ? 'true' : undefined"
         :aria-describedby="error || hint ? `${controlId}-note` : undefined"
+        :data-autofocus="autofocus ? '' : undefined"
         @blur="emit('blur')"
       >
       <button

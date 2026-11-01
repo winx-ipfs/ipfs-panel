@@ -53,7 +53,7 @@ npm install
 npm run dev
 ```
 
-Open the printed local URL. The Node card starts, stops, and restarts the node. Files adds, downloads, renames, moves, copies, and deletes files on that node. The dev server proxies `/api` and `/health` to `http://127.0.0.1:8080`. The largest upload is 512 MiB unless you set `-max-file-bytes` or `IPFS_PANEL_MAX_FILE_BYTES`. The rules are in [Files](docs/design/files.md).
+Open the printed local URL. The Node card starts, stops, and restarts the node. Files adds, downloads, renames, moves, copies, and deletes files on that node. Pins shows what this node is keeping, lets you pin a content ID or a file, and lets you unpin. The dev server proxies `/api` and `/health` to `http://127.0.0.1:8080`. The largest upload is 512 MiB unless you set `-max-file-bytes` or `IPFS_PANEL_MAX_FILE_BYTES`. A pin that has to be fetched from the network runs in the background for up to 30 minutes (`-pins-timeout` or `IPFS_PANEL_PINS_TIMEOUT`). The rules are in [Files](docs/design/files.md) and [Pins](docs/design/pins.md).
 
 Checks CI runs for the UI:
 
@@ -94,6 +94,10 @@ The shell, the tokens, and the rules for new screens are in [Design system](docs
 
 ![Files, light theme, 中文, narrow](docs/screenshots/files-list-light-zh-390.png)
 
+![Pins, light theme, 中文](docs/screenshots/pins-list-light-zh-1440.png)
+
+![Add pin, dark theme, English](docs/screenshots/pins-add-dark-en-1440.png)
+
 ## Read next
 
 - [Vision](docs/VISION.md)
@@ -101,6 +105,7 @@ The shell, the tokens, and the rules for new screens are in [Design system](docs
 - [Design system](docs/DESIGN-SYSTEM.md)
 - [Auth](docs/design/auth.md)
 - [Files](docs/design/files.md)
+- [Pins](docs/design/pins.md)
 - [Node lifecycle](docs/DESIGN-node-lifecycle.md)
 - [Contributing](CONTRIBUTING.md) (Git Flow, CI, hotfixes)
 - [Org setup](docs/ORG-SETUP.md) (repository settings checklist)
@@ -163,7 +168,7 @@ npm install
 npm run dev
 ```
 
-打开它打印出来的本机地址。节点卡片可以启动、停止和重启节点。文件页可以在这个节点上添加、下载、重命名、移动、复制和删除文件。开发服务器把 `/api` 和 `/health` 代理到 `http://127.0.0.1:8080`。单次上传默认最大 512 MiB，可以用 `-max-file-bytes` 或 `IPFS_PANEL_MAX_FILE_BYTES` 改。规则在[文件](docs/design/files.md)。
+打开它打印出来的本机地址。节点卡片可以启动、停止和重启节点。文件页可以在这个节点上添加、下载、重命名、移动、复制和删除文件。固定页可以看到这个节点留着什么，可以按内容标识或文件来固定，也可以取消固定。开发服务器把 `/api` 和 `/health` 代理到 `http://127.0.0.1:8080`。单次上传默认最大 512 MiB，可以用 `-max-file-bytes` 或 `IPFS_PANEL_MAX_FILE_BYTES` 改。需要从网络获取的固定在后台跑，最长 30 分钟（`-pins-timeout` 或 `IPFS_PANEL_PINS_TIMEOUT`）。规则在[文件](docs/design/files.md)和[固定](docs/design/pins.md)。
 
 和 CI 一样的界面检查：
 
@@ -204,6 +209,10 @@ go build -o /dev/null ./cmd/manager
 
 ![文件列表，浅色，中文，窄屏](docs/screenshots/files-list-light-zh-390.png)
 
+![固定列表，浅色，中文](docs/screenshots/pins-list-light-zh-1440.png)
+
+![添加固定，深色，英文](docs/screenshots/pins-add-dark-en-1440.png)
+
 ## 接着读
 
 - [愿景](docs/VISION.md)
@@ -211,6 +220,7 @@ go build -o /dev/null ./cmd/manager
 - [设计系统](docs/DESIGN-SYSTEM.md)
 - [认证](docs/design/auth.md)
 - [文件](docs/design/files.md)
+- [固定](docs/design/pins.md)
 - [节点启停](docs/DESIGN-node-lifecycle.md)
 - [参与方式](CONTRIBUTING.md)（Git Flow、CI、热修）
 - [组织设置](docs/ORG-SETUP.md)（仓库设置清单）

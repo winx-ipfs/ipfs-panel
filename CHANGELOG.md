@@ -9,7 +9,8 @@ Releases are tagged from `main` only. The heading `## [X.Y.Z]` has to be in this
 
 ## [Unreleased]
 
-- Files page for the node's mutable files. Upload, download, rename, move, copy, and delete go through the manager to Kubo on loopback. A stopped node returns `503 node_not_running`.
+- Pins page for what this node is keeping. Add a pin by content ID, upload a file and pin it, pin an item from Files, and unpin. A fetch from the network is a background job with progress and cancel. A stopped node returns `503 node_not_running`.
+- Files page for the node's mutable files. Upload, download, rename, move, copy, and delete go through the manager to Kubo on loopback. A stopped node returns `503 node_not_running`. The narrow file list is a compact card, and the content-ID note uses the panel's disclosure.
 - Login and setup passwords can be shown or hidden. A failed login keeps the username. Setup stays disabled until the form is valid.
 - First-run admin setup and session login. The manager rejects `/api` routes without a session. Passwords are hashed with argon2id. A forgotten password is cleared with `manager reset-admin`.
 - A design system and a polished panel shell, in English and 中文, with light, dark, and system themes.

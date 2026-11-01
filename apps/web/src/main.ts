@@ -16,6 +16,7 @@ import './styles/components.css'
 import './styles/shell.css'
 import './styles/auth.css'
 import './styles/files.css'
+import './styles/pins.css'
 
 const app = createApp(App)
 

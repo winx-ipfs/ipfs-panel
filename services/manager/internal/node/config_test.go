@@ -103,6 +103,10 @@ func TestLoadConfigFileLimits(t *testing.T) {
 	if cfg.MaxFileBytes != 2048 || cfg.FilesTimeout != 4*time.Second || cfg.FilesTransferTimeout != 2*time.Minute {
 		t.Fatalf("flags %+v", cfg)
 	}
+	cfg, err = LoadConfig([]string{"-pins-timeout", "15m"})
+	if err != nil || cfg.PinsTimeout != 15*time.Minute {
+		t.Fatalf("pins timeout %+v %v", cfg, err)
+	}
 	t.Setenv("IPFS_PANEL_FILES_TIMEOUT", "nope")
 	if _, err := LoadConfig(nil); err == nil {
 		t.Fatal("expected error")

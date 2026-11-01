@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronRight, FileText, Folder, FolderPlus, MoreHorizontal, RefreshCw, Upload } from '@lucide/vue'
+import { ChevronRight, FileText, Folder, FolderPlus, Home, MoreHorizontal, RefreshCw, Upload } from '@lucide/vue'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
@@ -28,11 +28,13 @@ import {
 } from '@/files/model'
 import { shortenMiddle } from '@/lib/inline'
 import { useFilesStore } from '@/stores/files'
+import { usePinsStore } from '@/stores/pins'
 import { useToastStore } from '@/stores/toast'
 
 const { t, locale } = useI18n()
 const route = useRoute()
 const store = useFilesStore()
+const pins = usePinsStore()
 const toast = useToastStore()
 
 const sortKeys = ['name', 'size', 'modified'] as const
@@ -161,6 +163,7 @@ function problemText(code: string, name: string) {
   if (code === 'too_large') return t('filesErrorLarge', { name, size: formatBytes(store.maxBytes) })
   if (code === 'timeout') return t('filesErrorTimeout')
   if (code === 'network') return t('filesErrorNetwork')
+  if (code === 'too_many') return t('pinsErrorTooMany')
   return t('filesErrorGeneric')
 }
 
@@ -361,6 +364,15 @@ function onDrop(event: DragEvent) {
   void sendFiles([...(event.dataTransfer?.files ?? [])])
 }
 
+async function pinEntry(entry: FileEntry) {
+  const path = entryPath(store.path, entry)
+  if (!path) return
+  closeMenu(false)
+  const result = await pins.pinPath(path, entry.name)
+  if (result.ok) toast.show(t('filesPinStarted', { name: entry.name }))
+  else announce(result.error, entry.name)
+}
+
 function copyCid(entry: FileEntry) {
   if (!entry.cid) return
   void copyText(entry.cid, t('filesCopiedCid'))
@@ -409,8 +421,11 @@ onUnmounted(() => document.removeEventListener('pointerdown', onPointer))
 <template>
   <div class="files-page" :data-files="marker">
     <PageHeader :title="t('filesTitle')" :description="t('filesDescription')" />
-    <details class="files-advanced">
-      <summary>{{ t('filesAdvancedSummary') }}</summary>
+    <details class="ui-disclosure">
+      <summary>
+        <ChevronRight class="ui-disclosure-chevron" :size="16" :stroke-width="1.75" aria-hidden="true" />
+        <span>{{ t('filesAdvancedSummary') }}</span>
+      </summary>
       <p>{{ t('filesAdvancedBody') }}</p>
     </details>
 
@@ -500,8 +515,16 @@ onUnmounted(() => document.removeEventListener('pointerdown', onPointer))
         <ol>
           <li v-for="(crumb, index) in trail" :key="crumb.path">
             <ChevronRight v-if="index > 0" :size="14" :stroke-width="1.75" aria-hidden="true" />
-            <span v-if="index === trail.length - 1" aria-current="page">{{ index === 0 ? t('filesRoot') : crumb.name }}</span>
-            <RouterLink v-else :to="hrefFor(crumb.path)">{{ index === 0 ? t('filesRoot') : crumb.name }}</RouterLink>
+            <span v-if="index === trail.length - 1" aria-current="page">
+              <Home v-if="index === 0" class="files-crumb-home" :size="16" :stroke-width="1.75" aria-hidden="true" />
+              <span v-if="index === 0" class="sr-only">{{ t('filesRoot') }}</span>
+              <template v-else>{{ crumb.name }}</template>
+            </span>
+            <RouterLink v-else :to="hrefFor(crumb.path)">
+              <Home v-if="index === 0" class="files-crumb-home" :size="16" :stroke-width="1.75" aria-hidden="true" />
+              <span v-if="index === 0" class="sr-only">{{ t('filesRoot') }}</span>
+              <template v-else>{{ crumb.name }}</template>
+            </RouterLink>
           </li>
         </ol>
       </nav>
@@ -568,6 +591,10 @@ onUnmounted(() => document.removeEventListener('pointerdown', onPointer))
                 <span class="files-kicker" aria-hidden="true">{{ t('filesModified') }}</span>
                 {{ formatWhen(entry.modified) }}
               </td>
+              <td class="files-meta">
+                <span class="sr-only">{{ t('filesSize') }} {{ sizeText(entry) }}, {{ t('filesModified') }} {{ formatWhen(entry.modified) }}</span>
+                <span aria-hidden="true">{{ sizeText(entry) }} · {{ formatWhen(entry.modified) }}</span>
+              </td>
               <td class="files-actions">
                 <div class="files-menu-wrap">
                   <IconButton :label="t('filesActions', { name: entry.name })" @click="toggleMenu(entry.name, $event)">
@@ -591,6 +618,11 @@ onUnmounted(() => document.removeEventListener('pointerdown', onPointer))
                     <button v-if="entry.cid && localShareURL(store.localGateway, entry.cid)" type="button" role="menuitem" @click="copyLink(entry)">
                       {{ t('filesLocalLink') }}
                     </button>
+                    <button v-if="entry.cid" type="button" class="files-menu-cid" role="menuitem" :aria-label="t('filesCopyCid')" @click="copyCid(entry)">
+                      <span aria-hidden="true">{{ t('filesCopyCid') }}</span>
+                      <span class="files-menu-cid-value" aria-hidden="true">{{ entry.cid }}</span>
+                    </button>
+                    <button v-if="entry.cid" type="button" role="menuitem" @click="pinEntry(entry)">{{ t('filesPin') }}</button>
                     <button type="button" role="menuitem" @click="openDialog('rename', entry)">{{ t('filesRename') }}</button>
                     <button type="button" role="menuitem" @click="openDialog('move', entry)">{{ t('filesMove') }}</button>
                     <button type="button" role="menuitem" @click="openDialog('copy', entry)">{{ t('filesDuplicate') }}</button>

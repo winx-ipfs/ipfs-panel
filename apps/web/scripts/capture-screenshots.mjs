@@ -268,6 +268,46 @@ try {
         }
       }
     }
+    const pinShots = [
+      { name: 'list', query: 'pins=list', wait: '[data-pins="list"]' },
+      { name: 'add', query: 'pins=add', wait: '[data-pins="add"]' },
+      { name: 'job', query: 'pins=job', wait: '[data-pins="job"]' },
+      { name: 'empty', query: 'pins=empty', wait: '[data-pins="empty"]' },
+    ]
+    for (const theme of themes) {
+      for (const locale of locales) {
+        for (const size of widths) {
+          const context = await browser.newContext({
+            viewport: { width: size.width, height: size.height },
+            deviceScaleFactor: 1,
+            colorScheme: theme,
+            reducedMotion: 'reduce',
+          })
+          await context.addInitScript(
+            ({ themePreference, localePreference }) => {
+              localStorage.setItem('ipfs-panel.theme', themePreference)
+              localStorage.setItem('ipfs-panel.lang', localePreference)
+            },
+            { themePreference: theme, localePreference: locale },
+          )
+          const page = await context.newPage()
+          for (const shot of pinShots) {
+            await page.goto(`${origin}/pins?${shot.query}`, { waitUntil: 'domcontentloaded' })
+            await page.waitForSelector(shot.wait)
+            if (shot.name === 'add') {
+              await page.evaluate(() => {
+                const active = document.activeElement
+                if (active instanceof HTMLElement) active.blur()
+              })
+            }
+            const file = path.join(outDir, `pins-${shot.name}-${theme}-${locale}-${size.name}.png`)
+            await shoot(page, file)
+            index.push(file)
+          }
+          await context.close()
+        }
+      }
+    }
   } finally {
     await browser.close()
   }
