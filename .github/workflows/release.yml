@@ -1,0 +1,65 @@
+# Tags vX.Y.Z and GitHub Releases are produced from main only.
+# A merge of release/X.Y.Z or hotfix/X.Y.Z into main publishes that version.
+# A direct push of an annotated tag vX.Y.Z publishes too (emergency follow-up).
+# Pushes that use GITHUB_TOKEN do not start a second run, so this workflow
+# builds in the same job that creates the tag.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+  pull-requests: read
+  actions: write
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Decide version
+        id: meta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/release-version.sh
+      - name: Set up Go
+        if: steps.meta.outputs.publish == 'true'
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: services/manager/go.mod
+          cache: true
+      - name: Build manager binaries
+        if: steps.meta.outputs.publish == 'true'
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean --release-notes=${{ steps.meta.outputs.notes }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Set up Node
+        if: steps.meta.outputs.publish == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Build and upload the web bundle
+        if: steps.meta.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: bash .github/scripts/upload-web-dist.sh

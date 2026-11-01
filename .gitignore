@@ -6,7 +6,8 @@ Desktop.ini
 
 # Editors
 .idea/
-.vscode/
+.vscode/*
+!.vscode/extensions.json
 *.swp
 *.swo
 *~
@@ -29,6 +30,10 @@ dist-ssr/
 .npm
 *.tsbuildinfo
 coverage/
+
+# Python
+__pycache__/
+*.py[cod]
 
 # Go
 *.exe

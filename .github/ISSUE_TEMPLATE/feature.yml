@@ -1,0 +1,55 @@
+name: Feature
+description: Something the panel should do for Kubo
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        可以用中文写。English is fine too.
+        This repo manages Kubo, not the whole machine.
+  - type: dropdown
+    id: slice
+    attributes:
+      label: Which slice
+      options:
+        - Foundation
+        - "1 Shell, auth, and languages"
+        - "2 Start, stop, and health"
+        - "3 Files"
+        - "4 Pins"
+        - "5 Scene settings"
+        - "6 Expert mode or more than one node"
+        - None of these
+    validations:
+      required: true
+  - type: dropdown
+    id: who
+    attributes:
+      label: Who it is for
+      options:
+        - Beginner
+        - Expert
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: happen
+    attributes:
+      label: What should happen
+    validations:
+      required: true
+  - type: textarea
+    id: not
+    attributes:
+      label: What should not happen
+    validations:
+      required: false
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: This is about Kubo, not a host panel (no web server, database, or OS admin)
+          required: true
+        - label: It does not need Kubo RPC to be reachable from the public internet
+          required: true

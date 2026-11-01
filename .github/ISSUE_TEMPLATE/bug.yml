@@ -1,0 +1,45 @@
+name: Bug
+description: The panel or the manager did something wrong
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        可以用中文写。English is fine too.
+        Security issues go to a [private advisory](https://github.com/winx-ipfs/ipfs-panel/security/advisories/new), not here.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: UI language
+      options:
+        - en
+        - zh
+        - both
+        - not the UI
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+      description: A git SHA or a vX.Y.Z tag. Use "main" or "develop" if you built from a branch.
+    validations:
+      required: true

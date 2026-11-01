@@ -1,0 +1,57 @@
+version: 2
+
+project_name: ipfs-panel-manager
+
+before:
+  hooks: []
+
+builds:
+  - id: manager
+    dir: services/manager
+    main: ./cmd/manager
+    binary: ipfs-panel-manager
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: manager
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ .ShortCommit }}-nightly"
+
+changelog:
+  disable: true
+
+release:
+  mode: replace
+  draft: false
+  prerelease: auto
+  github:
+    owner: winx-ipfs
+    name: ipfs-panel
+  footer: |
+    Web bundle: `ipfs-panel-web_{{ .Version }}_dist.zip` and `ipfs-panel-web_{{ .Version }}_dist.zip.sha256`.
+    Manager checksums: `checksums.txt`.
+
+dist: dist

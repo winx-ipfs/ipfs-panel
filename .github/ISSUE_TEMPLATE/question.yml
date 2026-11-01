@@ -1,0 +1,22 @@
+name: Question
+description: A question about using or building the panel
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        可以用中文写。English is fine too.
+        Read [Support](https://github.com/winx-ipfs/ipfs-panel/blob/main/SUPPORT.md) first.
+        Security issues do not belong here.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you already tried
+    validations:
+      required: true
