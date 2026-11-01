@@ -189,6 +189,8 @@ Open <https://github.com/winx-ipfs/ipfs-panel/settings/security_analysis> (the s
 
 Dependabot version updates are configured in [dependabot.yml](../.github/dependabot.yml): npm in `apps/web`, Go modules in `services/manager`, and GitHub Actions at the repo root. Each ecosystem opens one grouped pull request a week, against the default branch, with a Conventional Commit title (`chore(deps): ...`). Turn the default branch into `develop` before the Monday run, or those pull requests target `main` and `branch-policy` rejects them once `develop` exists.
 
+The `dependency-review` job calls the dependency graph API first. While that API returns 403 or 404, the job logs that the graph is off and stays green, so `ci-ok` is not blocked before this checklist is applied. After the graph is on, the same job fails the pull request when a new dependency is high or critical.
+
 Secret scanning and push protection are available on public repositories. If a toggle is missing, the plan does not offer it. Do not block the rest of this checklist on it. Write down which toggle was missing.
 
 Private vulnerability reporting is what [Security](../SECURITY.md) links to. Turn it on before telling people to use the advisory form.
@@ -199,6 +201,7 @@ Private vulnerability reporting is what [Security](../SECURITY.md) links to. Tur
 - The default branch is `develop`.
 - A direct `git push origin develop` is rejected.
 - A direct `git push origin main` is rejected for a non-admin. An admin can push, and must then open a post-incident issue.
+- On a pull request, the `dependency-review` log runs the review action. It should not say the dependency graph is off.
 - A pull request into `develop` can be squash-merged by the maintainer with 0 approvals when `ci-ok` is green and the branch is up to date.
 - A pull request into `main` from `feature/*` fails `branch-policy`. One from `release/X.Y.Z` or `hotfix/X.Y.Z` can use **Create a merge commit** when `ci-ok` is green and `CHANGELOG.md` contains `## [X.Y.Z]`.
 - Deleting `main` or `develop`, or force-pushing either, is rejected.
@@ -420,6 +423,8 @@ Release 工作流不解析合并提交的说明。它从 API 读取已合并的 
 
 Dependabot 的版本更新写在 [dependabot.yml](../.github/dependabot.yml)：`apps/web` 的 npm、`services/manager` 的 Go 模块，以及仓库根目录的 GitHub Actions。每个生态系统每周向默认分支开一个分组的 pull request，标题是 Conventional Commit（`chore(deps): ...`）。周一的运行之前把默认分支改成 `develop`，否则这些 pull request 会指向 `main`，而 `develop` 一旦存在，`branch-policy` 会拒绝它们。
 
+`dependency-review` 会先调用依赖图 API。API 返回 403 或 404 时，任务只记下「图还没开」，并保持绿色，这样在这份清单做完之前不会挡住 `ci-ok`。图打开之后，同一个任务会在新依赖是高危或严重时让 pull request 失败。
+
 公开仓库可以用 secret scanning 和 push protection。如果某个开关不存在，就是当前计划没有这项。不要为了它卡住这份清单的其余部分。记下缺了哪个开关。
 
 私下漏洞报告就是 [安全](../SECURITY.md) 里的那个链接。在告诉别人使用通告表单之前，先把它打开。
@@ -430,6 +435,7 @@ Dependabot 的版本更新写在 [dependabot.yml](../.github/dependabot.yml)：`
 - 默认分支是 `develop`。
 - 直接 `git push origin develop` 会被拒绝。
 - 非管理员直接 `git push origin main` 会被拒绝。管理员可以推，并且必须随后开一份事后说明 issue。
+- 在一个 pull request 上，`dependency-review` 的日志会真正跑审阅。它不应该再说依赖图是关着的。
 - 指向 `develop` 的 pull request，在 `ci-ok` 为绿且分支已更新时，维护者可以在 0 个批准的情况下 squash 合并。
 - 从 `feature/*` 指向 `main` 的 pull request 会在 `branch-policy` 失败。从 `release/X.Y.Z` 或 `hotfix/X.Y.Z` 来的，在 `ci-ok` 为绿且 `CHANGELOG.md` 含有 `## [X.Y.Z]` 时，可以用 **Create a merge commit**。
 - 删除 `main` 或 `develop`，或对它们强推，会被拒绝。

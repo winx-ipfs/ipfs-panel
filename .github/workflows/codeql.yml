@@ -24,16 +24,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+      # Go must be on PATH before init, or the tracer is replaced and the
+      # build is invisible to CodeQL.
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: services/manager/go.mod
+          cache: false
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: go
           build-mode: manual
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version-file: services/manager/go.mod
-          cache: true
       - name: Build manager
         working-directory: services/manager
         run: go build -o /dev/null ./cmd/manager

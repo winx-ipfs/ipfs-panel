@@ -171,7 +171,7 @@ The workflow is `.github/workflows/ci.yml`. It runs on pull requests and pushes 
 | `manager` | `services/manager/**` or the CI workflow changed. `gofmt`, `go vet`, `golangci-lint`, `go test -race`, `go build`. |
 | `pr-title` | Pull requests. Conventional Commits title. |
 | `branch-policy` | Pull requests. The Git Flow rules above, plus the script's own tests. |
-| `dependency-review` | Pull requests. Fails on high or critical new vulnerabilities. |
+| `dependency-review` | Pull requests. Fails on high or critical new vulnerabilities once the dependency graph is enabled. Until then it logs that and stays green. |
 | `ci-ok` | Always, unless the run was cancelled. Passes when every job above succeeded or skipped. |
 
 Branch protection requires **`ci-ok` only**. The other names are skipped on some events. A skipped required check blocks the merge. Do not add `web` or `manager` as their own required checks.
@@ -376,7 +376,7 @@ go run ./cmd/manager
 | `manager` | `services/manager/**` 或 CI 工作流变了。`gofmt`、`go vet`、`golangci-lint`、`go test -race`、`go build`。 |
 | `pr-title` | pull request。检查 Conventional Commits 标题。 |
 | `branch-policy` | pull request。上面的 Git Flow 规则，外加脚本自己的测试。 |
-| `dependency-review` | pull request。新引入高危或严重漏洞时失败。 |
+| `dependency-review` | pull request。依赖图打开之后，新引入高危或严重漏洞时失败。图还没开时，它记下这一点并保持绿色。 |
 | `ci-ok` | 除非这次运行被取消，否则总是跑。上面每个任务成功或被跳过时，它才通过。 |
 
 分支保护只要求 **`ci-ok`**。其他名字在有些事件上会被跳过。把一个会被跳过的检查设为必须，合并会被卡住。不要把 `web` 或 `manager` 单独设为必须。
