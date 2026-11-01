@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 	"sync"
+	"time"
 )
 
 // errClosed is returned when the supervisor loop has exited.
@@ -18,6 +19,7 @@ const (
 	cmdStop
 	cmdRestart
 	cmdShutdown
+	cmdCached
 )
 
 type command struct {
@@ -107,6 +109,16 @@ func New(cfg Config) (*Supervisor, error) {
 // `ipfs id` before returning.
 func (s *Supervisor) Snapshot(ctx context.Context) (Overview, error) {
 	return s.call(ctx, cmdGet)
+}
+
+// Cached returns the supervisor's state without probing Kubo.
+func (s *Supervisor) Cached(ctx context.Context) (Overview, error) {
+	return s.call(ctx, cmdCached)
+}
+
+// FileLimits returns the upload cap and the files deadlines.
+func (s *Supervisor) FileLimits() (maxBytes int64, op, transfer time.Duration) {
+	return s.cfg.MaxFileBytes, s.cfg.FilesTimeout, s.cfg.FilesTransferTimeout
 }
 
 // Start begins startup when the state table allows it.
@@ -222,6 +234,8 @@ func (s *Supervisor) handle(st *loopState, c command) bool {
 		c.reply <- st.overview()
 	case cmdRestart:
 		s.handleRestart(st)
+		c.reply <- st.overview()
+	case cmdCached:
 		c.reply <- st.overview()
 	default:
 		c.reply <- st.overview()

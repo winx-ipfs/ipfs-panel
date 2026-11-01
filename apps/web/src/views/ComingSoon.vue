@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FolderOpen, LayoutGrid, Pin } from '@lucide/vue'
+import { LayoutGrid, Pin } from '@lucide/vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -11,23 +11,11 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
-const kind = computed(() => {
-  if (route.path.startsWith('/pins')) return 'pins'
-  if (route.path.startsWith('/scenes')) return 'scenes'
-  return 'files'
-})
+const kind = computed(() => (route.path.startsWith('/scenes') ? 'scenes' : 'pins'))
 
-const title = computed(() => {
-  if (kind.value === 'pins') return t('comingPinsTitle')
-  if (kind.value === 'scenes') return t('comingScenesTitle')
-  return t('comingFilesTitle')
-})
+const title = computed(() => (kind.value === 'scenes' ? t('comingScenesTitle') : t('comingPinsTitle')))
 
-const description = computed(() => {
-  if (kind.value === 'pins') return t('comingPinsBody')
-  if (kind.value === 'scenes') return t('comingScenesBody')
-  return t('comingFilesBody')
-})
+const description = computed(() => (kind.value === 'scenes' ? t('comingScenesBody') : t('comingPinsBody')))
 </script>
 
 <template>
@@ -35,9 +23,8 @@ const description = computed(() => {
     <PageHeader :title="title" />
     <EmptyState :title="t('comingLead')" :description="description">
       <template #icon>
-        <Pin v-if="kind === 'pins'" :size="22" :stroke-width="1.75" aria-hidden="true" />
-        <LayoutGrid v-else-if="kind === 'scenes'" :size="22" :stroke-width="1.75" aria-hidden="true" />
-        <FolderOpen v-else :size="22" :stroke-width="1.75" aria-hidden="true" />
+        <LayoutGrid v-if="kind === 'scenes'" :size="22" :stroke-width="1.75" aria-hidden="true" />
+        <Pin v-else :size="22" :stroke-width="1.75" aria-hidden="true" />
       </template>
       <template #actions>
         <Button variant="primary" @click="router.push('/')">{{ t('comingBack') }}</Button>

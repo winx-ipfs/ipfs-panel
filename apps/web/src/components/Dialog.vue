@@ -50,7 +50,8 @@ watch(open, async (value) => {
     document.addEventListener('keydown', onKey)
     await nextTick()
     const items = panel.value ? focusable(panel.value) : []
-    ;(items[0] ?? panel.value)?.focus()
+    const preferred = panel.value?.querySelector<HTMLElement>('[data-autofocus]')
+    ;(preferred ?? items[0] ?? panel.value)?.focus()
   } else {
     document.removeEventListener('keydown', onKey)
     previous?.focus()

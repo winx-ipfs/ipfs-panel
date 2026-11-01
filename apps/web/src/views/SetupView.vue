@@ -91,6 +91,8 @@ async function submit() {
             type="password"
             name="new-password"
             autocomplete="new-password"
+            :show-password-label="t('showPassword')"
+            :hide-password-label="t('hidePassword')"
             required
           />
           <PasswordMeter :password="password" />
@@ -102,6 +104,8 @@ async function submit() {
           type="password"
           name="confirm-password"
           autocomplete="new-password"
+          :show-password-label="t('showPassword')"
+          :hide-password-label="t('hidePassword')"
           required
           @blur="confirmTouched = true"
         />
@@ -114,7 +118,7 @@ async function submit() {
           autocomplete="off"
           :spellcheck="false"
         />
-        <Button class="auth-submit" type="submit" variant="primary" :disabled="auth.pending">
+        <Button class="auth-submit" type="submit" variant="primary" :disabled="!canSubmit">
           {{ t('setupAction') }}
         </Button>
       </form>

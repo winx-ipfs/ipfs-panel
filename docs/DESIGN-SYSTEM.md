@@ -120,7 +120,7 @@ Rules:
 
 - One primary button in a group. Restart stays quiet, and only while the node is up.
 - Do not invent a sixth node state. Restart is stop, then start.
-- Do not show ports, a gateway link, or a Kubo RPC address.
+- Do not show a Kubo RPC address, or port 5001. The files page may copy a local gateway link. The label says it only works on this computer.
 - Placeholder sections say they are not built yet, in both languages, and offer a way back to the node. They do not render fake files or fake pins.
 
 ## Empty, loading, error
@@ -150,14 +150,14 @@ Rules:
 - Do not ellipsize a sentence, a button label, a peer id, a path, or an error. Wrapping is the layout. A long detail block may scroll inside its well. The text is still in the page.
 - Folder paths get a break opportunity after each `/`. Peer ids have no breaks in them, so they wrap anywhere.
 - Buttons may grow and wrap onto a second line. Do not fix their width in `ch` of the English word. Chinese labels are often shorter. English hints are often longer. The column is `min(760px, 100%)` so neither language has a line that runs the full desktop.
-- The sidebar labels wrap instead of clipping. Files, Pins, and Scenes sit under "Coming soon" / "即将推出", at lower opacity, with `aria-disabled`. They have no per-item badge.
+- The sidebar labels wrap instead of clipping. Pins and Scenes sit under "Coming soon" / "即将推出", at lower opacity, with `aria-disabled`. They have no per-item badge. Files is a normal item.
 
 ## Shell
 
 - Sidebar from 880px up. Below that, a menu button opens the drawer.
 - Top bar: English / 中文, and a theme button. The button cycles light, dark, and match-device. Its icon and, from 720px up, its label show the current mode. The accessible name and the tooltip say the same mode. Both choices persist in `localStorage` (`ipfs-panel.lang`, `ipfs-panel.theme`). The theme is applied from a small script in `index.html` before paint, so the first frame is not the wrong theme.
 - From 1200px the node page is two columns. The status card is on the left. On the right, while the node is up, a Connection card shows the version and a shortened peer id. The copy button copies the full peer id. The overview does not include a gateway address or an API address, so the card does not invent them. Otherwise the right card explains what a node is and links to the IPFS docs.
-- Nav: Node, then Later (Files, Pins, Scenes), then Settings. Expert mode is not a nav item. The vision keeps it off the home page until the common path is dull.
+- Nav: Node, Files, then Later (Pins, Scenes), then Settings. Files is a real page. Pins and Scenes stay under "Coming soon". Expert mode is not a nav item.
 - `winx.run` sits in the sidebar footer. It opens in a new tab. It is the portal, labeled as such.
 
 Dev-only, the node page reads `?mock=` when `import.meta.env.DEV` is true: `down`, `starting`, `up`, `stopping`, `failed`, or `unreachable`. The production bundle does not include those fixtures. The Vite proxy to the manager is unchanged.
@@ -170,7 +170,7 @@ From `apps/web`, after `npx playwright install chromium`:
 npm run shots
 ```
 
-That writes the node page in all five states, the setup screen, the login screen with an error, and the settings password form, light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture.
+That writes the node page in all five states, the files page (list, empty, uploading, delete dialog, node stopped), the setup screen, the login screen with an error, and the settings password form, light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture. The files page uses `?files=`.
 
 This is not a CI job. A Chromium install and the machine's CJK fonts make a pixel run slow and easy to flake, and `ci-ok` should stay the fast check. The unit tests still cover the sentences, the manager actions, and the form controls. Re-run `npm run shots` when the shell or the node card changes, and look at the pictures.
 
@@ -300,7 +300,7 @@ reka-ui（Radix Vue）是认真考虑过的。它能提供焦点圈定和列表�
 
 - 一组里只有一个主按钮。重启保持次要，而且只在节点运行时出现。
 - 不要发明第六个节点状态。重启就是先停再启动。
-- 不显示端口，不链到网关，也不出现 Kubo RPC 地址。
+- 不显示 Kubo RPC 地址，也不出现 5001 端口。文件页可以复制一条本机网关链接。文案说明它只在这台电脑上有效。
 - 占位栏目用两种语言写明还没做，并给一条回到节点的路。不要画假的文件或假的 pin。
 
 ### 空、加载、错误
@@ -330,14 +330,14 @@ reka-ui（Radix Vue）是认真考虑过的。它能提供焦点圈定和列表�
 - 句子、按钮文字、Peer ID、路径、错误，都不要省略号截断。排版用换行。很长的详情可以在自己的块里滚动。文字仍在页面里。
 - 文件夹路径在每个 `/` 后面留一个可换行的位置。Peer ID 中间没有自然断点，所以允许在任意位置换行。
 - 按钮可以变宽，也可以换到下一行。不要按英文单词的宽度把按钮写死。中文标签常常更短。英文说明常常更长。栏宽是 `min(760px, 100%)`，两种语言都不会在桌面上拉成一整行。
-- 侧栏文字换行，不裁切。文件、固定、场景归在「即将推出」下面，透明度更低，并带 `aria-disabled`。每一项不再单独放徽章。
+- 侧栏文字换行，不裁切。固定和场景归在「即将推出」下面，透明度更低，并带 `aria-disabled`。每一项不再单独放徽章。文件是普通的一项。
 
 ### 外壳
 
 - 880px 及以上是侧栏。更窄时，菜单按钮打开抽屉。
 - 顶栏：英文 / 中文，以及一个主题按钮。按钮在浅色、深色、跟随设备之间轮换。图标在表明当前模式；720px 及以上还会写出当前模式。可访问名称和提示说的是同一个模式。两个选择都记在 `localStorage`（`ipfs-panel.lang`、`ipfs-panel.theme`）。`index.html` 里有一小段脚本，在绘制前套上主题，避免第一帧是错的主题。
 - 1200px 起，节点页是两列。左边是状态卡片。节点在跑时，右边的「连接」卡片显示版本和缩短后的 Peer ID。复制按钮复制的是完整的 Peer ID。概览里没有网关地址，也没有 API 地址，所以卡片不去编造它们。其余时候，右边用一段话说明什么是节点，并链到 IPFS 文档。
-- 导航：节点，然后是「以后」（文件、固定、场景），然后是设置。专家模式不进导航。愿景里它要等常用路径变得没劲之后再出现，不放在首页。
+- 导航：节点、文件，然后是「以后」（固定、场景），然后是设置。文件是真正的页面。固定和场景仍在「即将推出」下面。专家模式不进导航。愿景里它要等常用路径变得没劲之后再出现，不放在首页。
 - `winx.run` 在侧栏底部。新标签页打开。它是门户，文案也这么说。
 
 只在开发构建里，节点页会读 `?mock=`（`import.meta.env.DEV` 为真时）：`down`、`starting`、`up`、`stopping`、`failed` 或 `unreachable`。生产包里没有这些假数据。Vite 代理到 manager 的方式不变。

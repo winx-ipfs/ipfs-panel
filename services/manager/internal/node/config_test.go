@@ -3,6 +3,7 @@ package node
 import (
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestLoadConfigDefaults(t *testing.T) {
@@ -80,6 +81,31 @@ func TestLoadConfigEnvAndFlags(t *testing.T) {
 	want := filepath.Join(xdg, "ipfs-panel", "kubo")
 	if got != want {
 		t.Fatalf("xdg repo %s want %s", got, want)
+	}
+}
+
+func TestLoadConfigFileLimits(t *testing.T) {
+	t.Setenv("IPFS_PANEL_REPO", t.TempDir())
+	t.Setenv("IPFS_PANEL_MAX_FILE_BYTES", "1024")
+	t.Setenv("IPFS_PANEL_FILES_TIMEOUT", "3s")
+	t.Setenv("IPFS_PANEL_FILES_TRANSFER_TIMEOUT", "1m")
+	cfg, err := LoadConfig(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.MaxFileBytes != 1024 || cfg.FilesTimeout != 3*time.Second || cfg.FilesTransferTimeout != time.Minute {
+		t.Fatalf("%+v", cfg)
+	}
+	cfg, err = LoadConfig([]string{"-max-file-bytes", "2048", "-files-timeout", "4s", "-files-transfer-timeout", "2m"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.MaxFileBytes != 2048 || cfg.FilesTimeout != 4*time.Second || cfg.FilesTransferTimeout != 2*time.Minute {
+		t.Fatalf("flags %+v", cfg)
+	}
+	t.Setenv("IPFS_PANEL_FILES_TIMEOUT", "nope")
+	if _, err := LoadConfig(nil); err == nil {
+		t.Fatal("expected error")
 	}
 }
 

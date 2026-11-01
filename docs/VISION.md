@@ -35,9 +35,9 @@ Remote does not mean "forward Kubo's port". We are not picking a desktop shell (
 
 Kubo's own HTTP API, usually `127.0.0.1:5001`, stays on the loopback interface. We do not bind it to a public address, we do not document a port forward for it, and we do not put it behind a reverse proxy "just for convenience".
 
-The browser talks to `services/manager`. That process is our API gateway. Later it will know whether you are logged in, and it will call only the Kubo operations the panel knows how to explain. It is not a pass-through of the raw RPC.
+The browser talks to `services/manager`. That process is our API gateway. It checks the session, then calls only the Kubo operations the panel knows how to explain: start and stop, and the file actions. It is not a pass-through of the raw RPC.
 
-Right now the manager listens on `127.0.0.1:8080` unless `MANAGER_ADDR` is set. It answers `GET /health` for itself, and `GET /api/node` plus start, stop, and restart for one local Kubo. Auth is slice 1, and it is not built yet. Until that exists, publishing the manager is a mistake.
+Right now the manager listens on `127.0.0.1:8080` unless `MANAGER_ADDR` is set. It answers `GET /health` for itself. `GET /api/node` plus start, stop, and restart, and the files routes, need the session from [Auth](design/auth.md). Do not publish the manager until you have read that. The files routes never hand the browser Kubo's RPC address.
 
 ### Scenes first, raw config later
 
@@ -103,9 +103,9 @@ Kubo 能跑。顺的那条路仍然是一堆参数加一份大 JSON。很多人�
 
 Kubo 自己的 HTTP API 一般在 `127.0.0.1:5001`，就留在回环地址上。不把它绑到公网地址，不在文档里教人做端口转发，也不为了省事把它反代出去。
 
-浏览器访问的是 `services/manager`。这个进程是我们的 API 网关。以后它会知道你有没有登录，并且只去叫面板讲得清的那些 Kubo 操作。它不是原始 RPC 的透传。
+浏览器访问的是 `services/manager`。这个进程是我们的 API 网关。它先检查会话，然后只去叫面板讲得清的那些 Kubo 操作：启动和停止，以及文件相关的动作。它不是原始 RPC 的透传。
 
-现在 manager 默认听 `127.0.0.1:8080`，除非设置了 `MANAGER_ADDR`。它用 `GET /health` 说明自己还在，并用 `GET /api/node` 以及启动、停止、重启来管本机上的一个 Kubo。认证是第 1 片，还没做。在那之前，把 manager 公布出去是错的。
+现在 manager 默认听 `127.0.0.1:8080`，除非设置了 `MANAGER_ADDR`。它用 `GET /health` 说明自己还在。`GET /api/node`、启动、停止、重启，以及文件路由，都需要[认证](design/auth.md)里的会话。在读过那一篇之前，别把 manager 公布出去。文件路由不会把 Kubo 的 RPC 地址交给浏览器。
 
 ### 先场景，原始配置以后再说
 
