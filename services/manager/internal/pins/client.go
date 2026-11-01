@@ -342,7 +342,10 @@ func (c *Client) Upload(ctx context.Context, filename string, r io.Reader) (Pin,
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.endpoint("add", q), pr)
 	if err != nil {
 		_ = pr.CloseWithError(err)
-		<-errCh
+		partErr := <-errCh
+		if CodeOf(partErr) == "too_large" {
+			return Pin{}, partErr
+		}
 		return Pin{}, &OpError{Code: "unavailable"}
 	}
 	req.Header.Set("Content-Type", contentType)

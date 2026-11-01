@@ -131,7 +131,7 @@ func mentionsArg(msg, arg string) bool {
 		return true
 	}
 	for _, field := range strings.FieldsFunc(msg, func(r rune) bool {
-		return r != '_' && !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9'))
+		return r != '_' && (r < 'a' || r > 'z') && (r < '0' || r > '9')
 	}) {
 		if field == arg {
 			return true
