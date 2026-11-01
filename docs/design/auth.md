@@ -36,7 +36,7 @@ What this does not try to stop: a bug that lets the page run an attacker's scrip
 
 1. **One admin.** There are no accounts, no roles, and no invitation. The first successful setup creates the only user. A second setup is **409** `already_setup`.
 
-2. **Passwords are hashed with argon2id** from `golang.org/x/crypto`. The stored string is PHC format (`$argon2id$v=19$m=19456,t=2,p=1$...`). Parameters for new hashes: memory 19 MiB (`m=19456`), time 2, parallelism 1, 32-byte tag, 16-byte salt. That is the OWASP interactive setting. Verify uses the parameters inside the string, and refuses a string that asks for more than 256 MiB, more than 10 passes, or more than 4 lanes, so a edited file cannot make the process allocate a huge region. A missing user still runs a verify against a dummy hash created at startup with the same parameters, so the response time does not answer "is there such a user?".
+2. **Passwords are hashed with argon2id** from `golang.org/x/crypto` (the current patched release; older tags fail dependency review). The stored string is PHC format (`$argon2id$v=19$m=19456,t=2,p=1$...`). Parameters for new hashes: memory 19 MiB (`m=19456`), time 2, parallelism 1, 32-byte tag, 16-byte salt. That is the OWASP interactive setting. Verify uses the parameters inside the string, and refuses a string that asks for more than 256 MiB, more than 10 passes, or more than 4 lanes, so a edited file cannot make the process allocate a huge region. A missing user still runs a verify against a dummy hash created at startup with the same parameters, so the response time does not answer "is there such a user?".
 
 3. **The hash lives in the manager data directory, never in the Kubo repo.** The file is `<data>/auth.json`, mode `0600`. The directory is mode `0700`. Writes go to a temp file in the same directory, then `fsync`, then rename. The default data directory is `$XDG_DATA_HOME/ipfs-panel`, or `~/.local/share/ipfs-panel`. The Kubo repo stays `<data>/kubo`. Flags: `-data` / `IPFS_PANEL_DATA`. If that file would be inside the Kubo repo, the manager refuses to start. The repo is given to the `ipfs` child; the password hash must not go with it.
 
@@ -150,7 +150,7 @@ manager 可以启动和停止 Kubo。后面的切片会让别的机器上的浏�
 
 1. **只有一个管理员。** 没有多账号，没有角色，没有邀请。第一次成功的设置创建唯一的用户。第二次设置是 **409** `already_setup`。
 
-2. **密码用 argon2id**（`golang.org/x/crypto`）。存下来的是 PHC 字符串（`$argon2id$v=19$m=19456,t=2,p=1$...`）。新哈希的参数：内存 19 MiB（`m=19456`），时间 2，并行度 1，标签 32 字节，盐 16 字节。这是 OWASP 的交互式设置。校验时用字符串里的参数，并拒绝超过 256 MiB、超过 10 轮或超过 4 条并行的字符串，避免有人改文件让进程分配一块巨大的内存。用户不存在时，仍用启动时按同样参数生成的假哈希做一次校验，这样响应时间不会回答「有没有这个用户」。
+2. **密码用 argon2id**（`golang.org/x/crypto` 当前已修补的版本；更旧的标签过不了依赖审查）。存下来的是 PHC 字符串（`$argon2id$v=19$m=19456,t=2,p=1$...`）。新哈希的参数：内存 19 MiB（`m=19456`），时间 2，并行度 1，标签 32 字节，盐 16 字节。这是 OWASP 的交互式设置。校验时用字符串里的参数，并拒绝超过 256 MiB、超过 10 轮或超过 4 条并行的字符串，避免有人改文件让进程分配一块巨大的内存。用户不存在时，仍用启动时按同样参数生成的假哈希做一次校验，这样响应时间不会回答「有没有这个用户」。
 
 3. **哈希放在 manager 的数据目录里，绝不放进 Kubo 仓库。** 文件是 `<data>/auth.json`，权限 `0600`。目录权限 `0700`。先写到同目录的临时文件，`fsync`，再改名。默认数据目录是 `$XDG_DATA_HOME/ipfs-panel`，没设 `XDG_DATA_HOME` 时是 `~/.local/share/ipfs-panel`。Kubo 仓库仍是 `<data>/kubo`。参数：`-data` / `IPFS_PANEL_DATA`。如果这个文件会落在 Kubo 仓库里面，manager 拒绝启动。仓库会交给 `ipfs` 子进程，密码哈希不能跟着进去。
 

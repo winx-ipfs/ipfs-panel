@@ -76,7 +76,7 @@ go test -race ./...
 go build -o /dev/null ./cmd/manager
 ```
 
-Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). Go 1.22 is enough for the manager.
+Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). The manager module needs Go 1.26, which is what `services/manager/go.mod` asks for. CI installs that version.
 
 ## Look
 
@@ -179,7 +179,7 @@ go test -race ./...
 go build -o /dev/null ./cmd/manager
 ```
 
-界面用 Node 22 就行（22.18 或更新，或者 Node 24.12+）。管理服务用 Go 1.22 就行。
+界面用 Node 22 就行（22.18 或更新，或者 Node 24.12+）。管理服务模块需要 Go 1.26，`services/manager/go.mod` 里写的就是这个版本。CI 会装它。
 
 ## 看一眼
 

@@ -146,7 +146,7 @@ npm test
 npm run build
 ```
 
-Manager, from `services/manager`. Go 1.22.
+Manager, from `services/manager`. Go 1.26, as in `services/manager/go.mod`.
 
 ```bash
 gofmt -l .
@@ -351,7 +351,7 @@ npm test
 npm run build
 ```
 
-管理服务在 `services/manager`。Go 1.22。
+管理服务在 `services/manager`。Go 1.26，和 `services/manager/go.mod` 一致。
 
 ```bash
 gofmt -l .
