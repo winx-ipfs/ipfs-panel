@@ -177,7 +177,8 @@ describe('NodeView', () => {
     expect(wrapper.get('[data-node-action="start"]').attributes('disabled')).toBeDefined()
     expect(fetchMock).toHaveBeenLastCalledWith('/api/node/start', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': '' },
       body: '{}',
     })
     release(

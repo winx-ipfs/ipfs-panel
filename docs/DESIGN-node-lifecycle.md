@@ -2,7 +2,7 @@
 
 English below. 中文在后半部分。Same decisions, two languages.
 
-**Status: implemented.** This file stays the spec. If the code and this file disagree, this file wins until a pull request changes it. The manager can start, stop, and restart one local Kubo. Login is still not part of this slice.
+**Status: implemented.** This file stays the spec. If the code and this file disagree, this file wins until a pull request changes it. The manager can start, stop, and restart one local Kubo. Those routes now require a session. Login is specified in [Auth](design/auth.md).
 
 This slice is one local Kubo: start, stop, restart, and a health overview a beginner can read in one sentence. [Roadmap](ROADMAP.md) calls that slice 2. Login stays slice 1 and is not designed here.
 
@@ -36,7 +36,7 @@ These are the choices an implementation should follow. Object to them in the pul
 4. On later starts, the manager checks those addresses. If the API or the gateway is not loopback, it refuses to start. It does not rewrite the config again.
 5. Swarm (Kubo's network port, usually 4001) stays at Kubo's default. A quiet node is a scene, which is a later slice.
 6. The states are `down`, `starting`, `up`, `stopping`, and `failed`. Restart is a stop followed by a start. It is not a sixth state.
-7. This slice does not add login. The guards are loopback, no CORS headers, and a JSON content type on the action routes.
+7. Login is a separate spec. These routes require a session. The other guards stay: no CORS headers, and a JSON content type on the action routes. A missing session is **401** `{"error":"unauthorized"}`. `GET /health` stays open.
 8. The UI calls relative URLs (`/api/node`, `/health`). Vite proxies them to the manager in development. The page bundle does not contain a Kubo address.
 
 ### Who runs Kubo
@@ -178,7 +178,7 @@ POST rules:
 
 - `Content-Type` is `application/json`. A missing or other type is **415**. An empty body is valid. `{}` is valid. Any JSON key is **400**. The browser cannot pass a path, a port, or a flag.
 - Success is **200** and the overview, including when the new state is `starting` or `stopping`. There is no 202. The handler returns once the state has moved to that next value. It does not wait until the daemon is up, or until a stop has finished. The page learns the rest by polling `GET /api/node`.
-- There is no 401. Login is not this slice.
+- A missing session is **401** `{"error":"unauthorized"}`. See [Auth](design/auth.md). `GET /health` does not require a session.
 - Unknown paths stay **404**. The wrong method stays **405**, the same as today's `/health` behavior.
 - The manager does not set `Access-Control-Allow-Origin`.
 
@@ -301,7 +301,7 @@ A crash while `up` becomes `failed` / `daemon_exited` on the next probe. The 5s 
 
 ### Security
 
-The manager's default listen address stays `127.0.0.1:8080`. Publishing the manager is still a mistake: this slice does not add login, and `MANAGER_ADDR` can still be pointed at a public interface. Do not do that.
+The manager's default listen address stays `127.0.0.1:8080`. Publishing the manager is still a decision, not the default: `/api` now requires a session, and `MANAGER_ADDR` can still be pointed at a public interface. Do not do that unless you mean to, and read [Auth](design/auth.md) first.
 
 The Kubo API stays on loopback. The gateway stays on loopback. The manager refuses to start the daemon when either check fails. The implementation writes those addresses only in the moment after `ipfs init` created the repo. A later edit that opens them up is a reason to refuse, not a reason to start and hope.
 
@@ -401,7 +401,7 @@ Tests follow the style of `services/manager/internal/api/health_test.go`: `httpt
 4. 以后每次启动只检查这两个地址。API 或网关不是回环，就拒绝启动，不再改写配置。
 5. Swarm（Kubo 连别的节点的端口，通常是 4001）保持 Kubo 的默认。安静地跑是场景，属于后面的切片。
 6. 状态只有 `down`、`starting`、`up`、`stopping`、`failed`。重启就是先停再启动，不是第六个状态。
-7. 这一片不加登录。防护是：只听回环、不发 CORS 头、动作类请求必须带 JSON 的 Content-Type。
+7. 登录是另一份规格。这些路由需要会话。其他防护不变：不发 CORS 头，动作类请求必须带 JSON 的 Content-Type。没有会话是 **401** `{"error":"unauthorized"}`。`GET /health` 仍然开放。
 8. 界面请求相对路径（`/api/node`、`/health`）。开发时由 Vite 代理到 manager。打包后的页面里不出现 Kubo 的地址。
 
 ### 谁来跑 Kubo
@@ -543,7 +543,7 @@ POST 的规则：
 
 - `Content-Type` 必须是 `application/json`。没有这个头，或是别的类型，返回 **415**。空正文可以。`{}` 可以。JSON 里出现任何键，返回 **400**。浏览器不能顺便传路径、端口或参数。
 - 成功是 **200** 加概览。新状态是 `starting` 或 `stopping` 时也一样。不用 202。处理函数在状态变成下一个值之后就返回，不等 daemon 真正起来，也不等停止做完。页面靠轮询 `GET /api/node` 知道后面的变化。
-- 没有 401。登录不是这一片。
+- 没有会话是 **401** `{"error":"unauthorized"}`。见[认证](design/auth.md)。`GET /health` 不需要会话。
 - 未知路径仍是 **404**。方法不对仍是 **405**，和现在的 `/health` 一样。
 - manager 不设置 `Access-Control-Allow-Origin`。
 
@@ -666,7 +666,7 @@ POST 的规则：
 
 ### 安全
 
-manager 的默认监听地址仍是 `127.0.0.1:8080`。把 manager 公布出去仍然是错的：这一片没有登录，而且 `MANAGER_ADDR` 仍然可以被指到公网网卡。不要那样设置。
+manager 的默认监听地址仍是 `127.0.0.1:8080`。把 manager 公布出去仍然不是默认：`/api` 现在需要会话，而且 `MANAGER_ADDR` 仍然可以被指到公网网卡。除非你就是要这么做，否则不要那样设置，并且先读[认证](design/auth.md)。
 
 Kubo API 留在回环。网关留在回环。任一检查失败，manager 就拒绝启动 daemon。只有在 `ipfs init` 刚刚创建仓库的那一刻，实现才去写这两个地址。之后若有人把它们改成对外，这是拒绝启动的理由，不是“先跑起来再说”的理由。
 

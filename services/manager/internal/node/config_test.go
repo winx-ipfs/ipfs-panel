@@ -8,7 +8,9 @@ import (
 func TestLoadConfigDefaults(t *testing.T) {
 	t.Setenv("MANAGER_ADDR", "")
 	t.Setenv("IPFS_PANEL_REPO", "")
+	t.Setenv("IPFS_PANEL_DATA", "")
 	t.Setenv("IPFS_PANEL_KUBO_BIN", "")
+	t.Setenv("IPFS_PANEL_TRUST_PROXY", "")
 	t.Setenv("XDG_DATA_HOME", "")
 
 	cfg, err := LoadConfig(nil)
@@ -27,6 +29,16 @@ func TestLoadConfigDefaults(t *testing.T) {
 	}
 	if cfg.KuboBin != "" {
 		t.Fatalf("bin %s", cfg.KuboBin)
+	}
+	data, err := DefaultDataDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.DataDir != data {
+		t.Fatalf("data %s want %s", cfg.DataDir, data)
+	}
+	if cfg.TrustProxy {
+		t.Fatal("trust proxy default")
 	}
 }
 

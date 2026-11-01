@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { csrfHeaders } from '@/lib/csrf'
+import { notifyUnauthorized } from '@/lib/session'
 import type { NodeOverview, NodeState } from '@/node/types'
 
 const devMockEnabled = import.meta.env.DEV
@@ -75,8 +77,14 @@ export const useNodeStore = defineStore('node', () => {
       if (mine === session) arm()
       return
     }
+    let unauthorized = false
     try {
-      const res = await fetch('/api/node')
+      const res = await fetch('/api/node', { credentials: 'same-origin' })
+      if (res.status === 401) {
+        unauthorized = true
+        notifyUnauthorized()
+        return
+      }
       if (!res.ok) throw new Error(String(res.status))
       const parsed = parseOverview(await res.json())
       if (!parsed) throw new Error('bad overview')
@@ -87,7 +95,7 @@ export const useNodeStore = defineStore('node', () => {
       if (mine !== session) return
       unreachable.value = true
     } finally {
-      if (mine === session) arm()
+      if (mine === session && !unauthorized) arm()
     }
   }
 
@@ -100,12 +108,19 @@ export const useNodeStore = defineStore('node', () => {
       if (mine === session) arm()
       return
     }
+    let unauthorized = false
     try {
       const res = await fetch(path, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
         body: '{}',
       })
+      if (res.status === 401) {
+        unauthorized = true
+        notifyUnauthorized()
+        return
+      }
       if (!res.ok) throw new Error(String(res.status))
       const parsed = parseOverview(await res.json())
       if (!parsed) throw new Error('bad overview')
@@ -117,7 +132,7 @@ export const useNodeStore = defineStore('node', () => {
       unreachable.value = true
     } finally {
       acting.value = false
-      if (mine === session) arm()
+      if (mine === session && !unauthorized) arm()
     }
   }
 

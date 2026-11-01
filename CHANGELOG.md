@@ -9,6 +9,7 @@ Releases are tagged from `main` only. The heading `## [X.Y.Z]` has to be in this
 
 ## [Unreleased]
 
+- First-run admin setup and session login. The manager rejects `/api` routes without a session. Passwords are hashed with argon2id. A forgotten password is cleared with `manager reset-admin`.
 - A design system and a polished panel shell, in English and 中文, with light, dark, and system themes.
 - Start, stop, and restart one local Kubo from the panel, with a one-sentence status in English and 中文.
 - Git Flow, CI, governance docs, and release automation.

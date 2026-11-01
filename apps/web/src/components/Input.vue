@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const model = defineModel<string>({ default: '' })
+const emit = defineEmits<{ blur: [] }>()
 
 withDefaults(
   defineProps<{
@@ -9,6 +10,9 @@ withDefaults(
     type?: string
     placeholder?: string
     autocomplete?: string
+    name?: string
+    spellcheck?: boolean
+    required?: boolean
   }>(),
   {
     type: 'text',
@@ -16,6 +20,9 @@ withDefaults(
     error: '',
     placeholder: '',
     autocomplete: undefined,
+    name: undefined,
+    spellcheck: undefined,
+    required: false,
   },
 )
 
@@ -32,8 +39,12 @@ const controlId = `input-${Math.random().toString(36).slice(2, 9)}`
       :type="type"
       :placeholder="placeholder"
       :autocomplete="autocomplete"
+      :name="name"
+      :spellcheck="spellcheck"
+      :required="required || undefined"
       :aria-invalid="error ? 'true' : undefined"
       :aria-describedby="error || hint ? `${controlId}-note` : undefined"
+      @blur="emit('blur')"
     >
     <p v-if="error" :id="`${controlId}-note`" class="ui-field-error">{{ error }}</p>
     <p v-else-if="hint" :id="`${controlId}-note`" class="ui-field-hint">{{ hint }}</p>

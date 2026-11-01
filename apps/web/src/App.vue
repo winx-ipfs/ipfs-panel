@@ -1,53 +1,29 @@
 <script setup lang="ts">
-import { Menu, Monitor, Moon, Sun } from '@lucide/vue'
+import { Menu } from '@lucide/vue'
 import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterView, useRoute } from 'vue-router'
+import BrandMark from '@/components/BrandMark.vue'
 import Dialog from '@/components/Dialog.vue'
 import IconButton from '@/components/IconButton.vue'
+import LocaleThemeControls from '@/components/LocaleThemeControls.vue'
 import SidebarNav from '@/components/SidebarNav.vue'
 import Toast from '@/components/Toast.vue'
-import Tooltip from '@/components/Tooltip.vue'
-import type { AppLocale } from '@/i18n'
-import { useLocaleStore } from '@/stores/locale'
-import { useThemeStore, type ThemePreference } from '@/stores/theme'
+import { useAuthStore } from '@/stores/auth'
 
 const { t } = useI18n()
 const route = useRoute()
-const localeStore = useLocaleStore()
-const theme = useThemeStore()
+const auth = useAuthStore()
 
 const navOpen = ref(false)
 const narrow = ref(false)
 let media: MediaQueryList | null = null
-const themeOrder: ThemePreference[] = ['light', 'dark', 'system']
 
-const themeIcon = computed(() => {
-  if (theme.preference === 'light') return Sun
-  if (theme.preference === 'dark') return Moon
-  return Monitor
-})
-
-const themeName = computed(() => {
-  if (theme.preference === 'light') return t('themeLight')
-  if (theme.preference === 'dark') return t('themeDark')
-  return t('themeSystem')
-})
-
-const themeButtonLabel = computed(() => `${t('themeLabel')}: ${themeName.value}`)
+const authReady = computed(() => auth.status !== 'loading')
+const gate = computed(() => !authReady.value || route.name === 'login' || route.name === 'setup')
 
 function onNarrow() {
   narrow.value = media?.matches ?? false
-}
-
-function chooseLocale(next: AppLocale) {
-  localeStore.setLocale(next)
-}
-
-function cycleTheme() {
-  const index = themeOrder.indexOf(theme.preference)
-  const next = themeOrder[(index + 1) % themeOrder.length] ?? 'system'
-  theme.setPreference(next)
 }
 
 onMounted(() => {
@@ -79,7 +55,22 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="shell">
+  <div v-if="gate" class="gate">
+    <a class="skip" href="#content">{{ t('skipToContent') }}</a>
+    <header class="gate-bar">
+      <LocaleThemeControls />
+    </header>
+    <main id="content" class="gate-main" tabindex="-1">
+      <RouterView v-if="authReady" />
+      <div v-else class="gate-column gate-loading">
+        <span class="gate-badge">
+          <BrandMark />
+        </span>
+        <p class="sr-only" role="status">{{ t('authLoading') }}</p>
+      </div>
+    </main>
+  </div>
+  <div v-else class="shell">
     <a class="skip" href="#content">{{ t('skipToContent') }}</a>
     <aside class="sidebar">
       <SidebarNav />
@@ -94,20 +85,7 @@ watchEffect(() => {
           <span class="machine">{{ t('machineLabel') }}</span>
         </div>
         <div class="topbar-end">
-          <div class="segment" role="group" :aria-label="t('languageLabel')">
-            <button type="button" :aria-pressed="localeStore.locale === 'en'" :aria-label="t('languageNameEn')" @click="chooseLocale('en')">
-              {{ t('languageEn') }}
-            </button>
-            <button type="button" :aria-pressed="localeStore.locale === 'zh'" :aria-label="t('languageNameZh')" @click="chooseLocale('zh')">
-              {{ t('languageZh') }}
-            </button>
-          </div>
-          <Tooltip :text="themeName">
-            <button type="button" class="theme-cycle" :aria-label="themeButtonLabel" @click="cycleTheme">
-              <component :is="themeIcon" :size="18" :stroke-width="1.75" aria-hidden="true" />
-              <span class="theme-cycle-name">{{ themeName }}</span>
-            </button>
-          </Tooltip>
+          <LocaleThemeControls />
         </div>
       </header>
       <main id="content" class="main" tabindex="-1">

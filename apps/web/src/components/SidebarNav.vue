@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import { FolderOpen, LayoutGrid, Pin, Server, Settings } from '@lucide/vue'
 import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import BrandMark from '@/components/BrandMark.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const emit = defineEmits<{ navigate: [] }>()
 const { t } = useI18n()
+const router = useRouter()
+const auth = useAuthStore()
+
+async function logout() {
+  emit('navigate')
+  await auth.logout()
+  await router.push({ name: 'login' })
+}
 
 const later = computed(() => [
   { to: '/files', label: t('navFiles'), icon: FolderOpen },
@@ -71,6 +80,7 @@ function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
     </RouterLink>
   </nav>
   <div class="sidebar-foot">
+    <button type="button" class="nav-logout" @click="logout">{{ t('logout') }}</button>
     <a
       class="portal"
       href="https://winx.run"
