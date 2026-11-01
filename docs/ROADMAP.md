@@ -14,34 +14,34 @@ We do not build the whole backend, then the whole UI.
 
 ### Where this repo is
 
-The tree you can clone today is the foundation, not slice 1.
+The tree you can clone today has finished slice 1 and slice 2.
 
 What is here:
 
 - a panel shell with a Node card
 - English and 中文, with the language switch saved in the browser
-- `GET /health` on the manager, loopback by default
-- start, stop, and restart for one local Kubo, with a one-sentence status
+- one admin, created on first run, with a session on the manager
+- `GET /health` on the manager, loopback by default, and still open without a session
+- start, stop, and restart for one local Kubo, with a one-sentence status, behind that session
 
 What is not here:
 
-- auth
 - files, pins, or scenes
 - more than one node
 
 ### 1. Shell, auth, and languages
 
-The shell and the language switch already exist. This slice adds a real login on the manager, and a UI that stays signed out until that login works.
+The shell, the language switch, and login are in place. The spec is [Auth](design/auth.md).
 
-An anonymous browser cannot call the manager. The browser still never receives a Kubo RPC address to call itself.
+An anonymous browser cannot call the manager's `/api` routes. The browser still never receives a Kubo RPC address to call itself.
 
-Done when you can sign in, the shell renders in both languages, and a request without a session is rejected.
+Done when you can sign in, the shell renders in both languages, and a request without a session is rejected. That is the current tree.
 
 ### 2. Start, stop, and health
 
 Show whether Kubo is up. Start it. Stop it. Restart it. The status is a sentence (up, down, starting, stopping, failed), not a dump of the RPC response.
 
-The spec is [Node lifecycle](DESIGN-node-lifecycle.md). The manager and the Node card implement it. Login is still not built; this slice does not add it.
+The spec is [Node lifecycle](DESIGN-node-lifecycle.md). The manager and the Node card implement it. The routes require the session from slice 1.
 
 Done when you can change whether the local node is running from the panel, and the panel tells the truth when it fails.
 
@@ -91,34 +91,34 @@ This waits until slices 1–5 feel dull. Dull is the goal.
 
 ### 这个仓库现在在哪
 
-现在能克隆到的是地基，不是第 1 片。
+现在能克隆到的已经做完第 1 片和第 2 片。
 
 已经有的：
 
 - 带节点卡片的面板壳
 - 英文和中文，语言开关会记在浏览器里
-- manager 上的 `GET /health`，默认只听本机
-- 启动、停止、重启本机上的一个 Kubo，状态是一句话
+- 一个管理员，第一次运行时创建，manager 上有会话
+- manager 上的 `GET /health`，默认只听本机，并且仍然不需要会话
+- 启动、停止、重启本机上的一个 Kubo，状态是一句话，并且要有那个会话
 
 还没有的：
 
-- 登录
 - 文件、pin、场景
 - 多个节点
 
 ### 1. 壳、登录、语言
 
-壳和语言开关已经在了。这一片要补的是 manager 上真正的登录，以及没登录成功之前界面都保持未登录。
+壳、语言开关和登录都在了。规格是[认证](design/auth.md)。
 
-没会话的浏览器不能调用 manager。浏览器仍然拿不到一个可以自己去叫的 Kubo RPC 地址。
+没会话的浏览器不能调用 manager 的 `/api`。浏览器仍然拿不到一个可以自己去叫的 Kubo RPC 地址。
 
-做完的样子：能登录，壳用两种语言都能画出来，没有会话的请求会被拒绝。
+做完的样子：能登录，壳用两种语言都能画出来，没有会话的请求会被拒绝。现在的树就是这样。
 
 ### 2. 启动、停止、健康
 
 看出 Kubo 在不在。启动它。停止它。重启它。状态是一句话（在跑、停了、正在启动、正在停止、失败了），不是把 RPC 响应倒出来。
 
-规格在 [节点启停](DESIGN-node-lifecycle.md)。manager 和节点卡片已经按它实现。登录还没做；这一片不加登录。
+规格在 [节点启停](DESIGN-node-lifecycle.md)。manager 和节点卡片已经按它实现。这些路由需要第 1 片的会话。
 
 做完的样子：你可以在面板上改变本机节点是否在跑，失败时面板说的是实话。
 

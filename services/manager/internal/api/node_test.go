@@ -9,11 +9,19 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/auth"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/fakebin"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/node"
+)
+
+var (
+	sessionMu     sync.Mutex
+	sessionCookie string
+	sessionCSRF   string
 )
 
 func fakeMux(t *testing.T) (*node.Supervisor, http.Handler, string) {
@@ -40,7 +48,22 @@ func fakeMux(t *testing.T) (*node.Supervisor, http.Handler, string) {
 		defer cancel()
 		_ = sup.Shutdown(ctx)
 	})
-	return sup, NewMux(sup), repo
+	svc, err := auth.New(t.TempDir(), "", auth.Options{Params: auth.TestingParams()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, err := svc.Setup("admin", "correct-horse-battery", "127.0.0.1:9", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	useSession(res.Session, res.CSRF)
+	return sup, NewMux(sup, svc), repo
+}
+
+func useSession(cookie, csrf string) {
+	sessionMu.Lock()
+	sessionCookie, sessionCSRF = cookie, csrf
+	sessionMu.Unlock()
 }
 
 func do(mux http.Handler, method, path, contentType, body string) *httptest.ResponseRecorder {
@@ -53,6 +76,13 @@ func do(mux http.Handler, method, path, contentType, body string) *httptest.Resp
 	req := httptest.NewRequest(method, path, reader)
 	if contentType != "" {
 		req.Header.Set("Content-Type", contentType)
+	}
+	sessionMu.Lock()
+	cookie, csrf := sessionCookie, sessionCSRF
+	sessionMu.Unlock()
+	if cookie != "" {
+		req.AddCookie(&http.Cookie{Name: auth.SessionCookieName, Value: cookie})
+		req.Header.Set(auth.CSRFHeader, csrf)
 	}
 	rr := httptest.NewRecorder()
 	mux.ServeHTTP(rr, req)

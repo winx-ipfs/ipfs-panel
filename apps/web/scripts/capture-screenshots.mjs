@@ -123,7 +123,7 @@ try {
       localStorage.setItem('ipfs-panel.lang', 'en')
     })
     const settings = await extra.newPage()
-    await settings.goto(`${origin}/settings`, { waitUntil: 'domcontentloaded' })
+    await settings.goto(`${origin}/settings?auth=session`, { waitUntil: 'domcontentloaded' })
     await settings.evaluate(() => document.fonts.ready)
     const settingsFile = path.join(outDir, 'settings-light-en-1440.png')
     await settings.screenshot({ path: settingsFile, fullPage: true })
@@ -171,6 +171,61 @@ try {
     await tabletPage.screenshot({ path: tabletFile })
     index.push(tabletFile)
     await tablet.close()
+
+    const authShots = [
+      {
+        name: 'setup',
+        path: '/setup?auth=setup',
+        heading: { en: 'Create the admin account', zh: '创建管理员账号' },
+      },
+      {
+        name: 'login',
+        path: '/login?auth=login-error',
+        heading: { en: 'Sign in', zh: '登录' },
+      },
+    ]
+    for (const theme of themes) {
+      for (const locale of locales) {
+        for (const size of widths) {
+          const context = await browser.newContext({
+            viewport: { width: size.width, height: size.height },
+            deviceScaleFactor: 1,
+            colorScheme: theme,
+            reducedMotion: 'reduce',
+          })
+          await context.addInitScript(
+            ({ themePreference, localePreference }) => {
+              localStorage.setItem('ipfs-panel.theme', themePreference)
+              localStorage.setItem('ipfs-panel.lang', localePreference)
+            },
+            { themePreference: theme, localePreference: locale },
+          )
+          const page = await context.newPage()
+          for (const shot of authShots) {
+            await page.goto(`${origin}${shot.path}`, { waitUntil: 'domcontentloaded' })
+            await page.getByRole('heading', { name: shot.heading[locale], exact: true }).waitFor()
+            if (shot.name === 'login') await page.getByRole('alert').waitFor()
+            const file = path.join(outDir, `auth-${shot.name}-${theme}-${locale}-${size.name}.png`)
+            await shoot(page, file)
+            index.push(file)
+          }
+          await page.goto(`${origin}/settings?auth=session`, { waitUntil: 'domcontentloaded' })
+          await page.getByRole('tab', { name: locale === 'zh' ? '账号' : 'Account', exact: true }).click()
+          await page.getByLabel(locale === 'zh' ? '当前密码' : 'Current password', { exact: true }).fill('correct horse')
+          await page.getByLabel(locale === 'zh' ? '新密码' : 'New password', { exact: true }).fill('correct horse battery staple')
+          await page.getByLabel(locale === 'zh' ? '再输入一次新密码' : 'Confirm new password', { exact: true }).fill('correct horse battery staple')
+          await page.getByText(locale === 'zh' ? '很稳妥。' : 'Strong.').waitFor()
+          await page.evaluate(() => {
+            const active = document.activeElement
+            if (active instanceof HTMLElement) active.blur()
+          })
+          const passwordFile = path.join(outDir, `auth-password-${theme}-${locale}-${size.name}.png`)
+          await shoot(page, passwordFile)
+          index.push(passwordFile)
+          await context.close()
+        }
+      }
+    }
   } finally {
     await browser.close()
   }

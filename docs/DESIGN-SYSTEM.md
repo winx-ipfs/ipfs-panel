@@ -103,10 +103,10 @@ All of them are in `apps/web/src/components`. Prefer these over a new one-off bu
 | `IconButton` | Needs a `label`. The label is the accessible name. Pair it with `Tooltip` when the name also helps sighted people. |
 | `Card` | One subject. `tone` paints a 3px status bar. `none` is a plain card. |
 | `StatusPill` | A word plus a dot. Tones match the color table. `pulse` only for starting and stopping. |
-| `Input` | Label above, hint or error below. Wire `aria-invalid` through the `error` prop. Not on a screen yet: the node page must not grow a path field. Login will use it. |
+| `Input` | Label above, hint or error below. Wire `aria-invalid` through the `error` prop. Setup, login, and change-password use it. The node page still must not grow a path field. |
 | `Select` | Native select. Two or more options that should use the platform picker. Language on the Settings page. The top bar keeps a two-way segment for English / 中文, because two choices do not need a menu. |
 | `Switch` | A boolean the person can flip immediately. Theme "match this device" is the example. |
-| `Tabs` | Real panels, not a radio by another name. Arrow keys move the tab. Settings uses General and About. |
+| `Tabs` | Real panels, not a radio by another name. Arrow keys move the tab. Settings uses General, Account, and About. |
 | `Dialog` | `dialog` for a short decision. `drawer` for the narrow-screen nav. Escape closes. Focus returns to the opener. The title is required even when it is visually hidden. |
 | `Toast` | Short confirmation, `aria-live="polite"`. "Copied" is the one we show. |
 | `Tooltip` | Extra name on hover and focus. Do not hide the only copy of a required sentence in a tooltip. |
@@ -170,7 +170,7 @@ From `apps/web`, after `npx playwright install chromium`:
 npm run shots
 ```
 
-That writes the node page in all five states, light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager.
+That writes the node page in all five states, the setup screen, the login screen with an error, and the settings password form, light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture.
 
 This is not a CI job. A Chromium install and the machine's CJK fonts make a pixel run slow and easy to flake, and `ci-ok` should stay the fast check. The unit tests still cover the sentences, the manager actions, and the form controls. Re-run `npm run shots` when the shell or the node card changes, and look at the pictures.
 
@@ -283,10 +283,10 @@ reka-ui（Radix Vue）是认真考虑过的。它能提供焦点圈定和列表�
 | `IconButton` | 必须有 `label`。这个 label 就是可访问的名字。需要让看得见的人也读到时，配 `Tooltip`。 |
 | `Card` | 一件事一张卡。`tone` 画一条 3px 的状态条。`none` 是普通卡片。 |
 | `StatusPill` | 一个词加一个圆点。色调和上面的表一致。`pulse` 只给正在启动和正在停止。 |
-| `Input` | 标签在上，说明或错误在下。错误走 `error`，会带上 `aria-invalid`。现在还没有画面用它：节点页不能长出路径输入框。登录会用到。 |
+| `Input` | 标签在上，说明或错误在下。错误走 `error`，会带上 `aria-invalid`。设置、登录和改密码用它。节点页仍然不能长出路径输入框。 |
 | `Select` | 原生下拉。两个以上、适合用系统选择器的选项。设置页上的语言用它。顶栏的英文 / 中文仍是两段切换，两个选项不必再套一层菜单。 |
 | `Switch` | 可以马上翻转的布尔值。主题里的「跟这台设备一致」就是例子。 |
-| `Tabs` | 真正的面板，不是换了名字的单选。方向键移动。设置页是「通用」和「关于」。 |
+| `Tabs` | 真正的面板，不是换了名字的单选。方向键移动。设置页是「通用」、「账号」和「关于」。 |
 | `Dialog` | `dialog` 给一个短决定。`drawer` 给窄屏导航。Escape 关闭。焦点回到打开它的控件。标题必须有，哪怕视觉上藏起来。 |
 | `Toast` | 短确认，`aria-live="polite"`。现在用来显示「已复制」。 |
 | `Tooltip` | 悬停和焦点时多给一个名字。一句必须读到的话，不要只放在提示里。 |
@@ -350,7 +350,7 @@ reka-ui（Radix Vue）是认真考虑过的。它能提供焦点圈定和列表�
 npm run shots
 ```
 
-这会把节点页的五种状态、浅色和深色、英文和中文、1440 和 390 宽，再加上 404，写到 `SHOTS_DIR` 或 `/opt/cursor/artifacts`。脚本自己拉起 Vite。不需要 manager 在跑。
+这会把节点页的五种状态、设置页、带错误的登录页、设置里的改密码，浅色和深色、英文和中文、1440 和 390 宽，再加上 404，写到 `SHOTS_DIR` 或 `/opt/cursor/artifacts`。脚本自己拉起 Vite。不需要 manager 在跑。登录相关画面用仅开发环境的 `?auth=`。
 
 这不是 CI 任务。装 Chromium，再加上机器上的中文字体，像素对比又慢又容易抖，而 `ci-ok` 应该保持快。单元测试仍然覆盖那句话、管理动作和表单控件。外壳或节点卡片有改动时，再跑一次 `npm run shots`，看图。
 

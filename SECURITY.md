@@ -33,7 +33,7 @@ Private vulnerability reporting has to be enabled on the repository. The switch 
 
 - A Kubo bug that this repo does not add. Report that to Kubo.
 - Putting Kubo RPC (usually port 5001) on a public address. The panel must not do that, and we will not help someone do it.
-- Missing auth on the manager today. That is a known gap, written in the README. A report that only restates it is not a vulnerability. A report that shows how to abuse it beyond the loopback default is.
+- Missing auth on the manager. Current `develop` requires a session for `/api` routes other than setup-status, setup, and login. `GET /health` stays open. A report that only restates the old "no auth yet" README is not a vulnerability. A report that shows how to skip the session, the setup token, or the loopback check is.
 
 ## Disclosure
 
@@ -74,7 +74,7 @@ We prefer a coordinated disclosure. We will credit you in the advisory unless yo
 
 - Kubo 自己的缺陷，而这个仓库没有加一层。请向 Kubo 报告。
 - 把 Kubo RPC（一般是 5001 端口）开到公网。面板不应该这么做，我们也不会帮别人这么做。
-- 管理服务目前没有认证。这是 README 里写明的缺口。只是复述这一点，不算漏洞。如果报告说明了怎么在默认的本机回环之外滥用它，那算。
+- 管理服务没有认证。当前的 `develop` 上，除了 setup-status、setup 和 login，`/api` 都要有会话。`GET /health` 仍然开放。只是复述旧 README 里「认证还没做」，不算漏洞。如果报告说明了怎么绕过会话、设置口令或回环检查，那算。
 
 ## 公开
 

@@ -1,6 +1,8 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { inlineParts, shortenMiddle } from '@/lib/inline'
+import { onUnauthorized } from '@/lib/session'
+import { setCSRFToken } from '@/lib/csrf'
 import { sentenceKey, visibleActions } from '@/node/present'
 import type { NodeOverview } from '@/node/types'
 import { useNodeStore } from '@/stores/node'
@@ -146,12 +148,32 @@ describe('node store', () => {
     const fetchMock = vi.fn().mockResolvedValue(json(overview({ state: 'starting' })))
     vi.stubGlobal('fetch', fetchMock)
     const store = useNodeStore()
+    setCSRFToken('csrf-test')
     await store.start()
     expect(fetchMock).toHaveBeenCalledWith('/api/node/start', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': 'csrf-test' },
       body: '{}',
     })
+    store.stopPolling()
+    vi.unstubAllGlobals()
+    vi.useRealTimers()
+  })
+
+  it('treats 401 as signed out and stops polling', async () => {
+    const seen = vi.fn()
+    const stop = onUnauthorized(seen)
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{"error":"unauthorized"}', { status: 401 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const store = useNodeStore()
+    await store.startPolling()
+    expect(store.unreachable).toBe(false)
+    expect(store.overview).toBeNull()
+    expect(seen).toHaveBeenCalledOnce()
+    await vi.advanceTimersByTimeAsync(10000)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    stop()
     store.stopPolling()
     vi.unstubAllGlobals()
     vi.useRealTimers()

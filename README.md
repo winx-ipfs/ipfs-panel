@@ -10,7 +10,7 @@ This repo is a panel for Kubo. Open it on the machine that runs the node, or ope
 
 **winx.run** is the portal. **This repository is the product.**
 
-The browser never talks to Kubo RPC (usually `127.0.0.1:5001`). That port stays on the machine. Our own manager is the API. It will check who you are before it does anything real. Today it can report its own health and start, stop, or restart one local Kubo. It binds to loopback unless you override it. Do not publish it. There is no auth yet.
+The browser never talks to Kubo RPC (usually `127.0.0.1:5001`). That port stays on the machine. Our own manager is the API. It checks who you are before it starts or stops Kubo. It binds to loopback unless you override it. Do not publish it until you have read [Auth](docs/design/auth.md).
 
 ## Layout
 
@@ -39,7 +39,11 @@ go run ./cmd/manager
 curl -s http://127.0.0.1:8080/health
 ```
 
-You should see `{"status":"ok","service":"manager"}`. That check is the manager process, not Kubo. With `MANAGER_ADDR` unset, the manager listens on `127.0.0.1:8080`. Optional flags: `-addr`, `-repo`, and `-kubo-bin`. Each one overrides the matching environment variable when you pass it. Do not publish the manager. There is no auth yet.
+You should see `{"status":"ok","service":"manager"}`. That check is the manager process, not Kubo. With `MANAGER_ADDR` unset, the manager listens on `127.0.0.1:8080`. Optional flags: `-addr`, `-repo`, `-data`, `-kubo-bin`, and `-trust-proxy`. Each one overrides the matching environment variable when you pass it.
+
+The first time you open the panel, it asks you to create the admin account. The password is hashed with argon2id and stored in `<data>/auth.json` (mode `0600`), next to the Kubo repo, not inside it. The default data directory is `$XDG_DATA_HOME/ipfs-panel`, or `~/.local/share/ipfs-panel`. After that, the panel asks you to sign in. A request to `/api` without a session is `401`. `GET /health` stays open.
+
+If you forget the password, stop the manager and run `go run ./cmd/manager reset-admin`. It deletes the account. It does not take a password on the command line. Start the manager again and create the account. From another machine, setup also needs the one-time token the new process prints. The reason, and the rest of the rules, are in [Auth](docs/design/auth.md).
 
 UI, in another terminal:
 
@@ -72,7 +76,7 @@ go test -race ./...
 go build -o /dev/null ./cmd/manager
 ```
 
-Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). Go 1.22 is enough for the manager.
+Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). The manager module needs Go 1.26, which is what `services/manager/go.mod` asks for. CI installs that version.
 
 ## Look
 
@@ -89,6 +93,7 @@ The shell, the tokens, and the rules for new screens are in [Design system](docs
 - [Vision](docs/VISION.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Design system](docs/DESIGN-SYSTEM.md)
+- [Auth](docs/design/auth.md)
 - [Node lifecycle](docs/DESIGN-node-lifecycle.md)
 - [Contributing](CONTRIBUTING.md) (Git Flow, CI, hotfixes)
 - [Org setup](docs/ORG-SETUP.md) (repository settings checklist)
@@ -108,7 +113,7 @@ IPFS 值得用。Kubo 默认的用法不太值得折腾。你拿到的是命令�
 
 **winx.run** 是门户。**这个仓库才是产品。**
 
-浏览器不和 Kubo RPC 说话（一般是 `127.0.0.1:5001`）。那个端口留在机器上。对外的是我们自己的 manager。它以后会先确认你是谁，再去做真正的事。现在它可以回答自己的健康检查，并启动、停止或重启本机上的一个 Kubo。默认只听本机回环地址。先别把它暴露出去，认证还没做。
+浏览器不和 Kubo RPC 说话（一般是 `127.0.0.1:5001`）。那个端口留在机器上。对外的是我们自己的 manager。它会先确认你是谁，再去启动或停止 Kubo。默认只听本机回环地址。在读过[认证](docs/design/auth.md)之前，别把它暴露出去。
 
 ## 目录
 
@@ -137,7 +142,11 @@ go run ./cmd/manager
 curl -s http://127.0.0.1:8080/health
 ```
 
-你应该看到 `{"status":"ok","service":"manager"}`。这个检查只说明 manager 这个进程在，不说明 Kubo 在不在。没设 `MANAGER_ADDR` 时，manager 听在 `127.0.0.1:8080`。可选参数：`-addr`、`-repo`、`-kubo-bin`。传了参数就覆盖对应的环境变量。先别把 manager 暴露出去，认证还没做。
+你应该看到 `{"status":"ok","service":"manager"}`。这个检查只说明 manager 这个进程在，不说明 Kubo 在不在。没设 `MANAGER_ADDR` 时，manager 听在 `127.0.0.1:8080`。可选参数：`-addr`、`-repo`、`-data`、`-kubo-bin`、`-trust-proxy`。传了参数就覆盖对应的环境变量。
+
+第一次打开面板时，它会让你创建管理员账号。密码用 argon2id 哈希，存在 `<data>/auth.json`（权限 `0600`），和 Kubo 仓库并列，不在仓库里面。默认数据目录是 `$XDG_DATA_HOME/ipfs-panel`，没设 `XDG_DATA_HOME` 时是 `~/.local/share/ipfs-panel`。之后面板会要求登录。没有会话的 `/api` 请求是 `401`。`GET /health` 仍然开放。
+
+如果忘了密码，先停掉 manager，再运行 `go run ./cmd/manager reset-admin`。它删掉账号。它不在命令行上接受密码。然后再启动 manager，重新创建账号。从另一台机器设置时，还需要新进程打印的一次性口令。原因和其余规则在[认证](docs/design/auth.md)。
 
 界面，另开一个终端：
 
@@ -170,7 +179,7 @@ go test -race ./...
 go build -o /dev/null ./cmd/manager
 ```
 
-界面用 Node 22 就行（22.18 或更新，或者 Node 24.12+）。管理服务用 Go 1.22 就行。
+界面用 Node 22 就行（22.18 或更新，或者 Node 24.12+）。管理服务模块需要 Go 1.26，`services/manager/go.mod` 里写的就是这个版本。CI 会装它。
 
 ## 看一眼
 
@@ -187,6 +196,7 @@ go build -o /dev/null ./cmd/manager
 - [愿景](docs/VISION.md)
 - [路线图](docs/ROADMAP.md)
 - [设计系统](docs/DESIGN-SYSTEM.md)
+- [认证](docs/design/auth.md)
 - [节点启停](docs/DESIGN-node-lifecycle.md)
 - [参与方式](CONTRIBUTING.md)（Git Flow、CI、热修）
 - [组织设置](docs/ORG-SETUP.md)（仓库设置清单）

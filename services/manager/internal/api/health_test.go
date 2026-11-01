@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/auth"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/node"
 )
 
@@ -33,7 +34,11 @@ func testMux(t *testing.T) (*node.Supervisor, http.Handler) {
 		defer cancel()
 		_ = sup.Shutdown(ctx)
 	})
-	return sup, NewMux(sup)
+	svc, err := auth.New(t.TempDir(), "", auth.Options{Params: auth.TestingParams()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return sup, NewMux(sup, svc)
 }
 
 func TestHealth(t *testing.T) {
@@ -72,12 +77,20 @@ func TestHealthPost(t *testing.T) {
 
 func TestNotFound(t *testing.T) {
 	_, mux := testMux(t)
-	for _, path := range []string{"/", "/api/files", "/api/pins", "/api/nodes"} {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rr := httptest.NewRecorder()
+	mux.ServeHTTP(rr, req)
+	if rr.Code != http.StatusNotFound {
+		t.Fatalf("/ status = %d", rr.Code)
+	}
+	assertNoCORS(t, rr.Header())
+
+	for _, path := range []string{"/api/files", "/api/pins", "/api/nodes"} {
 		req := httptest.NewRequest(http.MethodGet, path, nil)
 		rr := httptest.NewRecorder()
 		mux.ServeHTTP(rr, req)
-		if rr.Code != http.StatusNotFound {
-			t.Fatalf("%s status = %d", path, rr.Code)
+		if rr.Code != http.StatusUnauthorized {
+			t.Fatalf("%s status = %d body %s", path, rr.Code, rr.Body.Bytes())
 		}
 		assertNoCORS(t, rr.Header())
 	}
