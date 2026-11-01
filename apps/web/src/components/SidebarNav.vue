@@ -18,7 +18,6 @@ async function logout() {
 }
 
 const later = computed(() => [
-  { to: '/files', label: t('navFiles'), icon: FolderOpen },
   { to: '/pins', label: t('navPins'), icon: Pin },
   { to: '/scenes', label: t('navScenes'), icon: LayoutGrid },
 ])
@@ -50,6 +49,18 @@ function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
       >
         <Server :size="18" :stroke-width="1.75" aria-hidden="true" />
         <span class="nav-text">{{ t('navNode') }}</span>
+      </a>
+    </RouterLink>
+    <RouterLink v-slot="{ href, navigate, isActive }" to="/files" custom>
+      <a
+        :href="href"
+        class="nav-link"
+        :class="{ active: isActive }"
+        :aria-current="isActive ? 'page' : undefined"
+        @click="go(navigate, $event)"
+      >
+        <FolderOpen :size="18" :stroke-width="1.75" aria-hidden="true" />
+        <span class="nav-text">{{ t('navFiles') }}</span>
       </a>
     </RouterLink>
     <p class="nav-label">{{ t('navLater') }}</p>

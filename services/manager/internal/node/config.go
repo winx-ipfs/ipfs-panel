@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -29,6 +30,11 @@ type Config struct {
 	ShutdownTimeout time.Duration
 	StopKillAfter   time.Duration
 	PollInterval    time.Duration
+
+	// Files limits. Zero means the spec default.
+	MaxFileBytes         int64
+	FilesTimeout         time.Duration
+	FilesTransferTimeout time.Duration
 }
 
 func (c *Config) applyDefaults() {
@@ -52,6 +58,15 @@ func (c *Config) applyDefaults() {
 	}
 	if c.PollInterval <= 0 {
 		c.PollInterval = 200 * time.Millisecond
+	}
+	if c.MaxFileBytes <= 0 {
+		c.MaxFileBytes = 512 << 20
+	}
+	if c.FilesTimeout <= 0 {
+		c.FilesTimeout = 20 * time.Second
+	}
+	if c.FilesTransferTimeout <= 0 {
+		c.FilesTransferTimeout = 10 * time.Minute
 	}
 	if c.Logger == nil {
 		c.Logger = slog.New(slog.NewTextHandler(io.Discard, nil))
@@ -88,7 +103,10 @@ func DefaultRepoPath() (string, error) {
 //	-repo         IPFS_PANEL_REPO           default DefaultRepoPath
 //	-data         IPFS_PANEL_DATA           default DefaultDataDir
 //	-kubo-bin     IPFS_PANEL_KUBO_BIN       default empty (ipfs on PATH)
-//	-trust-proxy  IPFS_PANEL_TRUST_PROXY    default false
+//	-trust-proxy              IPFS_PANEL_TRUST_PROXY              default false
+//	-max-file-bytes           IPFS_PANEL_MAX_FILE_BYTES           default 512 MiB
+//	-files-timeout            IPFS_PANEL_FILES_TIMEOUT            default 20s
+//	-files-transfer-timeout   IPFS_PANEL_FILES_TRANSFER_TIMEOUT   default 10m
 func LoadConfig(args []string) (Config, error) {
 	repoDefault := os.Getenv("IPFS_PANEL_REPO")
 	if repoDefault == "" {
@@ -118,6 +136,21 @@ func LoadConfig(args []string) (Config, error) {
 	data := fs.String("data", dataDefault, "manager data directory (env IPFS_PANEL_DATA)")
 	bin := fs.String("kubo-bin", os.Getenv("IPFS_PANEL_KUBO_BIN"), "ipfs binary (env IPFS_PANEL_KUBO_BIN); empty searches PATH")
 	trust := fs.Bool("trust-proxy", envBool(os.Getenv("IPFS_PANEL_TRUST_PROXY")), "trust X-Forwarded-Proto and X-Forwarded-For from a reverse proxy (env IPFS_PANEL_TRUST_PROXY)")
+	maxDefault, err := envPositiveInt("IPFS_PANEL_MAX_FILE_BYTES")
+	if err != nil {
+		return Config{}, err
+	}
+	opDefault, err := envPositiveDuration("IPFS_PANEL_FILES_TIMEOUT")
+	if err != nil {
+		return Config{}, err
+	}
+	transferDefault, err := envPositiveDuration("IPFS_PANEL_FILES_TRANSFER_TIMEOUT")
+	if err != nil {
+		return Config{}, err
+	}
+	maxBytes := fs.Int64("max-file-bytes", maxDefault, "largest upload in bytes (env IPFS_PANEL_MAX_FILE_BYTES)")
+	opTimeout := fs.Duration("files-timeout", opDefault, "metadata deadline (env IPFS_PANEL_FILES_TIMEOUT)")
+	transferTimeout := fs.Duration("files-transfer-timeout", transferDefault, "upload and download deadline (env IPFS_PANEL_FILES_TRANSFER_TIMEOUT)")
 	if err := fs.Parse(args); err != nil {
 		return Config{}, err
 	}
@@ -125,12 +158,39 @@ func LoadConfig(args []string) (Config, error) {
 		return Config{}, fmt.Errorf("unexpected arguments: %s", fs.Args())
 	}
 	return Config{
-		ManagerAddr: *addr,
-		RepoPath:    *repo,
-		DataDir:     *data,
-		KuboBin:     *bin,
-		TrustProxy:  *trust,
+		ManagerAddr:          *addr,
+		RepoPath:             *repo,
+		DataDir:              *data,
+		KuboBin:              *bin,
+		TrustProxy:           *trust,
+		MaxFileBytes:         *maxBytes,
+		FilesTimeout:         *opTimeout,
+		FilesTransferTimeout: *transferTimeout,
 	}, nil
+}
+
+func envPositiveInt(key string) (int64, error) {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return 0, nil
+	}
+	n, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil || n <= 0 {
+		return 0, fmt.Errorf("%s: %q", key, raw)
+	}
+	return n, nil
+}
+
+func envPositiveDuration(key string) (time.Duration, error) {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return 0, nil
+	}
+	d, err := time.ParseDuration(raw)
+	if err != nil || d <= 0 {
+		return 0, fmt.Errorf("%s: %q", key, raw)
+	}
+	return d, nil
 }
 
 func envBool(value string) bool {

@@ -204,7 +204,14 @@ try {
           for (const shot of authShots) {
             await page.goto(`${origin}${shot.path}`, { waitUntil: 'domcontentloaded' })
             await page.getByRole('heading', { name: shot.heading[locale], exact: true }).waitFor()
-            if (shot.name === 'login') await page.getByRole('alert').waitFor()
+            if (shot.name === 'login') {
+              await page.getByRole('alert').waitFor()
+              await page.getByLabel(locale === 'zh' ? '用户名' : 'Username', { exact: true }).fill('ada')
+              await page.evaluate(() => {
+                const active = document.activeElement
+                if (active instanceof HTMLElement) active.blur()
+              })
+            }
             const file = path.join(outDir, `auth-${shot.name}-${theme}-${locale}-${size.name}.png`)
             await shoot(page, file)
             index.push(file)
@@ -222,6 +229,41 @@ try {
           const passwordFile = path.join(outDir, `auth-password-${theme}-${locale}-${size.name}.png`)
           await shoot(page, passwordFile)
           index.push(passwordFile)
+          await context.close()
+        }
+      }
+    }
+    const fileShots = [
+      { name: 'list', query: 'files=list', wait: '[data-files="list"]' },
+      { name: 'empty', query: 'files=empty', wait: '[data-files="empty"]' },
+      { name: 'uploading', query: 'files=uploading', wait: '[data-files="uploading"]' },
+      { name: 'delete', query: 'files=delete', wait: '[data-files="delete"]' },
+      { name: 'down', query: 'files=down', wait: '[data-files="down"]' },
+    ]
+    for (const theme of themes) {
+      for (const locale of locales) {
+        for (const size of widths) {
+          const context = await browser.newContext({
+            viewport: { width: size.width, height: size.height },
+            deviceScaleFactor: 1,
+            colorScheme: theme,
+            reducedMotion: 'reduce',
+          })
+          await context.addInitScript(
+            ({ themePreference, localePreference }) => {
+              localStorage.setItem('ipfs-panel.theme', themePreference)
+              localStorage.setItem('ipfs-panel.lang', localePreference)
+            },
+            { themePreference: theme, localePreference: locale },
+          )
+          const page = await context.newPage()
+          for (const shot of fileShots) {
+            await page.goto(`${origin}/files?${shot.query}`, { waitUntil: 'domcontentloaded' })
+            await page.waitForSelector(shot.wait)
+            const file = path.join(outDir, `files-${shot.name}-${theme}-${locale}-${size.name}.png`)
+            await shoot(page, file)
+            index.push(file)
+          }
           await context.close()
         }
       }

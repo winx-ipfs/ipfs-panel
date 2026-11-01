@@ -1,0 +1,361 @@
+.files-page {
+  width: min(960px, 100%);
+}
+
+.files-page a.ui-btn {
+  text-decoration: none;
+}
+
+.files-advanced {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.files-advanced summary {
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 600;
+  width: fit-content;
+}
+
+.files-advanced p {
+  margin: 8px 0 0;
+  max-width: 62ch;
+}
+
+.files-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.files-toolbar-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.files-sort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.files-sort-btn {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.files-sort-btn.is-active {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.files-sort-btn:hover {
+  background: var(--surface-sunken);
+}
+
+.files-limit {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.files-uploads {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.files-upload-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--text-sm);
+}
+
+.files-upload-row span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.files-upload-state {
+  color: var(--muted);
+  flex: none;
+}
+
+.files-uploads progress {
+  width: 100%;
+  height: 6px;
+  margin-top: 6px;
+  accent-color: var(--primary);
+}
+
+.files-crumbs {
+  margin-top: 16px;
+}
+
+.files-crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.files-crumbs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.files-crumbs a,
+.files-crumbs span {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.files-crumbs [aria-current='page'] {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.files-drop {
+  margin-top: 8px;
+  border-radius: var(--radius-md);
+}
+
+.files-drop.is-over {
+  outline: 2px dashed var(--primary);
+  outline-offset: 6px;
+  background: var(--primary-soft);
+}
+
+.files-drop-hint {
+  margin: 8px 0;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.files-loading {
+  display: grid;
+  gap: 10px;
+  padding: 8px 0 4px;
+}
+
+.files-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.files-table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.files-table th,
+.files-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.files-table thead th {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.files-table tbody tr:last-child th,
+.files-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.files-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.files-name svg {
+  flex: none;
+  color: var(--muted);
+}
+
+.files-cid code {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.files-text-btn {
+  margin-inline-start: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 600;
+  min-height: 40px;
+}
+
+.files-kicker {
+  display: none;
+}
+
+.files-actions {
+  width: 1%;
+  text-align: end;
+}
+
+.files-menu-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.files-menu {
+  position: absolute;
+  z-index: 5;
+  inset-inline-end: 0;
+  top: calc(100% + 4px);
+  min-width: 220px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  display: grid;
+}
+
+.files-menu a,
+.files-menu button {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  text-align: start;
+}
+
+.files-menu a:hover,
+.files-menu button:hover,
+.files-menu a:focus-visible,
+.files-menu button:focus-visible {
+  background: var(--surface-sunken);
+}
+
+.files-menu .is-danger {
+  color: var(--danger);
+}
+
+.files-form {
+  display: grid;
+  gap: 14px;
+}
+
+.files-form p {
+  margin: 0;
+  line-height: var(--leading-body);
+}
+
+.files-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 720px) {
+  .files-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .files-table,
+  .files-table tbody,
+  .files-table tr,
+  .files-table th,
+  .files-table td {
+    display: block;
+    width: auto;
+  }
+
+  .files-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name actions"
+      "size size"
+      "cid cid"
+      "time time";
+    gap: 4px 8px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .files-table tbody tr:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .files-name-cell { grid-area: name; }
+  .files-actions { grid-area: actions; align-self: start; }
+  .files-size { grid-area: size; }
+  .files-cid { grid-area: cid; }
+  .files-time { grid-area: time; }
+
+  .files-table th,
+  .files-table td {
+    border: 0;
+    padding: 0;
+  }
+
+  .files-kicker {
+    display: inline;
+    margin-inline-end: 6px;
+    color: var(--muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .files-menu {
+    min-width: min(240px, 78vw);
+  }
+}

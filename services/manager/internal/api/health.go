@@ -14,9 +14,26 @@ type healthBody struct {
 }
 
 // NewMux is the manager HTTP API.
-// GET /health reports this process only. Node routes do not proxy Kubo.
+// GET /health reports this process only.
+// Node routes do not proxy Kubo. Files routes proxy the mutable-file RPC
+// on loopback and never return that address.
 // Every /api route except setup-status, setup, and login requires a session.
 func NewMux(sup *node.Supervisor, svc *auth.Service) http.Handler {
+	return newMux(sup, svc, nil)
+}
+
+func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP) http.Handler {
+	if filesHandler == nil {
+		maxBytes, op, transfer := sup.FileLimits()
+		filesHandler = &filesHTTP{
+			sup:             sup,
+			maxBytes:        maxBytes,
+			op:              op,
+			transferTimeout: transfer,
+		}
+	} else if filesHandler.sup == nil {
+		filesHandler.sup = sup
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", health)
 	accounts := &authHTTP{svc: svc}
@@ -37,6 +54,15 @@ func NewMux(sup *node.Supervisor, svc *auth.Service) http.Handler {
 	mux.HandleFunc("POST /api/node/restart", nodes.post(func(r *http.Request) (node.Overview, error) {
 		return sup.Restart(r.Context())
 	}))
+	mux.HandleFunc("GET /api/files", filesHandler.list)
+	mux.HandleFunc("GET /api/files/stat", filesHandler.stat)
+	mux.HandleFunc("GET /api/files/download", filesHandler.download)
+	mux.HandleFunc("POST /api/files/mkdir", filesHandler.mkdir)
+	mux.HandleFunc("POST /api/files/upload", filesHandler.upload)
+	mux.HandleFunc("POST /api/files/rename", filesHandler.rename)
+	mux.HandleFunc("POST /api/files/move", filesHandler.move)
+	mux.HandleFunc("POST /api/files/copy", filesHandler.copy)
+	mux.HandleFunc("POST /api/files/delete", filesHandler.delete)
 	return protect(svc, mux)
 }
 

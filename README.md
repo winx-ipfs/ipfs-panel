@@ -53,7 +53,7 @@ npm install
 npm run dev
 ```
 
-Open the printed local URL. The Node card starts, stops, and restarts the node. The dev server proxies `/api` and `/health` to `http://127.0.0.1:8080`.
+Open the printed local URL. The Node card starts, stops, and restarts the node. Files adds, downloads, renames, moves, copies, and deletes files on that node. The dev server proxies `/api` and `/health` to `http://127.0.0.1:8080`. The largest upload is 512 MiB unless you set `-max-file-bytes` or `IPFS_PANEL_MAX_FILE_BYTES`. The rules are in [Files](docs/design/files.md).
 
 Checks CI runs for the UI:
 
@@ -88,12 +88,19 @@ The shell, the tokens, and the rules for new screens are in [Design system](docs
 
 ![Node stopped, light theme, 中文, narrow](docs/screenshots/node-stopped-light-zh-mobile.png)
 
+![Files, light theme, 中文](docs/screenshots/files-list-light-zh-1440.png)
+
+![Files, dark theme, English](docs/screenshots/files-list-dark-en-1440.png)
+
+![Files, light theme, 中文, narrow](docs/screenshots/files-list-light-zh-390.png)
+
 ## Read next
 
 - [Vision](docs/VISION.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Design system](docs/DESIGN-SYSTEM.md)
 - [Auth](docs/design/auth.md)
+- [Files](docs/design/files.md)
 - [Node lifecycle](docs/DESIGN-node-lifecycle.md)
 - [Contributing](CONTRIBUTING.md) (Git Flow, CI, hotfixes)
 - [Org setup](docs/ORG-SETUP.md) (repository settings checklist)
@@ -156,7 +163,7 @@ npm install
 npm run dev
 ```
 
-打开它打印出来的本机地址。节点卡片可以启动、停止和重启节点。开发服务器把 `/api` 和 `/health` 代理到 `http://127.0.0.1:8080`。
+打开它打印出来的本机地址。节点卡片可以启动、停止和重启节点。文件页可以在这个节点上添加、下载、重命名、移动、复制和删除文件。开发服务器把 `/api` 和 `/health` 代理到 `http://127.0.0.1:8080`。单次上传默认最大 512 MiB，可以用 `-max-file-bytes` 或 `IPFS_PANEL_MAX_FILE_BYTES` 改。规则在[文件](docs/design/files.md)。
 
 和 CI 一样的界面检查：
 
@@ -191,12 +198,19 @@ go build -o /dev/null ./cmd/manager
 
 ![节点已停止，浅色，中文，窄屏](docs/screenshots/node-stopped-light-zh-mobile.png)
 
+![文件列表，浅色，中文](docs/screenshots/files-list-light-zh-1440.png)
+
+![文件列表，深色，英文](docs/screenshots/files-list-dark-en-1440.png)
+
+![文件列表，浅色，中文，窄屏](docs/screenshots/files-list-light-zh-390.png)
+
 ## 接着读
 
 - [愿景](docs/VISION.md)
 - [路线图](docs/ROADMAP.md)
 - [设计系统](docs/DESIGN-SYSTEM.md)
 - [认证](docs/design/auth.md)
+- [文件](docs/design/files.md)
 - [节点启停](docs/DESIGN-node-lifecycle.md)
 - [参与方式](CONTRIBUTING.md)（Git Flow、CI、热修）
 - [组织设置](docs/ORG-SETUP.md)（仓库设置清单）

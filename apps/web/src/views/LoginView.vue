@@ -71,6 +71,8 @@ async function retry() {
           type="password"
           name="password"
           autocomplete="current-password"
+          :show-password-label="t('showPassword')"
+          :hide-password-label="t('hidePassword')"
           required
         />
         <Button class="auth-submit" type="submit" variant="primary" :disabled="auth.pending">

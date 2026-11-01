@@ -4,6 +4,7 @@ import type { MessageSchema } from '@/locales/en'
 import { onUnauthorized } from '@/lib/session'
 import { useAuthStore } from '@/stores/auth'
 import ComingSoon from '@/views/ComingSoon.vue'
+import FilesView from '@/views/FilesView.vue'
 import LoginView from '@/views/LoginView.vue'
 import NodeView from '@/views/NodeView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
@@ -20,7 +21,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', name: 'node', component: NodeView, meta: { titleKey: 'nodePageTitle' } },
-    { path: '/files', name: 'files', component: ComingSoon, meta: { titleKey: 'comingFilesTitle' } },
+    { path: '/files', name: 'files', component: FilesView, meta: { titleKey: 'filesTitle' } },
     { path: '/pins', name: 'pins', component: ComingSoon, meta: { titleKey: 'comingPinsTitle' } },
     { path: '/scenes', name: 'scenes', component: ComingSoon, meta: { titleKey: 'comingScenesTitle' } },
     { path: '/settings', name: 'settings', component: SettingsView, meta: { titleKey: 'settingsTitle' } },

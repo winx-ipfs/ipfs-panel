@@ -135,6 +135,8 @@ function choose(next: ThemePreference) {
               type="password"
               name="current-password"
               autocomplete="current-password"
+              :show-password-label="t('showPassword')"
+              :hide-password-label="t('hidePassword')"
               required
             />
             <div class="auth-password">
@@ -144,6 +146,8 @@ function choose(next: ThemePreference) {
                 type="password"
                 name="new-password"
                 autocomplete="new-password"
+                :show-password-label="t('showPassword')"
+                :hide-password-label="t('hidePassword')"
                 required
               />
               <PasswordMeter :password="newPassword" />
@@ -155,6 +159,8 @@ function choose(next: ThemePreference) {
               type="password"
               name="confirm-password"
               autocomplete="new-password"
+              :show-password-label="t('showPassword')"
+              :hide-password-label="t('hidePassword')"
               required
               @blur="confirmTouched = true"
             />

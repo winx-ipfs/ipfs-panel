@@ -14,19 +14,20 @@ We do not build the whole backend, then the whole UI.
 
 ### Where this repo is
 
-The tree you can clone today has finished slice 1 and slice 2.
+The tree you can clone today has finished slice 1, slice 2, and the files part of slice 3.
 
 What is here:
 
-- a panel shell with a Node card
+- a panel shell with a Node card and a Files page
 - English and 中文, with the language switch saved in the browser
 - one admin, created on first run, with a session on the manager
 - `GET /health` on the manager, loopback by default, and still open without a session
 - start, stop, and restart for one local Kubo, with a one-sentence status, behind that session
+- add, download, rename, move, copy, and delete files on that node, through its mutable file system
 
 What is not here:
 
-- files, pins, or scenes
+- pins or scenes
 - more than one node
 
 ### 1. Shell, auth, and languages
@@ -47,9 +48,9 @@ Done when you can change whether the local node is running from the panel, and t
 
 ### 3. Files: add, pin, and MFS
 
-Add a file, see the CID, find it again in the mutable file system (MFS), and pin it as part of that flow.
+Add a file, see the content ID, and find it again in the mutable file system. That part is in. The spec is [Files](design/files.md). Pinning is not part of the file browser. It is slice 4.
 
-Done when a beginner can put a file on the node and open it again from the panel.
+Done when a beginner can put a file on the node and open it again from the panel. The file part of that is done. Pinning is not.
 
 ### 4. Pins
 
@@ -91,19 +92,20 @@ This waits until slices 1–5 feel dull. Dull is the goal.
 
 ### 这个仓库现在在哪
 
-现在能克隆到的已经做完第 1 片和第 2 片。
+现在能克隆到的已经做完第 1 片、第 2 片，以及第 3 片里的文件部分。
 
 已经有的：
 
-- 带节点卡片的面板壳
+- 带节点卡片和文件页的面板壳
 - 英文和中文，语言开关会记在浏览器里
 - 一个管理员，第一次运行时创建，manager 上有会话
 - manager 上的 `GET /health`，默认只听本机，并且仍然不需要会话
 - 启动、停止、重启本机上的一个 Kubo，状态是一句话，并且要有那个会话
+- 在这个节点上添加、下载、重命名、移动、复制和删除文件，走的是可变文件系统
 
 还没有的：
 
-- 文件、pin、场景
+- pin、场景
 - 多个节点
 
 ### 1. 壳、登录、语言
@@ -124,9 +126,9 @@ This waits until slices 1–5 feel dull. Dull is the goal.
 
 ### 3. 文件：添加、固定、MFS
 
-添加一个文件，看到 CID，在可变文件系统（MFS）里再找到它，并在这条流程里把它 pin 上。
+添加一个文件，看到内容标识，在可变文件系统里再找到它。这一部分已经在了。规格是[文件](design/files.md)。固定不放在文件浏览器里。它是第 4 片。
 
-做完的样子：新手可以把一个文件放到节点上，再从面板里打开它。
+做完的样子：新手可以把一个文件放到节点上，再从面板里打开它。文件这一部分做完了。固定还没有。
 
 ### 4. 固定列表（pins）
 

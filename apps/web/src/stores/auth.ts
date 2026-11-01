@@ -23,7 +23,7 @@ function devAuthMode(): 'setup' | 'login' | 'login-error' | 'session' | 'node' |
   const params = new URLSearchParams(window.location.search)
   const mode = params.get('auth')
   if (mode === 'setup' || mode === 'login' || mode === 'login-error' || mode === 'session') return mode
-  if (params.has('mock')) return 'node'
+  if (params.has('mock') || params.has('files')) return 'node'
   return null
 }
 
