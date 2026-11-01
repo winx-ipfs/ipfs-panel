@@ -1,0 +1,36 @@
+name: Post-incident note
+description: Required after an emergency direct push to main
+labels: ["post-incident"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Open this the same day a repository admin pushes to `main` without a pull request.
+        可以用中文写。English is fine too.
+        The normal path is a `hotfix/X.Y.Z` pull request. This note is only for the bypass.
+  - type: input
+    id: sha
+    attributes:
+      label: Commit SHA on main
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What was pushed, and why a hotfix pull request could not wait
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Who was affected, and what broke.
+    validations:
+      required: true
+  - type: textarea
+    id: followup
+    attributes:
+      label: Follow-up
+      description: Back-merge into develop, the vX.Y.Z tag if the release workflow did not create one, and any repair pull request.
+    validations:
+      required: true

@@ -1,27 +1,204 @@
+# Required status check for branch rulesets: ci-ok
+#
+# The other job names in this workflow are real checks, but they are not
+# stable requirements. web and manager skip when their paths do not change.
+# pr-title, branch-policy, and dependency-review skip on push.
+# A skipped required check blocks merges, so rulesets require only ci-ok.
+# See docs/ORG-SETUP.md.
+
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [main, develop]
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main, develop]
 
 permissions:
   contents: read
+  pull-requests: read
+  actions: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      manager: ${{ steps.filter.outputs.manager }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            web:
+              - 'apps/web/**'
+              - '.github/workflows/ci.yml'
+            manager:
+              - 'services/manager/**'
+              - '.github/workflows/ci.yml'
+
   web:
-    name: web typecheck and build
+    name: web
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/web
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Node
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run build
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build-only
+
+  manager:
+    name: manager
+    needs: changes
+    if: needs.changes.outputs.manager == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: services/manager/go.mod
+          cache: true
+      - name: gofmt
+        working-directory: services/manager
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "gofmt would change:"
+            echo "$unformatted"
+            exit 1
+          fi
+      - name: go vet
+        working-directory: services/manager
+        run: go vet ./...
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.15.0
+          working-directory: services/manager
+      - name: Test
+        working-directory: services/manager
+        run: go test -race -count=1 ./...
+      - name: Build
+        working-directory: services/manager
+        run: go build -o /dev/null ./cmd/manager
+
+  pr-title:
+    name: pr-title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Check Conventional Commits title
+        uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          validateSingleCommit: true
+
+  branch-policy:
+    name: branch-policy
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Test the policy script
+        run: bash .github/scripts/branch-policy.test.sh
+      - name: Enforce Git Flow targets
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+          GITHUB_EVENT_NAME: pull_request
+        run: bash .github/scripts/branch-policy.sh
+
+  dependency-review:
+    name: dependency-review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
+
+  ci-ok:
+    name: ci-ok
+    if: ${{ !cancelled() }}
+    needs:
+      - changes
+      - web
+      - manager
+      - pr-title
+      - branch-policy
+      - dependency-review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every job to pass or skip
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          WEB: ${{ needs.web.result }}
+          MANAGER: ${{ needs.manager.result }}
+          PR_TITLE: ${{ needs.pr-title.result }}
+          BRANCH_POLICY: ${{ needs.branch-policy.result }}
+          DEPENDENCY_REVIEW: ${{ needs.dependency-review.result }}
+        run: |
+          set -eu
+          fail=0
+          for name in CHANGES WEB MANAGER PR_TITLE BRANCH_POLICY DEPENDENCY_REVIEW; do
+            value="${!name}"
+            echo "$name=$value"
+            case "$value" in
+              success|skipped) ;;
+              *) fail=1 ;;
+            esac
+          done
+          exit "$fail"

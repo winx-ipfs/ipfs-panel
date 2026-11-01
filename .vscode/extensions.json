@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "Vue.volar",
+    "dbaeumer.vscode-eslint",
+    "golang.go",
+    "EditorConfig.EditorConfig"
+  ]
+}

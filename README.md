@@ -1,5 +1,7 @@
 # ipfs-panel
 
+[![CI](https://github.com/winx-ipfs/ipfs-panel/actions/workflows/ci.yml/badge.svg)](https://github.com/winx-ipfs/ipfs-panel/actions/workflows/ci.yml)
+
 English below. 中文在后半部分。
 
 IPFS is worth using. The usual way to run Kubo is not. You get a CLI, a long JSON config, and a local RPC port that must stay private. A lot of people give up before the node feels real.
@@ -49,15 +51,21 @@ Checks CI runs for the UI:
 
 ```bash
 cd apps/web
+npm ci
+npm run lint
 npm run typecheck
+npm test
 npm run build
 ```
 
-Manager tests:
+Manager checks:
 
 ```bash
 cd services/manager
-go test ./...
+gofmt -l .
+go vet ./...
+go test -race ./...
+go build -o /dev/null ./cmd/manager
 ```
 
 Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). Go 1.22 is enough for the manager.
@@ -67,8 +75,12 @@ Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). Go 1.22 is enough
 - [Vision](docs/VISION.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Node lifecycle (design only)](docs/DESIGN-node-lifecycle.md)
-- [Org setup](docs/ORG-SETUP.md)
-- [Contributing](CONTRIBUTING.md)
+- [Contributing](CONTRIBUTING.md) (Git Flow, CI, hotfixes)
+- [Org setup](docs/ORG-SETUP.md) (repository settings checklist)
+- [Governance](GOVERNANCE.md)
+- [Security](SECURITY.md)
+- [Support](SUPPORT.md)
+- [Code of conduct](CODE_OF_CONDUCT.md)
 - License: [MIT](LICENSE)
 
 ---
@@ -122,15 +134,21 @@ curl -s http://127.0.0.1:8080/health
 
 ```bash
 cd apps/web
+npm ci
+npm run lint
 npm run typecheck
+npm test
 npm run build
 ```
 
-管理服务的测试：
+管理服务的检查：
 
 ```bash
 cd services/manager
-go test ./...
+gofmt -l .
+go vet ./...
+go test -race ./...
+go build -o /dev/null ./cmd/manager
 ```
 
 界面用 Node 22 就行（22.18 或更新，或者 Node 24.12+）。管理服务用 Go 1.22 就行。
@@ -140,6 +158,10 @@ go test ./...
 - [愿景](docs/VISION.md)
 - [路线图](docs/ROADMAP.md)
 - [节点启停（只有设计）](docs/DESIGN-node-lifecycle.md)
-- [组织设置](docs/ORG-SETUP.md)
-- [参与方式](CONTRIBUTING.md)
+- [参与方式](CONTRIBUTING.md)（Git Flow、CI、热修）
+- [组织设置](docs/ORG-SETUP.md)（仓库设置清单）
+- [治理](GOVERNANCE.md)
+- [安全](SECURITY.md)
+- [支持](SUPPORT.md)
+- [行为准则](CODE_OF_CONDUCT.md)
 - 许可证：[MIT](LICENSE)

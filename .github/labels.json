@@ -1,0 +1,52 @@
+[
+  {
+    "name": "bug",
+    "color": "d73a4a",
+    "description": "Something the panel or manager did wrong"
+  },
+  {
+    "name": "enhancement",
+    "color": "a2eeef",
+    "description": "A change the panel should grow into"
+  },
+  {
+    "name": "documentation",
+    "color": "0075ca",
+    "description": "Docs, translations, or repo policy"
+  },
+  {
+    "name": "question",
+    "color": "d876e3",
+    "description": "A question about using or building the panel"
+  },
+  {
+    "name": "good first issue",
+    "color": "7057ff",
+    "description": "Small and well bounded"
+  },
+  {
+    "name": "dependencies",
+    "color": "0366d6",
+    "description": "Dependency updates"
+  },
+  {
+    "name": "post-incident",
+    "color": "b60205",
+    "description": "Follow-up required after an emergency push to main"
+  },
+  {
+    "name": "area: web",
+    "color": "1d76db",
+    "description": "apps/web"
+  },
+  {
+    "name": "area: manager",
+    "color": "5319e7",
+    "description": "services/manager"
+  },
+  {
+    "name": "area: ci",
+    "color": "bfdadc",
+    "description": "GitHub Actions and release automation"
+  }
+]

@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Security vulnerability
+    url: https://github.com/winx-ipfs/ipfs-panel/security/advisories/new
+    about: Report vulnerabilities in private. Do not open a public issue.
   - name: Product direction
     url: https://github.com/winx-ipfs/ipfs-panel/blob/main/docs/VISION.md
     about: Read the vision before proposing something that is really a host panel.
+  - name: How to get help
+    url: https://github.com/winx-ipfs/ipfs-panel/blob/main/SUPPORT.md
+    about: Support channels, and what this repo will not debug.

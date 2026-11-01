@@ -1,0 +1,65 @@
+# Pre-release artifacts from develop. Not a GitHub Release and not a v* tag.
+# schedule runs on the default branch. After develop is the default branch,
+# this job runs. Until then the ref check skips it.
+
+name: Nightly
+
+on:
+  schedule:
+    - cron: "15 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: nightly-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nightly-artifacts:
+    name: nightly-artifacts
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: services/manager/go.mod
+          cache: true
+      - name: Snapshot manager binaries
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --snapshot --clean --skip=publish
+      - name: Upload manager snapshot
+        uses: actions/upload-artifact@v7
+        with:
+          name: manager-nightly
+          path: dist/**
+          retention-days: 7
+          if-no-files-found: error
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Build web
+        working-directory: apps/web
+        run: |
+          npm ci
+          npm run build-only
+      - name: Upload web bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-nightly
+          path: apps/web/dist
+          retention-days: 7
+          if-no-files-found: error
