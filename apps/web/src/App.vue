@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useLocaleStore } from '@/stores/locale'
 import type { AppLocale } from '@/i18n'
@@ -38,7 +38,7 @@ function choose(next: AppLocale) {
     </header>
     <div class="body">
       <nav class="nav" :aria-label="t('navLabel')">
-        <p>{{ t('navEmpty') }}</p>
+        <RouterLink to="/">{{ t('navNode') }}</RouterLink>
       </nav>
       <main class="main">
         <RouterView />

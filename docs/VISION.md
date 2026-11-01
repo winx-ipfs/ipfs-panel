@@ -37,7 +37,7 @@ Kubo's own HTTP API, usually `127.0.0.1:5001`, stays on the loopback interface. 
 
 The browser talks to `services/manager`. That process is our API gateway. Later it will know whether you are logged in, and it will call only the Kubo operations the panel knows how to explain. It is not a pass-through of the raw RPC.
 
-Right now the manager has one route, `GET /health`, and it listens on `127.0.0.1:8080` unless `MANAGER_ADDR` is set. Auth is slice 1, and it is not built yet. Until that exists, publishing the manager is a mistake.
+Right now the manager listens on `127.0.0.1:8080` unless `MANAGER_ADDR` is set. It answers `GET /health` for itself, and `GET /api/node` plus start, stop, and restart for one local Kubo. Auth is slice 1, and it is not built yet. Until that exists, publishing the manager is a mistake.
 
 ### Scenes first, raw config later
 
@@ -105,7 +105,7 @@ Kubo 自己的 HTTP API 一般在 `127.0.0.1:5001`，就留在回环地址上。
 
 浏览器访问的是 `services/manager`。这个进程是我们的 API 网关。以后它会知道你有没有登录，并且只去叫面板讲得清的那些 Kubo 操作。它不是原始 RPC 的透传。
 
-现在 manager 只有一个路由，`GET /health`，默认听 `127.0.0.1:8080`，除非设置了 `MANAGER_ADDR`。认证是第 1 片，还没做。在那之前，把 manager 公布出去是错的。
+现在 manager 默认听 `127.0.0.1:8080`，除非设置了 `MANAGER_ADDR`。它用 `GET /health` 说明自己还在，并用 `GET /api/node` 以及启动、停止、重启来管本机上的一个 Kubo。认证是第 1 片，还没做。在那之前，把 manager 公布出去是错的。
 
 ### 先场景，原始配置以后再说
 
