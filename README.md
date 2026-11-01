@@ -74,10 +74,21 @@ go build -o /dev/null ./cmd/manager
 
 Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). Go 1.22 is enough for the manager.
 
+## Look
+
+The shell, the tokens, and the rules for new screens are in [Design system](docs/DESIGN-SYSTEM.md).
+
+![Node running, light theme, English](docs/screenshots/node-running-light-en.png)
+
+![Node running, dark theme, 中文](docs/screenshots/node-running-dark-zh.png)
+
+![Node stopped, light theme, 中文, narrow](docs/screenshots/node-stopped-light-zh-mobile.png)
+
 ## Read next
 
 - [Vision](docs/VISION.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Design system](docs/DESIGN-SYSTEM.md)
 - [Node lifecycle](docs/DESIGN-node-lifecycle.md)
 - [Contributing](CONTRIBUTING.md) (Git Flow, CI, hotfixes)
 - [Org setup](docs/ORG-SETUP.md) (repository settings checklist)
@@ -161,10 +172,21 @@ go build -o /dev/null ./cmd/manager
 
 界面用 Node 22 就行（22.18 或更新，或者 Node 24.12+）。管理服务用 Go 1.22 就行。
 
+## 看一眼
+
+外壳、令牌，以及新画面要遵守的规矩，在[设计系统](docs/DESIGN-SYSTEM.md)。
+
+![节点正在运行，浅色，英文](docs/screenshots/node-running-light-en.png)
+
+![节点正在运行，深色，中文](docs/screenshots/node-running-dark-zh.png)
+
+![节点已停止，浅色，中文，窄屏](docs/screenshots/node-stopped-light-zh-mobile.png)
+
 ## 接着读
 
 - [愿景](docs/VISION.md)
 - [路线图](docs/ROADMAP.md)
+- [设计系统](docs/DESIGN-SYSTEM.md)
 - [节点启停](docs/DESIGN-node-lifecycle.md)
 - [参与方式](CONTRIBUTING.md)（Git Flow、CI、热修）
 - [组织设置](docs/ORG-SETUP.md)（仓库设置清单）

@@ -51,7 +51,7 @@ describe('NodeView', () => {
     const { wrapper } = mountCard(overview())
     await flushPromises()
     expect(wrapper.get('[role="status"]').text()).toBe('The node is stopped.')
-    expect(wrapper.findAll('button').map((button) => button.text())).toEqual(['Start'])
+    expect(wrapper.findAll('[data-node-action]').map((button) => button.text())).toEqual(['Start'])
     expect(wrapper.text()).toContain('Node folder')
     expect(wrapper.text()).toContain('/srv/ipfs-panel/kubo')
     expect(wrapper.text()).not.toContain('5001')
@@ -67,9 +67,11 @@ describe('NodeView', () => {
     expect(wrapper.text()).toContain('Version')
     expect(wrapper.text()).toContain('kubo/0.32.1/')
     expect(wrapper.get('.peer').text()).toBe('12D3KooWPeer')
-    const buttons = wrapper.findAll('button')
+    const buttons = wrapper.findAll('[data-node-action]')
     expect(buttons.map((button) => button.text())).toEqual(['Stop', 'Restart'])
     expect(buttons[1]?.classes()).toContain('quiet')
+    expect(wrapper.find('[data-copy="peer"]').exists()).toBe(true)
+    expect(wrapper.find('[data-copy="version"]').exists()).toBe(true)
     wrapper.unmount()
   })
 
@@ -77,7 +79,7 @@ describe('NodeView', () => {
     const starting = mountCard(overview({ state: 'starting' }))
     await flushPromises()
     expect(starting.wrapper.get('[role="status"]').text()).toBe('The node is starting.')
-    expect(starting.wrapper.findAll('button')).toHaveLength(0)
+    expect(starting.wrapper.findAll('[data-node-action]')).toHaveLength(0)
     starting.wrapper.unmount()
 
     const busy = mountCard(
@@ -85,7 +87,7 @@ describe('NodeView', () => {
     )
     await flushPromises()
     expect(busy.wrapper.get('[role="status"]').text()).toContain('Another Kubo')
-    expect(busy.wrapper.findAll('button')).toHaveLength(0)
+    expect(busy.wrapper.findAll('[data-node-action]')).toHaveLength(0)
     expect(busy.wrapper.get('pre').text()).toBe('held')
     busy.wrapper.unmount()
   })
@@ -116,7 +118,7 @@ describe('NodeView', () => {
     )
     expect(wrapper.text()).not.toContain('The node is stopped.')
     expect(wrapper.text()).toContain('12D3KooWPeer')
-    expect(wrapper.findAll('button').map((button) => button.text())).toEqual(['Retry'])
+    expect(wrapper.findAll('[data-node-action]').map((button) => button.text())).toEqual(['Retry'])
     wrapper.unmount()
     vi.useRealTimers()
   })
@@ -125,7 +127,7 @@ describe('NodeView', () => {
     const { wrapper } = mountCard(overview(), 'zh')
     await flushPromises()
     expect(wrapper.get('[role="status"]').text()).toBe('节点已停止。')
-    expect(wrapper.get('button').text()).toBe('启动')
+    expect(wrapper.get('[data-node-action="start"]').text()).toBe('启动')
     wrapper.unmount()
   })
 
@@ -150,9 +152,9 @@ describe('NodeView', () => {
       },
     })
     await flushPromises()
-    const pendingClick = wrapper.get('button').trigger('click')
+    const pendingClick = wrapper.get('[data-node-action="start"]').trigger('click')
     await flushPromises()
-    expect(wrapper.get('button').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('[data-node-action="start"]').attributes('disabled')).toBeDefined()
     expect(fetchMock).toHaveBeenLastCalledWith('/api/node/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -166,7 +168,7 @@ describe('NodeView', () => {
     )
     await pendingClick
     await flushPromises()
-    expect(wrapper.findAll('button')).toHaveLength(0)
+    expect(wrapper.findAll('[data-node-action]')).toHaveLength(0)
     wrapper.unmount()
   })
 })

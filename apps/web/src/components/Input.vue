@@ -1,0 +1,41 @@
+<script setup lang="ts">
+const model = defineModel<string>({ default: '' })
+
+withDefaults(
+  defineProps<{
+    label: string
+    hint?: string
+    error?: string
+    type?: string
+    placeholder?: string
+    autocomplete?: string
+  }>(),
+  {
+    type: 'text',
+    hint: '',
+    error: '',
+    placeholder: '',
+    autocomplete: undefined,
+  },
+)
+
+const controlId = `input-${Math.random().toString(36).slice(2, 9)}`
+</script>
+
+<template>
+  <label class="ui-field" :for="controlId">
+    <span class="ui-field-label">{{ label }}</span>
+    <input
+      :id="controlId"
+      v-model="model"
+      class="ui-input"
+      :type="type"
+      :placeholder="placeholder"
+      :autocomplete="autocomplete"
+      :aria-invalid="error ? 'true' : undefined"
+      :aria-describedby="error || hint ? `${controlId}-note` : undefined"
+    >
+    <p v-if="error" :id="`${controlId}-note`" class="ui-field-error">{{ error }}</p>
+    <p v-else-if="hint" :id="`${controlId}-note`" class="ui-field-hint">{{ hint }}</p>
+  </label>
+</template>

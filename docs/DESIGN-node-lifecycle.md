@@ -199,7 +199,11 @@ A successful arrival at `up` sets `error` to `null`.
 
 ### UI
 
-The shell stays: brand, tagline, English / 中文 switch. The home route's main area becomes the node card. The nav's only item is "Node" / "节点".
+The sentences, the facts, the manager actions, and the polling in this file stay the contract. The chrome around them is in [Design system](DESIGN-SYSTEM.md): sidebar, theme, copy buttons, and the panel's own 404 page.
+
+The shell shows the brand and the tagline, and an English / 中文 switch. The home route's main area is the node card. The nav's working item is Node. Files, Pins, and Scenes are placeholders that do not call the manager. Settings holds the language and the theme for this browser.
+
+Copy buttons may sit on the version, the peer id, and the folder. They copy text the page already shows. They do not call the manager.
 
 The card shows, in order:
 
@@ -207,7 +211,7 @@ The card shows, in order:
 2. When `up`: a "Version" line and a "Peer ID" line. The peer id is the full value, as text the person can select.
 3. The node folder, when `repoPath` is known.
 4. When `error.detail` is non-empty, a preformatted block under the sentence, labeled "Details".
-5. The buttons in the table below, and no other controls.
+5. The manager actions in the table below. A copy button may sit on a fact. No other manager actions.
 
 The page does not show ports, a gateway link, a Kubo RPC link, or a text field for a path.
 
@@ -335,10 +339,10 @@ The implementation pull request is done when every box is true.
 - [x] If `ipfs id` does not succeed within 30s of spawn, the child is dead and the state is `failed` with `health_timeout`.
 - [x] `GET /api/node` and the three POST routes return the overview and do not include an API URL, a gateway URL, a multiaddr, or port 5001.
 - [x] A POST without `Content-Type: application/json` returns 415. Responses do not include `Access-Control-Allow-Origin`.
-- [x] The home card shows the sentence for each situation in English and in 中文, and only the buttons listed above. The page does not link to Kubo.
+- [x] The home card shows the sentence for each situation in English and in 中文, and only the manager actions listed above. Copy buttons on the version, the peer id, and the folder are allowed. The page does not link to Kubo.
 - [x] The UI fetches relative `/api/node` and `/health`. The Vite dev server proxies both to the manager.
 - [x] `go test ./...` covers the supervisor with a fake `ipfs` binary: the unsafe-address refusal, and two overlapping starts producing one child.
-- [x] No file route, pin route, or second-node route or page is added.
+- [x] No manager file route, pin route, or second-node route is added. Placeholder pages that do not call the manager are allowed.
 - [x] Both locale files contain every new key.
 
 Manual check, not required in CI: with a real `ipfs` on `PATH`, Start ends on "The node is running." and a peer id, Stop ends on "The node is stopped.", and both languages show those sentences. `curl` to `127.0.0.1:5001` can succeed while the node is up. The page does not document or perform that curl.
@@ -556,7 +560,11 @@ POST 的规则：
 
 ### 界面
 
-外壳保留：名字、标语、英文 / 中文开关。首页主区域变成节点卡片。导航里只有一项：「节点」。
+句子、事实、管理动作和轮询，仍以本文为准。周围的界面在[设计系统](DESIGN-SYSTEM.md)：侧栏、主题、复制按钮，以及面板自己的 404 页。
+
+外壳保留名字和标语，以及英文 / 中文开关。首页主区域是节点卡片。导航里真正能用的一项是「节点」。文件、固定、场景是占位，不调用 manager。设置里放的是这个浏览器的语言和主题。
+
+版本、Peer ID、文件夹上可以有复制按钮。它们只复制页面上已经显示的文字，不调用 manager。
 
 卡片按这个顺序：
 
@@ -564,7 +572,7 @@ POST 的规则：
 2. `up` 时：一行「版本」，一行「Peer ID」。Peer ID 用完整字符串，让人可以选中复制。
 3. 知道 `repoPath` 时，显示节点文件夹。
 4. `error.detail` 非空时，在句子下面放一块预格式文本，标题是「详情」。
-5. 下面表格里的按钮。不要别的控件。
+5. 下面表格里的管理动作。某一行事实上可以有复制按钮。不要别的管理动作。
 
 页面上不出现端口、网关链接、Kubo RPC 链接，也没有填写路径的输入框。
 
@@ -692,10 +700,10 @@ Kubo API 留在回环。网关留在回环。任一检查失败，manager 就拒
 - [x] 拉起后 30 秒内 `ipfs id` 没有成功，子进程已经被杀掉，状态是 `failed`，代码 `health_timeout`。
 - [x] `GET /api/node` 和三个 POST 返回概览，其中没有 API URL、网关 URL、multiaddr，也没有端口 5001。
 - [x] POST 没有 `Content-Type: application/json` 时返回 415。响应里没有 `Access-Control-Allow-Origin`。
-- [x] 首页卡片用英文和中文显示每种情况的那一句，并且只有上面列出的按钮。页面不链到 Kubo。
+- [x] 首页卡片用英文和中文显示每种情况的那一句，并且只有上面列出的管理动作。版本、Peer ID、文件夹上的复制按钮可以有。页面不链到 Kubo。
 - [x] 界面请求相对路径 `/api/node` 和 `/health`。Vite 开发服务器把两者代理到 manager。
 - [x] `go test ./...` 用一个假的 `ipfs` 二进制覆盖监督逻辑：拒绝不安全地址，以及两次重叠的启动只产生一个子进程。
-- [x] 不增加文件路由、pin 路由、第二节点的路由或页面。
+- [x] 不增加 manager 的文件路由、pin 路由或第二节点路由。不调用 manager 的占位页可以有。
 - [x] 两个语言文件都包含每一个新键。
 
 手工检查，不放进 CI：`PATH` 上有真的 `ipfs` 时，启动最后显示「节点正在运行。」和一个 Peer ID，停止最后显示「节点已停止。」两种语言都能看到这些句子。节点在跑时，对 `127.0.0.1:5001` 的 `curl` 可以成功。页面既不写这个地址，也不自己去请求它。

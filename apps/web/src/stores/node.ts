@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { NodeOverview, NodeState } from '@/node/types'
 
+const devMockEnabled = import.meta.env.DEV
+
 const states: readonly NodeState[] = ['down', 'starting', 'up', 'stopping', 'failed']
 
 function isState(value: unknown): value is NodeState {
@@ -55,9 +57,24 @@ export const useNodeStore = defineStore('node', () => {
     }, delay())
   }
 
+  async function mocked(): Promise<boolean> {
+    if (!devMockEnabled || typeof window === 'undefined') return false
+    if (!new URLSearchParams(window.location.search).has('mock')) return false
+    const { devMockFromLocation } = await import('@/dev/mockNode')
+    const next = devMockFromLocation(window.location.search)
+    if (!next) return false
+    overview.value = next.overview
+    unreachable.value = next.unreachable
+    return true
+  }
+
   async function refresh(): Promise<void> {
     const mine = session
     clearTimer()
+    if (await mocked()) {
+      if (mine === session) arm()
+      return
+    }
     try {
       const res = await fetch('/api/node')
       if (!res.ok) throw new Error(String(res.status))
@@ -78,6 +95,11 @@ export const useNodeStore = defineStore('node', () => {
     const mine = session
     acting.value = true
     clearTimer()
+    if (await mocked()) {
+      acting.value = false
+      if (mine === session) arm()
+      return
+    }
     try {
       const res = await fetch(path, {
         method: 'POST',
