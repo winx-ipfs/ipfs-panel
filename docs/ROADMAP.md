@@ -39,7 +39,9 @@ Done when you can sign in, the shell renders in both languages, and a request wi
 
 ### 2. Start, stop, and health
 
-Show whether Kubo is up. Start it. Stop it. The status is a sentence (up, down, starting, failed), not a dump of the RPC response.
+Show whether Kubo is up. Start it. Stop it. Restart it. The status is a sentence (up, down, starting, stopping, failed), not a dump of the RPC response.
+
+The spec is [Node lifecycle](DESIGN-node-lifecycle.md). That file is design only. The behavior is not in the code yet.
 
 Done when you can change whether the local node is running from the panel, and the panel tells the truth when it fails.
 
@@ -114,7 +116,9 @@ This waits until slices 1–5 feel dull. Dull is the goal.
 
 ### 2. 启动、停止、健康
 
-看出 Kubo 在不在。启动它。停止它。状态是一句话（在跑、停了、正在启动、失败了），不是把 RPC 响应倒出来。
+看出 Kubo 在不在。启动它。停止它。重启它。状态是一句话（在跑、停了、正在启动、正在停止、失败了），不是把 RPC 响应倒出来。
+
+规格在 [节点启停](DESIGN-node-lifecycle.md)。那份文件只有设计，行为还没进代码。
 
 做完的样子：你可以在面板上改变本机节点是否在跑，失败时面板说的是实话。
 

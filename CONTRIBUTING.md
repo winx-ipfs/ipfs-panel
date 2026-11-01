@@ -13,6 +13,8 @@ Every other branch is short-lived:
 
 Open the branch, open a pull request, merge, delete the branch. There is no `develop` branch. Do not push commits straight to `main`. A pull request is required, including for a small docs change.
 
+GitHub does not enforce that yet. Owner steps are in [Org setup](docs/ORG-SETUP.md).
+
 ## Pull requests
 
 Say which roadmap slice the change belongs to. Use "foundation" for repo hygiene that is not a product slice yet.
@@ -58,6 +60,8 @@ go test ./...
 - `fix/<短名字>` 做修复
 
 开分支，提 pull request，合并，删掉分支。没有 `develop`。不要把提交直接推到 `main`。改几个字的文档也要走 pull request。
+
+GitHub 还没有强制这一点。组织所有者的点击步骤在 [组织设置](docs/ORG-SETUP.md)。
 
 ## Pull request
 

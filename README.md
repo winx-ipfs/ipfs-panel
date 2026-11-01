@@ -66,6 +66,8 @@ Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). Go 1.22 is enough
 
 - [Vision](docs/VISION.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Node lifecycle (design only)](docs/DESIGN-node-lifecycle.md)
+- [Org setup](docs/ORG-SETUP.md)
 - [Contributing](CONTRIBUTING.md)
 - License: [MIT](LICENSE)
 
@@ -137,5 +139,7 @@ go test ./...
 
 - [愿景](docs/VISION.md)
 - [路线图](docs/ROADMAP.md)
+- [节点启停（只有设计）](docs/DESIGN-node-lifecycle.md)
+- [组织设置](docs/ORG-SETUP.md)
 - [参与方式](CONTRIBUTING.md)
 - 许可证：[MIT](LICENSE)
