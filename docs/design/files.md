@@ -94,13 +94,13 @@ List:
 
 ### UI
 
-The Files item in the nav is enabled. Pins and Scenes stay under "Coming soon".
+The Files item in the nav is enabled. Pins is its own page. Scenes stays under "Coming soon".
 
 The page has a title, one sentence, and a closed disclosure for the content ID and the local link. Then a toolbar: Upload (the one primary button), New folder, Refresh, and sort by name, size, or modified time. Sort is a button group, so it works on a phone where the table header is not the control. Name sort keeps folders first. Size and time sort by the value, and a missing time sorts last.
 
-A breadcrumb shows the folder. Names wrap. They are not cut off with an ellipsis.
+A breadcrumb shows the folder. The root is a home icon with an accessible name. Names wrap. They are not cut off with an ellipsis.
 
-The wide layout is a table: name with a type icon, size, content ID shortened in the middle with Copy, modified time, and an actions menu. A folder's size cell is "—", because the number Kubo returns is not the total of the files inside. The narrow layout (under 720px, including 390) turns each row into a card: name and menu on the first line, then size, content ID, and time. The same menu holds Download, Copy local link, Rename, Move, Make a copy, and Delete.
+The wide layout is a table: name with a type icon, size, content ID shortened in the middle with Copy, modified time, and an actions menu. A folder's size cell is "—", because the number Kubo returns is not the total of the files inside. The narrow layout (under 720px, including 390) turns each row into a compact card: the name and the menu on the first line, then size and modified time in muted type on the second. The content ID is not on the card. It is in the menu, in full, and choosing it copies it. The sort control is a three-column row. The same menu holds Download, Copy local link, Copy content ID, Pin on this node, Rename, Move, Make a copy, and Delete. Pin starts a pin job for that item's content ID. The file stays in this folder. Progress is on the Pins page. The disclosure uses a chevron and the token colors.
 
 Upload is a button and a drop target on the list. Each file has its own row with a percent. If the name exists, the page asks before replacing. New folder, rename, move, copy, and delete are dialogs. Delete is the danger button, and focus starts on Cancel. Empty, loading (skeletons plus "Loading files."), and node-not-running each have their own state. Node-not-running has one button to the Node page. The wording follows the state: stopped, starting, stopping, or needs attention. Errors that are not that state are toasts.
 
@@ -120,7 +120,7 @@ Web: path and sort helpers, the files store, the page states, the password toggl
 
 ### Out of scope
 
-- Pins, unpin, and `ipfs add`.
+- The pins page itself. A row can start a pin job. The page and the API are in [Pins](pins.md).
 - A public share link, or any gateway that is not loopback.
 - Editing bytes in the browser, folder upload, previews, and version history.
 - A quota other than the one size limit.
@@ -221,13 +221,13 @@ Kubo 没有时间时省略 `modified`。`type` 是 `file` 或 `directory`。文�
 
 ### 界面
 
-导航里的「文件」可用。「固定」和「场景」仍在「即将推出」下面。
+导航里的「文件」可用。「固定」是单独的一页。「场景」仍在「即将推出」下面。
 
 页面有标题、一句话，以及一处默认收起的说明，用来讲内容标识和本机链接。然后是工具条：上传（唯一的主按钮）、新建文件夹、刷新，以及按名称、大小或修改时间排序。排序是一组按钮，这样手机上不靠表头也能排。按名称排序时文件夹在前。按大小和时间排序时按数值，没有时间的排在最后。
 
-面包屑显示当前文件夹。名字会换行，不用省略号截断。
+面包屑显示当前文件夹。根是一个家的图标，并带无障碍名称。名字会换行，不用省略号截断。
 
-宽屏是表格：带类型图标的名称、大小、中间缩短并可复制的内容标识、修改时间，以及一个动作菜单。文件夹的大小是「—」，因为 Kubo 给的数字不是里面文件的合计。窄屏（720px 以下，包括 390）每一行变成一张卡片：第一行是名称和菜单，然后是大小、内容标识和时间。同一个菜单里有下载、复制本机链接、重命名、移动、复制一份和删除。
+宽屏是表格：带类型图标的名称、大小、中间缩短并可复制的内容标识、修改时间，以及一个动作菜单。文件夹的大小是「—」，因为 Kubo 给的数字不是里面文件的合计。窄屏（720px 以下，包括 390）每一行变成一张紧凑的卡片：第一行是名称和菜单，第二行是淡色的「大小 · 修改时间」。内容标识不在卡片上。它在菜单里，显示完整值，点一下就复制。排序是三列一行。同一个菜单里有下载、复制本机链接、复制内容标识、在此节点固定、重命名、移动、复制一份和删除。固定会按这个项目的内容标识启动一个固定任务。文件仍留在这个文件夹里。进度在「固定」页。说明用箭头图标和令牌颜色。
 
 上传可以点按钮，也可以把文件拖到列表上。每个文件有自己的一行和百分比。名字已经存在时，页面会先问再替换。新建文件夹、重命名、移动、复制和删除都是对话框。删除用危险按钮，焦点先在「取消」上。空文件夹、加载中（骨架和「正在加载文件。」）以及节点没在跑，各有自己的状态。节点没在跑时，只有一个按钮去节点页。措辞跟着状态走：停了、正在启动、正在停止，或需要处理。其他错误用提示条。
 
@@ -247,7 +247,7 @@ Go：路径表；假的 Kubo RPC 测客户端（流式上传、大小限制、�
 
 ### 不在这一片里
 
-- 固定、取消固定，以及 `ipfs add`。
+- 固定页本身。一行可以启动一个固定任务。页面和 API 在[固定](pins.md)。
 - 公开分享链接，或任何不是回环的网关。
 - 在浏览器里改字节、上传整个文件夹、预览、历史版本。
 - 除这一条大小限制以外的配额。

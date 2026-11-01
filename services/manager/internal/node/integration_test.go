@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/files"
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/pins"
 )
 
 // TestRealKuboOptional runs the lifecycle against a real Kubo binary.
@@ -85,6 +86,7 @@ func roundTripMFS(t *testing.T, client *files.Client) {
 	if entry.Size != 5 || entry.CID == "" || entry.Type != "file" {
 		t.Fatalf("write %#v", entry)
 	}
+	roundTripPin(t, entry.CID)
 	list, err := client.List(ctx, root)
 	if err != nil {
 		t.Fatal(err)
@@ -124,5 +126,44 @@ func roundTripMFS(t *testing.T, client *files.Client) {
 	}
 	if _, err := client.Stat(ctx, root+"/final.txt"); files.CodeOf(err) != "not_found" {
 		t.Fatalf("stat after remove: %v", err)
+	}
+}
+
+func roundTripPin(t *testing.T, cid string) {
+	t.Helper()
+	pc, err := pins.New(pins.Options{
+		BaseURL:         "http://127.0.0.1:5001",
+		OpTimeout:       30 * time.Second,
+		TransferTimeout: time.Minute,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	support := &pins.Support{}
+	pinned, err := pc.Add(ctx, cid, "panel-integration", true, nil, support)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		cctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+		_ = pc.Remove(cctx, pinned, "recursive")
+	})
+	list, err := pc.List(ctx, support)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, pin := range list {
+		if pin.CID == pinned && pin.Type == "recursive" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("pin list missing %s in %#v", pinned, list)
+	}
+	if err := pc.Remove(ctx, pinned, "recursive"); err != nil {
+		t.Fatal(err)
 	}
 }

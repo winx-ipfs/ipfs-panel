@@ -17,10 +17,7 @@ async function logout() {
   await router.push({ name: 'login' })
 }
 
-const later = computed(() => [
-  { to: '/pins', label: t('navPins'), icon: Pin },
-  { to: '/scenes', label: t('navScenes'), icon: LayoutGrid },
-])
+const later = computed(() => [{ to: '/scenes', label: t('navScenes'), icon: LayoutGrid }])
 
 function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
   navigate(event)
@@ -61,6 +58,18 @@ function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
       >
         <FolderOpen :size="18" :stroke-width="1.75" aria-hidden="true" />
         <span class="nav-text">{{ t('navFiles') }}</span>
+      </a>
+    </RouterLink>
+    <RouterLink v-slot="{ href, navigate, isActive }" to="/pins" custom>
+      <a
+        :href="href"
+        class="nav-link"
+        :class="{ active: isActive }"
+        :aria-current="isActive ? 'page' : undefined"
+        @click="go(navigate, $event)"
+      >
+        <Pin :size="18" :stroke-width="1.75" aria-hidden="true" />
+        <span class="nav-text">{{ t('navPins') }}</span>
       </a>
     </RouterLink>
     <p class="nav-label">{{ t('navLater') }}</p>

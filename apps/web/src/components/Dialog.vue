@@ -12,8 +12,9 @@ withDefaults(
     closeLabel: string
     variant?: 'dialog' | 'drawer'
     hideTitle?: boolean
+    scrollable?: boolean
   }>(),
-  { variant: 'dialog', hideTitle: false },
+  { variant: 'dialog', hideTitle: false, scrollable: false },
 )
 
 const titleId = useId()
@@ -71,7 +72,7 @@ onUnmounted(() => {
     <div
       ref="panel"
       class="ui-dialog-panel"
-      :class="{ 'is-drawer': variant === 'drawer' }"
+      :class="{ 'is-drawer': variant === 'drawer', 'is-scroll': scrollable }"
       role="dialog"
       aria-modal="true"
       :aria-labelledby="titleId"

@@ -150,14 +150,14 @@ Rules:
 - Do not ellipsize a sentence, a button label, a peer id, a path, or an error. Wrapping is the layout. A long detail block may scroll inside its well. The text is still in the page.
 - Folder paths get a break opportunity after each `/`. Peer ids have no breaks in them, so they wrap anywhere.
 - Buttons may grow and wrap onto a second line. Do not fix their width in `ch` of the English word. Chinese labels are often shorter. English hints are often longer. The column is `min(760px, 100%)` so neither language has a line that runs the full desktop.
-- The sidebar labels wrap instead of clipping. Pins and Scenes sit under "Coming soon" / "即将推出", at lower opacity, with `aria-disabled`. They have no per-item badge. Files is a normal item.
+- The sidebar labels wrap instead of clipping. Scenes sits under "Coming soon" / "即将推出", at lower opacity, with `aria-disabled`. It has no badge. Files and Pins are normal items.
 
 ## Shell
 
 - Sidebar from 880px up. Below that, a menu button opens the drawer.
 - Top bar: English / 中文, and a theme button. The button cycles light, dark, and match-device. Its icon and, from 720px up, its label show the current mode. The accessible name and the tooltip say the same mode. Both choices persist in `localStorage` (`ipfs-panel.lang`, `ipfs-panel.theme`). The theme is applied from a small script in `index.html` before paint, so the first frame is not the wrong theme.
 - From 1200px the node page is two columns. The status card is on the left. On the right, while the node is up, a Connection card shows the version and a shortened peer id. The copy button copies the full peer id. The overview does not include a gateway address or an API address, so the card does not invent them. Otherwise the right card explains what a node is and links to the IPFS docs.
-- Nav: Node, Files, then Later (Pins, Scenes), then Settings. Files is a real page. Pins and Scenes stay under "Coming soon". Expert mode is not a nav item.
+- Nav: Node, Files, Pins, then Later (Scenes), then Settings. Files and Pins are real pages. Scenes stays under "Coming soon". Expert mode is not a nav item.
 - `winx.run` sits in the sidebar footer. It opens in a new tab. It is the portal, labeled as such.
 
 Dev-only, the node page reads `?mock=` when `import.meta.env.DEV` is true: `down`, `starting`, `up`, `stopping`, `failed`, or `unreachable`. The production bundle does not include those fixtures. The Vite proxy to the manager is unchanged.
@@ -170,7 +170,7 @@ From `apps/web`, after `npx playwright install chromium`:
 npm run shots
 ```
 
-That writes the node page in all five states, the files page (list, empty, uploading, delete dialog, node stopped), the setup screen, the login screen with an error, and the settings password form, light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture. The files page uses `?files=`.
+That writes the node page in all five states, the files page (list, empty, uploading, delete dialog, node stopped), the pins page (list, add dialog with a validation error, a job in progress, empty), the setup screen, the login screen with an error, and the settings password form, light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture. The files page uses `?files=`. The pins page uses `?pins=`.
 
 This is not a CI job. A Chromium install and the machine's CJK fonts make a pixel run slow and easy to flake, and `ci-ok` should stay the fast check. The unit tests still cover the sentences, the manager actions, and the form controls. Re-run `npm run shots` when the shell or the node card changes, and look at the pictures.
 
@@ -330,14 +330,14 @@ reka-ui（Radix Vue）是认真考虑过的。它能提供焦点圈定和列表�
 - 句子、按钮文字、Peer ID、路径、错误，都不要省略号截断。排版用换行。很长的详情可以在自己的块里滚动。文字仍在页面里。
 - 文件夹路径在每个 `/` 后面留一个可换行的位置。Peer ID 中间没有自然断点，所以允许在任意位置换行。
 - 按钮可以变宽，也可以换到下一行。不要按英文单词的宽度把按钮写死。中文标签常常更短。英文说明常常更长。栏宽是 `min(760px, 100%)`，两种语言都不会在桌面上拉成一整行。
-- 侧栏文字换行，不裁切。固定和场景归在「即将推出」下面，透明度更低，并带 `aria-disabled`。每一项不再单独放徽章。文件是普通的一项。
+- 侧栏文字换行，不裁切。场景归在「即将推出」下面，透明度更低，并带 `aria-disabled`。它没有单独的徽章。文件和固定是普通的一项。
 
 ### 外壳
 
 - 880px 及以上是侧栏。更窄时，菜单按钮打开抽屉。
 - 顶栏：英文 / 中文，以及一个主题按钮。按钮在浅色、深色、跟随设备之间轮换。图标在表明当前模式；720px 及以上还会写出当前模式。可访问名称和提示说的是同一个模式。两个选择都记在 `localStorage`（`ipfs-panel.lang`、`ipfs-panel.theme`）。`index.html` 里有一小段脚本，在绘制前套上主题，避免第一帧是错的主题。
 - 1200px 起，节点页是两列。左边是状态卡片。节点在跑时，右边的「连接」卡片显示版本和缩短后的 Peer ID。复制按钮复制的是完整的 Peer ID。概览里没有网关地址，也没有 API 地址，所以卡片不去编造它们。其余时候，右边用一段话说明什么是节点，并链到 IPFS 文档。
-- 导航：节点、文件，然后是「以后」（固定、场景），然后是设置。文件是真正的页面。固定和场景仍在「即将推出」下面。专家模式不进导航。愿景里它要等常用路径变得没劲之后再出现，不放在首页。
+- 导航：节点、文件、固定，然后是「以后」（场景），然后是设置。文件和固定是真正的页面。场景仍在「即将推出」下面。专家模式不进导航。愿景里它要等常用路径变得没劲之后再出现，不放在首页。
 - `winx.run` 在侧栏底部。新标签页打开。它是门户，文案也这么说。
 
 只在开发构建里，节点页会读 `?mock=`（`import.meta.env.DEV` 为真时）：`down`、`starting`、`up`、`stopping`、`failed` 或 `unreachable`。生产包里没有这些假数据。Vite 代理到 manager 的方式不变。
@@ -350,7 +350,7 @@ reka-ui（Radix Vue）是认真考虑过的。它能提供焦点圈定和列表�
 npm run shots
 ```
 
-这会把节点页的五种状态、设置页、带错误的登录页、设置里的改密码，浅色和深色、英文和中文、1440 和 390 宽，再加上 404，写到 `SHOTS_DIR` 或 `/opt/cursor/artifacts`。脚本自己拉起 Vite。不需要 manager 在跑。登录相关画面用仅开发环境的 `?auth=`。
+这会把节点页的五种状态、文件页（列表、空、上传中、删除对话框、节点停了）、固定页（列表、带校验错误的添加对话框、进行中的任务、空列表）、设置页、带错误的登录页、设置里的改密码，浅色和深色、英文和中文、1440 和 390 宽，再加上 404，写到 `SHOTS_DIR` 或 `/opt/cursor/artifacts`。脚本自己拉起 Vite。不需要 manager 在跑。登录相关画面用仅开发环境的 `?auth=`。文件页用 `?files=`。固定页用 `?pins=`。
 
 这不是 CI 任务。装 Chromium，再加上机器上的中文字体，像素对比又慢又容易抖，而 `ci-ok` 应该保持快。单元测试仍然覆盖那句话、管理动作和表单控件。外壳或节点卡片有改动时，再跑一次 `npm run shots`，看图。
 

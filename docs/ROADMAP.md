@@ -14,7 +14,7 @@ We do not build the whole backend, then the whole UI.
 
 ### Where this repo is
 
-The tree you can clone today has finished slice 1, slice 2, and the files part of slice 3.
+The tree you can clone today has finished slices 1 through 4. Slice 3's files page and slice 4's pins page are both in.
 
 What is here:
 
@@ -24,10 +24,11 @@ What is here:
 - `GET /health` on the manager, loopback by default, and still open without a session
 - start, stop, and restart for one local Kubo, with a one-sentence status, behind that session
 - add, download, rename, move, copy, and delete files on that node, through its mutable file system
+- see what the node is pinning, pin a content ID or a file, and unpin, without the command line
 
 What is not here:
 
-- pins or scenes
+- scenes
 - more than one node
 
 ### 1. Shell, auth, and languages
@@ -48,15 +49,15 @@ Done when you can change whether the local node is running from the panel, and t
 
 ### 3. Files: add, pin, and MFS
 
-Add a file, see the content ID, and find it again in the mutable file system. That part is in. The spec is [Files](design/files.md). Pinning is not part of the file browser. It is slice 4.
+Add a file, see the content ID, and find it again in the mutable file system. That part is in. The spec is [Files](design/files.md). Pinning is not part of the file browser. It is slice 4, and it is in.
 
-Done when a beginner can put a file on the node and open it again from the panel. The file part of that is done. Pinning is not.
+Done when a beginner can put a file on the node and open it again from the panel.
 
 ### 4. Pins
 
-A page for what the node is holding, and a way to unpin. Pin bookkeeping is not hidden inside the file browser.
+A page for what the node is holding, and a way to unpin. Pin bookkeeping is not hidden inside the file browser. The spec is [Pins](design/pins.md).
 
-Done when you can answer "what is pinned?" and remove one pin without the CLI.
+Done when you can answer "what is pinned?" and remove one pin without the CLI. That is the current tree.
 
 ### 5. Scene settings
 
@@ -92,7 +93,7 @@ This waits until slices 1–5 feel dull. Dull is the goal.
 
 ### 这个仓库现在在哪
 
-现在能克隆到的已经做完第 1 片、第 2 片，以及第 3 片里的文件部分。
+现在能克隆到的已经做完第 1 到第 4 片。第 3 片的文件页和第 4 片的固定页都在。
 
 已经有的：
 
@@ -102,10 +103,11 @@ This waits until slices 1–5 feel dull. Dull is the goal.
 - manager 上的 `GET /health`，默认只听本机，并且仍然不需要会话
 - 启动、停止、重启本机上的一个 Kubo，状态是一句话，并且要有那个会话
 - 在这个节点上添加、下载、重命名、移动、复制和删除文件，走的是可变文件系统
+- 不用命令行就能看到节点固定了什么，固定一个内容标识或一个文件，以及取消固定
 
 还没有的：
 
-- pin、场景
+- 场景
 - 多个节点
 
 ### 1. 壳、登录、语言
@@ -126,15 +128,15 @@ This waits until slices 1–5 feel dull. Dull is the goal.
 
 ### 3. 文件：添加、固定、MFS
 
-添加一个文件，看到内容标识，在可变文件系统里再找到它。这一部分已经在了。规格是[文件](design/files.md)。固定不放在文件浏览器里。它是第 4 片。
+添加一个文件，看到内容标识，在可变文件系统里再找到它。这一部分已经在了。规格是[文件](design/files.md)。固定不放在文件浏览器里。它是第 4 片，而且已经在了。
 
-做完的样子：新手可以把一个文件放到节点上，再从面板里打开它。文件这一部分做完了。固定还没有。
+做完的样子：新手可以把一个文件放到节点上，再从面板里打开它。
 
 ### 4. 固定列表（pins）
 
-单独一页看节点拿着什么，以及怎么取消 pin。pin 的账不要藏在文件浏览器里面。
+单独一页看节点拿着什么，以及怎么取消 pin。pin 的账不要藏在文件浏览器里面。规格是[固定](design/pins.md)。
 
-做完的样子：你能回答「pin 了什么」，并且不用命令行就能去掉一个。
+做完的样子：你能回答「pin 了什么」，并且不用命令行就能去掉一个。现在的树就是这样。
 
 ### 5. 场景配置
 

@@ -59,6 +59,7 @@ describe('FilesView', () => {
     expect(wrapper.text()).not.toContain('5001')
     await wrapper.get('[aria-label="Actions for notes.txt"]').trigger('click')
     expect(wrapper.text()).toContain('Copy local link')
+    expect(wrapper.text()).toContain('Pin on this node')
     wrapper.unmount()
   })
 

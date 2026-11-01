@@ -15,16 +15,16 @@ type healthBody struct {
 
 // NewMux is the manager HTTP API.
 // GET /health reports this process only.
-// Node routes do not proxy Kubo. Files routes proxy the mutable-file RPC
+// Node routes do not proxy Kubo. Files and pins routes proxy Kubo
 // on loopback and never return that address.
 // Every /api route except setup-status, setup, and login requires a session.
 func NewMux(sup *node.Supervisor, svc *auth.Service) http.Handler {
-	return newMux(sup, svc, nil)
+	return newMux(sup, svc, nil, nil)
 }
 
-func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP) http.Handler {
+func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pinsHandler *pinsHTTP) http.Handler {
+	maxBytes, op, transfer := sup.FileLimits()
 	if filesHandler == nil {
-		maxBytes, op, transfer := sup.FileLimits()
 		filesHandler = &filesHTTP{
 			sup:             sup,
 			maxBytes:        maxBytes,
@@ -33,6 +33,18 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP) ht
 		}
 	} else if filesHandler.sup == nil {
 		filesHandler.sup = sup
+	}
+	if pinsHandler == nil {
+		pinsHandler = &pinsHTTP{
+			sup:        sup,
+			dataDir:    sup.DataDir(),
+			maxBytes:   maxBytes,
+			op:         op,
+			transfer:   transfer,
+			pinTimeout: sup.PinTimeout(),
+		}
+	} else if pinsHandler.sup == nil {
+		pinsHandler.sup = sup
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", health)
@@ -63,6 +75,14 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP) ht
 	mux.HandleFunc("POST /api/files/move", filesHandler.move)
 	mux.HandleFunc("POST /api/files/copy", filesHandler.copy)
 	mux.HandleFunc("POST /api/files/delete", filesHandler.delete)
+	mux.HandleFunc("GET /api/pins", pinsHandler.list)
+	mux.HandleFunc("POST /api/pins", pinsHandler.add)
+	mux.HandleFunc("POST /api/pins/remove", pinsHandler.remove)
+	mux.HandleFunc("POST /api/pins/from-files", pinsHandler.fromFiles)
+	mux.HandleFunc("POST /api/pins/upload", pinsHandler.upload)
+	mux.HandleFunc("GET /api/pins/jobs", pinsHandler.jobsList)
+	mux.HandleFunc("GET /api/pins/jobs/{id}", pinsHandler.jobGet)
+	mux.HandleFunc("POST /api/pins/jobs/{id}/cancel", pinsHandler.jobCancel)
 	return protect(svc, mux)
 }
 

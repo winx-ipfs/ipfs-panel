@@ -35,6 +35,9 @@ type Config struct {
 	MaxFileBytes         int64
 	FilesTimeout         time.Duration
 	FilesTransferTimeout time.Duration
+
+	// PinsTimeout is the deadline for one background pin/add. Zero means 30m.
+	PinsTimeout time.Duration
 }
 
 func (c *Config) applyDefaults() {
@@ -67,6 +70,9 @@ func (c *Config) applyDefaults() {
 	}
 	if c.FilesTransferTimeout <= 0 {
 		c.FilesTransferTimeout = 10 * time.Minute
+	}
+	if c.PinsTimeout <= 0 {
+		c.PinsTimeout = 30 * time.Minute
 	}
 	if c.Logger == nil {
 		c.Logger = slog.New(slog.NewTextHandler(io.Discard, nil))
@@ -107,6 +113,7 @@ func DefaultRepoPath() (string, error) {
 //	-max-file-bytes           IPFS_PANEL_MAX_FILE_BYTES           default 512 MiB
 //	-files-timeout            IPFS_PANEL_FILES_TIMEOUT            default 20s
 //	-files-transfer-timeout   IPFS_PANEL_FILES_TRANSFER_TIMEOUT   default 10m
+//	-pins-timeout             IPFS_PANEL_PINS_TIMEOUT             default 30m
 func LoadConfig(args []string) (Config, error) {
 	repoDefault := os.Getenv("IPFS_PANEL_REPO")
 	if repoDefault == "" {
@@ -151,6 +158,11 @@ func LoadConfig(args []string) (Config, error) {
 	maxBytes := fs.Int64("max-file-bytes", maxDefault, "largest upload in bytes (env IPFS_PANEL_MAX_FILE_BYTES)")
 	opTimeout := fs.Duration("files-timeout", opDefault, "metadata deadline (env IPFS_PANEL_FILES_TIMEOUT)")
 	transferTimeout := fs.Duration("files-transfer-timeout", transferDefault, "upload and download deadline (env IPFS_PANEL_FILES_TRANSFER_TIMEOUT)")
+	pinDefault, err := envPositiveDuration("IPFS_PANEL_PINS_TIMEOUT")
+	if err != nil {
+		return Config{}, err
+	}
+	pinTimeout := fs.Duration("pins-timeout", pinDefault, "pin fetch deadline (env IPFS_PANEL_PINS_TIMEOUT)")
 	if err := fs.Parse(args); err != nil {
 		return Config{}, err
 	}
@@ -166,6 +178,7 @@ func LoadConfig(args []string) (Config, error) {
 		MaxFileBytes:         *maxBytes,
 		FilesTimeout:         *opTimeout,
 		FilesTransferTimeout: *transferTimeout,
+		PinsTimeout:          *pinTimeout,
 	}, nil
 }
 

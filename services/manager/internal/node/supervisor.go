@@ -121,6 +121,12 @@ func (s *Supervisor) FileLimits() (maxBytes int64, op, transfer time.Duration) {
 	return s.cfg.MaxFileBytes, s.cfg.FilesTimeout, s.cfg.FilesTransferTimeout
 }
 
+// DataDir is the manager data directory. Pin labels live here, not in the Kubo repo.
+func (s *Supervisor) DataDir() string { return s.cfg.DataDir }
+
+// PinTimeout is the deadline for one pin/add job.
+func (s *Supervisor) PinTimeout() time.Duration { return s.cfg.PinsTimeout }
+
 // Start begins startup when the state table allows it.
 // The overview is returned once the state has moved, without waiting for the daemon.
 func (s *Supervisor) Start(ctx context.Context) (Overview, error) {

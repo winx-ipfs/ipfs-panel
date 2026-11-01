@@ -6,25 +6,6 @@
   text-decoration: none;
 }
 
-.files-advanced {
-  margin: 0 0 16px;
-  color: var(--muted);
-  font-size: var(--text-sm);
-  line-height: var(--leading-body);
-}
-
-.files-advanced summary {
-  cursor: pointer;
-  color: var(--text);
-  font-weight: 600;
-  width: fit-content;
-}
-
-.files-advanced p {
-  margin: 8px 0 0;
-  max-width: 62ch;
-}
-
 .files-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -125,10 +106,17 @@
 
 .files-crumbs a,
 .files-crumbs span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
   overflow-wrap: anywhere;
   color: var(--muted);
   font-size: var(--text-sm);
   text-decoration: none;
+}
+
+.files-crumb-home {
+  color: var(--muted);
 }
 
 .files-crumbs [aria-current='page'] {
@@ -224,7 +212,9 @@
   min-height: 40px;
 }
 
-.files-kicker {
+.files-kicker,
+.files-meta,
+.files-menu-cid-value {
   display: none;
 }
 
@@ -296,6 +286,25 @@
 }
 
 @media (max-width: 720px) {
+  .files-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .files-sort {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  .files-sort-btn {
+    min-height: 44px;
+    padding: 8px 6px;
+    line-height: 1.2;
+    white-space: normal;
+  }
+
   .files-table thead {
     position: absolute;
     width: 1px;
@@ -322,11 +331,9 @@
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "name actions"
-      "size size"
-      "cid cid"
-      "time time";
-    gap: 4px 8px;
-    padding: 12px 0;
+      "meta meta";
+    gap: 2px 8px;
+    padding: 10px 0;
     border-bottom: 1px solid var(--border);
   }
 
@@ -337,9 +344,15 @@
 
   .files-name-cell { grid-area: name; }
   .files-actions { grid-area: actions; align-self: start; }
-  .files-size { grid-area: size; }
-  .files-cid { grid-area: cid; }
-  .files-time { grid-area: time; }
+  .files-meta {
+    display: block;
+    grid-area: meta;
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+  .files-table .files-size,
+  .files-table .files-cid,
+  .files-table .files-time { display: none; }
 
   .files-table th,
   .files-table td {
@@ -347,12 +360,22 @@
     padding: 0;
   }
 
-  .files-kicker {
-    display: inline;
-    margin-inline-end: 6px;
-    color: var(--muted);
+  .files-menu-cid {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    min-height: 40px;
+    padding: 8px 10px;
+    gap: 4px;
+  }
+
+  .files-menu-cid-value {
+    display: block;
+    font-family: var(--font-mono);
     font-size: var(--text-sm);
-    font-weight: 600;
+    font-weight: 400;
+    color: var(--muted);
+    overflow-wrap: anywhere;
   }
 
   .files-menu {
