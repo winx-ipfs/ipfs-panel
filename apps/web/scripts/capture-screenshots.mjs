@@ -151,6 +151,26 @@ try {
     await drawerPage.screenshot({ path: drawerFile })
     index.push(drawerFile)
     await phone.close()
+
+    const tablet = await browser.newContext({
+      viewport: { width: 768, height: 1024 },
+      reducedMotion: 'reduce',
+      colorScheme: 'light',
+    })
+    await tablet.addInitScript(() => {
+      localStorage.setItem('ipfs-panel.theme', 'light')
+      localStorage.setItem('ipfs-panel.lang', 'zh')
+    })
+    const tabletPage = await tablet.newPage()
+    await tabletPage.goto(`${origin}/?mock=down`, { waitUntil: 'domcontentloaded' })
+    await tabletPage.getByRole('button', { name: '打开菜单' }).click()
+    await tabletPage.waitForSelector('[role="dialog"]')
+    await tabletPage.evaluate(() => document.fonts.ready)
+    await tabletPage.waitForTimeout(150)
+    const tabletFile = path.join(outDir, 'nav-drawer-light-zh-768.png')
+    await tabletPage.screenshot({ path: tabletFile })
+    index.push(tabletFile)
+    await tablet.close()
   } finally {
     await browser.close()
   }

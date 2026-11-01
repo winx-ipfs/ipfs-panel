@@ -1,5 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { inlineParts, shortenMiddle } from '@/lib/inline'
 import { sentenceKey, visibleActions } from '@/node/present'
 import type { NodeOverview } from '@/node/types'
 import { useNodeStore } from '@/stores/node'
@@ -16,6 +17,21 @@ function overview(patch: Partial<NodeOverview> = {}): NodeOverview {
     ...patch,
   }
 }
+
+describe('inline code markers', () => {
+  it('turns backtick pairs into code parts and leaves detail-like text alone', () => {
+    expect(inlineParts('find the `ipfs` command')).toEqual([
+      { code: false, text: 'find the ' },
+      { code: true, text: 'ipfs' },
+      { code: false, text: ' command' },
+    ])
+    expect(inlineParts('no markers')).toEqual([{ code: false, text: 'no markers' }])
+    expect(shortenMiddle('12D3KooWRjS6k8iG8m3mS5kQ8o8n8Yw8vQd7pQh2oE4mN1aB2cD')).toBe(
+      '12D3KooWRj…mN1aB2cD',
+    )
+    expect(shortenMiddle('12D3')).toBe('12D3')
+  })
+})
 
 describe('node sentences and buttons', () => {
   it('covers every situation in the design', () => {
@@ -55,7 +71,9 @@ describe('node sentences and buttons', () => {
     for (const [code, key] of codes) {
       const failed = overview({ state: 'failed', error: { code, detail: 'x' } })
       expect(sentenceKey(failed, false)).toBe(key)
-      expect(visibleActions(failed, false)).toEqual(code === 'repo_busy' ? [] : ['start'])
+      const actions =
+        code === 'repo_busy' ? [] : code === 'binary_not_found' ? ['retry'] : ['start']
+      expect(visibleActions(failed, false)).toEqual(actions)
     }
 
     expect(sentenceKey(overview({ state: 'down' }), true)).toBe('nodeUnreachable')

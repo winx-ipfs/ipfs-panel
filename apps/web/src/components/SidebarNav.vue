@@ -47,14 +47,14 @@ function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
     <RouterLink v-for="item in later" :key="item.to" v-slot="{ href, navigate, isActive }" :to="item.to" custom>
       <a
         :href="href"
-        class="nav-link soon"
+        class="nav-link is-later"
         :class="{ active: isActive }"
+        aria-disabled="true"
         :aria-current="isActive ? 'page' : undefined"
         @click="go(navigate, $event)"
       >
         <component :is="item.icon" :size="18" :stroke-width="1.75" aria-hidden="true" />
         <span class="nav-text">{{ item.label }}</span>
-        <span class="soon-badge">{{ t('navSoon') }}</span>
       </a>
     </RouterLink>
     <RouterLink v-slot="{ href, navigate, isActive }" to="/settings" custom>

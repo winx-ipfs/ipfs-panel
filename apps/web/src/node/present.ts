@@ -109,7 +109,9 @@ export function visibleActions(
     case 'up':
       return ['stop', 'restart']
     case 'failed':
-      return overview.error?.code === 'repo_busy' ? [] : ['start']
+      if (overview.error?.code === 'repo_busy') return []
+      if (overview.error?.code === 'binary_not_found') return ['retry']
+      return ['start']
     default:
       return []
   }

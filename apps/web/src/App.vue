@@ -18,10 +18,9 @@ const localeStore = useLocaleStore()
 const theme = useThemeStore()
 
 const navOpen = ref(false)
-const themeOpen = ref(false)
 const narrow = ref(false)
-const themeAnchor = ref<HTMLElement | null>(null)
 let media: MediaQueryList | null = null
+const themeOrder: ThemePreference[] = ['light', 'dark', 'system']
 
 const themeIcon = computed(() => {
   if (theme.preference === 'light') return Sun
@@ -35,6 +34,8 @@ const themeName = computed(() => {
   return t('themeSystem')
 })
 
+const themeButtonLabel = computed(() => `${t('themeLabel')}: ${themeName.value}`)
+
 function onNarrow() {
   narrow.value = media?.matches ?? false
 }
@@ -43,34 +44,20 @@ function chooseLocale(next: AppLocale) {
   localeStore.setLocale(next)
 }
 
-function chooseTheme(next: ThemePreference) {
+function cycleTheme() {
+  const index = themeOrder.indexOf(theme.preference)
+  const next = themeOrder[(index + 1) % themeOrder.length] ?? 'system'
   theme.setPreference(next)
-  themeOpen.value = false
-}
-
-function onDocumentPointer(event: PointerEvent) {
-  if (!themeOpen.value) return
-  const target = event.target
-  if (target instanceof Node && themeAnchor.value?.contains(target)) return
-  themeOpen.value = false
-}
-
-function onDocumentKey(event: KeyboardEvent) {
-  if (event.key === 'Escape') themeOpen.value = false
 }
 
 onMounted(() => {
   media = window.matchMedia('(max-width: 879px)')
   onNarrow()
   media.addEventListener('change', onNarrow)
-  document.addEventListener('pointerdown', onDocumentPointer)
-  document.addEventListener('keydown', onDocumentKey)
 })
 
 onUnmounted(() => {
   media?.removeEventListener('change', onNarrow)
-  document.removeEventListener('pointerdown', onDocumentPointer)
-  document.removeEventListener('keydown', onDocumentKey)
 })
 
 watch(narrow, (value) => {
@@ -81,7 +68,6 @@ watch(
   () => route.fullPath,
   () => {
     navOpen.value = false
-    themeOpen.value = false
   },
 )
 
@@ -116,32 +102,12 @@ watchEffect(() => {
               {{ t('languageZh') }}
             </button>
           </div>
-          <div ref="themeAnchor" class="theme-anchor">
-            <Tooltip :text="themeName">
-              <IconButton
-                :label="`${t('themeLabel')}: ${themeName}`"
-                :aria-expanded="themeOpen"
-                aria-haspopup="true"
-                @click="themeOpen = !themeOpen"
-              >
-                <component :is="themeIcon" :size="18" :stroke-width="1.75" aria-hidden="true" />
-              </IconButton>
-            </Tooltip>
-            <div v-if="themeOpen" class="theme-menu" role="group" :aria-label="t('themeLabel')">
-              <button type="button" :aria-pressed="theme.preference === 'light'" @click="chooseTheme('light')">
-                <Sun :size="16" :stroke-width="1.75" aria-hidden="true" />
-                {{ t('themeLight') }}
-              </button>
-              <button type="button" :aria-pressed="theme.preference === 'dark'" @click="chooseTheme('dark')">
-                <Moon :size="16" :stroke-width="1.75" aria-hidden="true" />
-                {{ t('themeDark') }}
-              </button>
-              <button type="button" :aria-pressed="theme.preference === 'system'" @click="chooseTheme('system')">
-                <Monitor :size="16" :stroke-width="1.75" aria-hidden="true" />
-                {{ t('themeSystem') }}
-              </button>
-            </div>
-          </div>
+          <Tooltip :text="themeName">
+            <button type="button" class="theme-cycle" :aria-label="themeButtonLabel" @click="cycleTheme">
+              <component :is="themeIcon" :size="18" :stroke-width="1.75" aria-hidden="true" />
+              <span class="theme-cycle-name">{{ themeName }}</span>
+            </button>
+          </Tooltip>
         </div>
       </header>
       <main id="content" class="main" tabindex="-1">

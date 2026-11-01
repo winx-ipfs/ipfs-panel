@@ -208,7 +208,7 @@ Copy buttons may sit on the version, the peer id, and the folder. They copy text
 The card shows, in order:
 
 1. One sentence for the situation.
-2. When `up`: a "Version" line and a "Peer ID" line. The peer id is the full value, as text the person can select.
+2. When `up`: a Connection card shows Version and Peer ID. On a wide screen it sits beside the status card. On a narrow screen it sits under it. The peer id is shortened on screen. The full value is what the copy button writes, and what assistive tech reads. The card does not show a gateway address or an API address. The overview does not include them.
 3. The node folder, when `repoPath` is known.
 4. When `error.detail` is non-empty, a preformatted block under the sentence, labeled "Details".
 5. The manager actions in the table below. A copy button may sit on a fact. No other manager actions.
@@ -222,10 +222,14 @@ The page does not show ports, a gateway link, a Kubo RPC link, or a text field f
 | `starting` | The node is starting. | none |
 | `up` | The node is running. | Stop, Restart |
 | `stopping` | The node is stopping. | none |
-| `failed`, see codes below | one sentence for that code | Start, except `repo_busy` which has no Start |
+| `failed`, see codes below | one sentence for that code | Start, except `repo_busy` which has no Start, and `binary_not_found` which shows Retry instead of Start |
 | manager request failed | The panel cannot reach the manager on this machine. | Retry |
 
 `repo_busy` has no Start button because another Kubo already holds the folder. Start would fail the same way again.
+
+`binary_not_found` shows Retry as the primary button, and a secondary link, "How to install Kubo", to `https://docs.ipfs.tech/install/command-line/` (a new tab). Retry posts start, so a person who just installed Kubo can try again. Start is not the label: starting cannot succeed until the `ipfs` command exists.
+
+A backtick pair in a sentence marks inline code. The panel renders the inside as a code chip. The backtick characters are not shown. `error.detail` is never parsed this way.
 
 Restart is the quieter button next to Stop. It is on screen only while the node is `up`.
 
@@ -569,7 +573,7 @@ POST 的规则：
 卡片按这个顺序：
 
 1. 一句说明当前情况的话。
-2. `up` 时：一行「版本」，一行「Peer ID」。Peer ID 用完整字符串，让人可以选中复制。
+2. `up` 时：「连接」卡片显示版本和 Peer ID。宽屏时它在状态卡片旁边，窄屏时在下面。屏幕上的 Peer ID 是缩短的。复制按钮写下的、以及辅助技术读到的，是完整值。这张卡片不显示网关地址，也不显示 API 地址。概览里没有这两项。
 3. 知道 `repoPath` 时，显示节点文件夹。
 4. `error.detail` 非空时，在句子下面放一块预格式文本，标题是「详情」。
 5. 下面表格里的管理动作。某一行事实上可以有复制按钮。不要别的管理动作。
@@ -583,10 +587,14 @@ POST 的规则：
 | `starting` | 节点正在启动。 | 无 |
 | `up` | 节点正在运行。 | 停止、重启 |
 | `stopping` | 节点正在停止。 | 无 |
-| `failed`，见下面的代码 | 对应该代码的一句 | 启动；`repo_busy` 没有启动按钮 |
+| `failed`，见下面的代码 | 对应该代码的一句 | 启动；`repo_busy` 没有启动按钮；`binary_not_found` 显示的是重试，不是启动 |
 | 请求 manager 失败 | 面板连不上这台机器上的管理服务。 | 重试 |
 
 `repo_busy` 不放「启动」。文件夹已经被另一个 Kubo 占用，再点一次还是同样的失败。
+
+`binary_not_found` 的主按钮是「重试」，旁边是次要链接「如何安装 Kubo」，指向 `https://docs.ipfs.tech/install/command-line/`（新标签页）。重试发出的是启动，这样刚装好 Kubo 的人可以再试一次。按钮不写「启动」：在有 `ipfs` 这条命令之前，启动不会成功。
+
+句子里的一对反引号表示行内代码。面板把里面的词画成代码芯片。反引号本身不显示。`error.detail` 不按这个规则解析。
 
 「重启」是「停止」旁边较轻的那个按钮。只有节点处于 `up` 时才出现。
 

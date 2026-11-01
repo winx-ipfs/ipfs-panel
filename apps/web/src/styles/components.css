@@ -98,19 +98,6 @@
   padding: 22px 24px 20px;
 }
 
-.ui-card-accent {
-  height: 3px;
-  margin: -22px -24px 18px;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  background: var(--card-accent, var(--border));
-}
-
-.ui-card[data-tone='neutral'] { --card-accent: var(--neutral); }
-.ui-card[data-tone='info'] { --card-accent: var(--info); }
-.ui-card[data-tone='success'] { --card-accent: var(--success); }
-.ui-card[data-tone='warning'] { --card-accent: var(--warning); }
-.ui-card[data-tone='danger'] { --card-accent: var(--danger); }
-
 .ui-pill {
   display: inline-flex;
   align-items: center;
@@ -577,10 +564,6 @@
 @media (max-width: 879px) {
   .ui-card {
     padding: 18px 16px 16px;
-  }
-
-  .ui-card-accent {
-    margin: -18px -16px 16px;
   }
 
   .ui-page-header h1 {

@@ -123,6 +123,26 @@ describe('NodeView', () => {
     vi.useRealTimers()
   })
 
+  it('renders a missing Kubo command as a code chip and offers install help', async () => {
+    const { wrapper } = mountCard(
+      overview({
+        state: 'failed',
+        error: { code: 'binary_not_found', detail: 'ipfs not found on PATH' },
+      }),
+    )
+    await flushPromises()
+    expect(wrapper.get('[role="status"]').text()).toBe(
+      'Kubo is not installed, or the panel cannot find the ipfs command.',
+    )
+    expect(wrapper.get('[role="status"]').text()).not.toContain('`')
+    expect(wrapper.get('code').text()).toBe('ipfs')
+    expect(wrapper.findAll('[data-node-action]').map((button) => button.text())).toEqual(['Retry'])
+    const link = wrapper.get('a[href="https://docs.ipfs.tech/install/command-line/"]')
+    expect(link.attributes('target')).toBe('_blank')
+    expect(link.text()).toBe('How to install Kubo')
+    wrapper.unmount()
+  })
+
   it('shows the Chinese sentence', async () => {
     const { wrapper } = mountCard(overview(), 'zh')
     await flushPromises()
