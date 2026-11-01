@@ -199,15 +199,19 @@ A successful arrival at `up` sets `error` to `null`.
 
 ### UI
 
-The shell stays: brand, tagline, English / 中文 switch. The home route's main area becomes the node card. The nav's only item is "Node" / "节点".
+The sentences, the facts, the manager actions, and the polling in this file stay the contract. The chrome around them is in [Design system](DESIGN-SYSTEM.md): sidebar, theme, copy buttons, and the panel's own 404 page.
+
+The shell shows the brand and the tagline, and an English / 中文 switch. The home route's main area is the node card. The nav's working item is Node. Files, Pins, and Scenes are placeholders that do not call the manager. Settings holds the language and the theme for this browser.
+
+Copy buttons may sit on the version, the peer id, and the folder. They copy text the page already shows. They do not call the manager.
 
 The card shows, in order:
 
 1. One sentence for the situation.
-2. When `up`: a "Version" line and a "Peer ID" line. The peer id is the full value, as text the person can select.
+2. When `up`: a Connection card shows Version and Peer ID. On a wide screen it sits beside the status card. On a narrow screen it sits under it. The peer id is shortened on screen. The full value is what the copy button writes, and what assistive tech reads. The card does not show a gateway address or an API address. The overview does not include them.
 3. The node folder, when `repoPath` is known.
 4. When `error.detail` is non-empty, a preformatted block under the sentence, labeled "Details".
-5. The buttons in the table below, and no other controls.
+5. The manager actions in the table below. A copy button may sit on a fact. No other manager actions.
 
 The page does not show ports, a gateway link, a Kubo RPC link, or a text field for a path.
 
@@ -218,10 +222,14 @@ The page does not show ports, a gateway link, a Kubo RPC link, or a text field f
 | `starting` | The node is starting. | none |
 | `up` | The node is running. | Stop, Restart |
 | `stopping` | The node is stopping. | none |
-| `failed`, see codes below | one sentence for that code | Start, except `repo_busy` which has no Start |
+| `failed`, see codes below | one sentence for that code | Start, except `repo_busy` which has no Start, and `binary_not_found` which shows Retry instead of Start |
 | manager request failed | The panel cannot reach the manager on this machine. | Retry |
 
 `repo_busy` has no Start button because another Kubo already holds the folder. Start would fail the same way again.
+
+`binary_not_found` shows Retry as the primary button, and a secondary link, "How to install Kubo", to `https://docs.ipfs.tech/install/command-line/` (a new tab). Retry posts start, so a person who just installed Kubo can try again. Start is not the label: starting cannot succeed until the `ipfs` command exists.
+
+A backtick pair in a sentence marks inline code. The panel renders the inside as a code chip. The backtick characters are not shown. `error.detail` is never parsed this way.
 
 Restart is the quieter button next to Stop. It is on screen only while the node is `up`.
 
@@ -335,10 +343,10 @@ The implementation pull request is done when every box is true.
 - [x] If `ipfs id` does not succeed within 30s of spawn, the child is dead and the state is `failed` with `health_timeout`.
 - [x] `GET /api/node` and the three POST routes return the overview and do not include an API URL, a gateway URL, a multiaddr, or port 5001.
 - [x] A POST without `Content-Type: application/json` returns 415. Responses do not include `Access-Control-Allow-Origin`.
-- [x] The home card shows the sentence for each situation in English and in 中文, and only the buttons listed above. The page does not link to Kubo.
+- [x] The home card shows the sentence for each situation in English and in 中文, and only the manager actions listed above. Copy buttons on the version, the peer id, and the folder are allowed. The page does not link to Kubo.
 - [x] The UI fetches relative `/api/node` and `/health`. The Vite dev server proxies both to the manager.
 - [x] `go test ./...` covers the supervisor with a fake `ipfs` binary: the unsafe-address refusal, and two overlapping starts producing one child.
-- [x] No file route, pin route, or second-node route or page is added.
+- [x] No manager file route, pin route, or second-node route is added. Placeholder pages that do not call the manager are allowed.
 - [x] Both locale files contain every new key.
 
 Manual check, not required in CI: with a real `ipfs` on `PATH`, Start ends on "The node is running." and a peer id, Stop ends on "The node is stopped.", and both languages show those sentences. `curl` to `127.0.0.1:5001` can succeed while the node is up. The page does not document or perform that curl.
@@ -556,15 +564,19 @@ POST 的规则：
 
 ### 界面
 
-外壳保留：名字、标语、英文 / 中文开关。首页主区域变成节点卡片。导航里只有一项：「节点」。
+句子、事实、管理动作和轮询，仍以本文为准。周围的界面在[设计系统](DESIGN-SYSTEM.md)：侧栏、主题、复制按钮，以及面板自己的 404 页。
+
+外壳保留名字和标语，以及英文 / 中文开关。首页主区域是节点卡片。导航里真正能用的一项是「节点」。文件、固定、场景是占位，不调用 manager。设置里放的是这个浏览器的语言和主题。
+
+版本、Peer ID、文件夹上可以有复制按钮。它们只复制页面上已经显示的文字，不调用 manager。
 
 卡片按这个顺序：
 
 1. 一句说明当前情况的话。
-2. `up` 时：一行「版本」，一行「Peer ID」。Peer ID 用完整字符串，让人可以选中复制。
+2. `up` 时：「连接」卡片显示版本和 Peer ID。宽屏时它在状态卡片旁边，窄屏时在下面。屏幕上的 Peer ID 是缩短的。复制按钮写下的、以及辅助技术读到的，是完整值。这张卡片不显示网关地址，也不显示 API 地址。概览里没有这两项。
 3. 知道 `repoPath` 时，显示节点文件夹。
 4. `error.detail` 非空时，在句子下面放一块预格式文本，标题是「详情」。
-5. 下面表格里的按钮。不要别的控件。
+5. 下面表格里的管理动作。某一行事实上可以有复制按钮。不要别的管理动作。
 
 页面上不出现端口、网关链接、Kubo RPC 链接，也没有填写路径的输入框。
 
@@ -575,10 +587,14 @@ POST 的规则：
 | `starting` | 节点正在启动。 | 无 |
 | `up` | 节点正在运行。 | 停止、重启 |
 | `stopping` | 节点正在停止。 | 无 |
-| `failed`，见下面的代码 | 对应该代码的一句 | 启动；`repo_busy` 没有启动按钮 |
+| `failed`，见下面的代码 | 对应该代码的一句 | 启动；`repo_busy` 没有启动按钮；`binary_not_found` 显示的是重试，不是启动 |
 | 请求 manager 失败 | 面板连不上这台机器上的管理服务。 | 重试 |
 
 `repo_busy` 不放「启动」。文件夹已经被另一个 Kubo 占用，再点一次还是同样的失败。
+
+`binary_not_found` 的主按钮是「重试」，旁边是次要链接「如何安装 Kubo」，指向 `https://docs.ipfs.tech/install/command-line/`（新标签页）。重试发出的是启动，这样刚装好 Kubo 的人可以再试一次。按钮不写「启动」：在有 `ipfs` 这条命令之前，启动不会成功。
+
+句子里的一对反引号表示行内代码。面板把里面的词画成代码芯片。反引号本身不显示。`error.detail` 不按这个规则解析。
 
 「重启」是「停止」旁边较轻的那个按钮。只有节点处于 `up` 时才出现。
 
@@ -692,10 +708,10 @@ Kubo API 留在回环。网关留在回环。任一检查失败，manager 就拒
 - [x] 拉起后 30 秒内 `ipfs id` 没有成功，子进程已经被杀掉，状态是 `failed`，代码 `health_timeout`。
 - [x] `GET /api/node` 和三个 POST 返回概览，其中没有 API URL、网关 URL、multiaddr，也没有端口 5001。
 - [x] POST 没有 `Content-Type: application/json` 时返回 415。响应里没有 `Access-Control-Allow-Origin`。
-- [x] 首页卡片用英文和中文显示每种情况的那一句，并且只有上面列出的按钮。页面不链到 Kubo。
+- [x] 首页卡片用英文和中文显示每种情况的那一句，并且只有上面列出的管理动作。版本、Peer ID、文件夹上的复制按钮可以有。页面不链到 Kubo。
 - [x] 界面请求相对路径 `/api/node` 和 `/health`。Vite 开发服务器把两者代理到 manager。
 - [x] `go test ./...` 用一个假的 `ipfs` 二进制覆盖监督逻辑：拒绝不安全地址，以及两次重叠的启动只产生一个子进程。
-- [x] 不增加文件路由、pin 路由、第二节点的路由或页面。
+- [x] 不增加 manager 的文件路由、pin 路由或第二节点路由。不调用 manager 的占位页可以有。
 - [x] 两个语言文件都包含每一个新键。
 
 手工检查，不放进 CI：`PATH` 上有真的 `ipfs` 时，启动最后显示「节点正在运行。」和一个 Peer ID，停止最后显示「节点已停止。」两种语言都能看到这些句子。节点在跑时，对 `127.0.0.1:5001` 的 `curl` 可以成功。页面既不写这个地址，也不自己去请求它。

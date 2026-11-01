@@ -3,6 +3,7 @@ import type { NodeOverview } from '@/node/types'
 
 export type SentenceKey = keyof MessageSchema
 export type NodeAction = 'start' | 'stop' | 'restart' | 'retry'
+export type StatusTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger'
 
 const failedSentences: Record<string, SentenceKey> = {
   binary_not_found: 'nodeErrorBinary',
@@ -40,6 +41,62 @@ export function sentenceKey(
   }
 }
 
+export function statusLabelKey(
+  overview: NodeOverview | null,
+  unreachable: boolean,
+): SentenceKey {
+  if (unreachable) return 'statusUnreachable'
+  if (!overview) return 'nodeLoading'
+  switch (overview.state) {
+    case 'down':
+      return 'statusDown'
+    case 'starting':
+      return 'statusStarting'
+    case 'up':
+      return 'statusUp'
+    case 'stopping':
+      return 'statusStopping'
+    case 'failed':
+      return 'statusFailed'
+    default:
+      return 'statusFailed'
+  }
+}
+
+export function statusTone(overview: NodeOverview | null, unreachable: boolean): StatusTone {
+  if (unreachable) return 'warning'
+  if (!overview) return 'neutral'
+  switch (overview.state) {
+    case 'down':
+      return 'neutral'
+    case 'starting':
+      return 'info'
+    case 'up':
+      return 'success'
+    case 'stopping':
+      return 'warning'
+    case 'failed':
+      return 'danger'
+    default:
+      return 'neutral'
+  }
+}
+
+export function hintKey(overview: NodeOverview | null, unreachable: boolean): SentenceKey | null {
+  if (unreachable) return 'nodeHintUnreachable'
+  if (!overview) return null
+  switch (overview.state) {
+    case 'down':
+      return 'nodeHintDown'
+    case 'starting':
+      return 'nodeHintStarting'
+    case 'stopping':
+      return 'nodeHintStopping'
+    default:
+      return null
+  }
+}
+
 export function visibleActions(
   overview: NodeOverview | null,
   unreachable: boolean,
@@ -52,7 +109,9 @@ export function visibleActions(
     case 'up':
       return ['stop', 'restart']
     case 'failed':
-      return overview.error?.code === 'repo_busy' ? [] : ['start']
+      if (overview.error?.code === 'repo_busy') return []
+      if (overview.error?.code === 'binary_not_found') return ['retry']
+      return ['start']
     default:
       return []
   }
