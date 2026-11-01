@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Product direction
+    url: https://github.com/winx-ipfs/ipfs-panel/blob/main/docs/VISION.md
+    about: Read the vision before proposing something that is really a host panel.
