@@ -115,7 +115,19 @@ button:focus-visible {
   background: var(--panel);
 }
 
-.nav p,
+.nav a {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav a.router-link-active {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
 .main p {
   margin: 0;
 }
@@ -124,22 +136,95 @@ button:focus-visible {
   padding: 28px 24px;
 }
 
-.empty h1 {
-  font-size: 1.4rem;
-  font-weight: 650;
-  margin: 0 0 8px;
+.node-card {
+  max-width: 40rem;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }
 
-.empty p {
-  max-width: 62ch;
+.sentence {
+  margin: 0;
+  font-size: 1.15rem;
 }
 
-.empty p + p {
-  margin-top: 12px;
+.facts {
+  display: grid;
+  gap: 10px;
+  margin: 0;
 }
 
-.empty .note {
+.facts div {
+  display: grid;
+  gap: 2px;
+}
+
+.facts dt,
+.label {
   color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.peer,
+.path {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  word-break: break-all;
+  user-select: text;
+}
+
+.folder {
+  display: grid;
+  gap: 2px;
+}
+
+.details pre {
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  max-height: 12rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--bg);
+  border-radius: 8px;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actions button {
+  border-radius: 999px;
+  padding: 6px 16px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.actions button.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.actions button.quiet {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--line);
+}
+
+.actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 @media (max-width: 720px) {

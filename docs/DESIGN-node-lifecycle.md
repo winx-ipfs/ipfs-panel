@@ -2,9 +2,9 @@
 
 English below. 中文在后半部分。Same decisions, two languages.
 
-**Status: design only.** Nothing in this document is implemented. This change does not start, stop, or restart Kubo. If the code and this file ever disagree, this file is the spec until a pull request changes it.
+**Status: implemented.** This file stays the spec. If the code and this file disagree, this file wins until a pull request changes it. The manager can start, stop, and restart one local Kubo. Login is still not part of this slice.
 
-The next slice is one local Kubo: start, stop, restart, and a health overview a beginner can read in one sentence. [Roadmap](ROADMAP.md) calls that slice 2. Login stays slice 1 and is not designed here.
+This slice is one local Kubo: start, stop, restart, and a health overview a beginner can read in one sentence. [Roadmap](ROADMAP.md) calls that slice 2. Login stays slice 1 and is not designed here.
 
 ## English
 
@@ -324,28 +324,26 @@ Later slices, not this one:
 
 The implementation pull request is done when every box is true.
 
-- [ ] `GET /health` is still `{"status":"ok","service":"manager"}` with content type `application/json; charset=utf-8`.
-- [ ] With `MANAGER_ADDR` unset, the manager listens on `127.0.0.1:8080`.
-- [ ] The child `IPFS_PATH` is the panel repo. An `IPFS_PATH` already set on the manager does not redirect the child.
-- [ ] The first start on a repo with no `config` runs `ipfs init`, sets the API to loopback port 5001, sets the gateway to loopback port 8081 (8082 only if the manager is using 8081), then runs `ipfs daemon` with no extra flags.
-- [ ] A start while `up` or `starting` does not spawn a second daemon.
-- [ ] Start is refused when any API or gateway address is not loopback, or when either uses the manager's port. Swarm lines in the config are unchanged.
-- [ ] Stop signals only a child the manager spawned or adopted. A foreign lock is `repo_busy`, and that process is still running afterward.
-- [ ] Restart from `up` goes through stopping and then starting, and ends at `up` or `failed`.
-- [ ] If `ipfs id` does not succeed within 30s of spawn, the child is dead and the state is `failed` with `health_timeout`.
-- [ ] `GET /api/node` and the three POST routes return the overview and do not include an API URL, a gateway URL, a multiaddr, or port 5001.
-- [ ] A POST without `Content-Type: application/json` returns 415. Responses do not include `Access-Control-Allow-Origin`.
-- [ ] The home card shows the sentence for each situation in English and in 中文, and only the buttons listed above. The page does not link to Kubo.
-- [ ] The UI fetches relative `/api/node` and `/health`. The Vite dev server proxies both to the manager.
-- [ ] `go test ./...` covers the supervisor with a fake `ipfs` binary: the unsafe-address refusal, and two overlapping starts producing one child.
-- [ ] No file route, pin route, or second-node route or page is added.
-- [ ] Both locale files contain every new key.
+- [x] `GET /health` is still `{"status":"ok","service":"manager"}` with content type `application/json; charset=utf-8`.
+- [x] With `MANAGER_ADDR` unset, the manager listens on `127.0.0.1:8080`.
+- [x] The child `IPFS_PATH` is the panel repo. An `IPFS_PATH` already set on the manager does not redirect the child.
+- [x] The first start on a repo with no `config` runs `ipfs init`, sets the API to loopback port 5001, sets the gateway to loopback port 8081 (8082 only if the manager is using 8081), then runs `ipfs daemon` with no extra flags.
+- [x] A start while `up` or `starting` does not spawn a second daemon.
+- [x] Start is refused when any API or gateway address is not loopback, or when either uses the manager's port. Swarm lines in the config are unchanged.
+- [x] Stop signals only a child the manager spawned or adopted. A foreign lock is `repo_busy`, and that process is still running afterward.
+- [x] Restart from `up` goes through stopping and then starting, and ends at `up` or `failed`.
+- [x] If `ipfs id` does not succeed within 30s of spawn, the child is dead and the state is `failed` with `health_timeout`.
+- [x] `GET /api/node` and the three POST routes return the overview and do not include an API URL, a gateway URL, a multiaddr, or port 5001.
+- [x] A POST without `Content-Type: application/json` returns 415. Responses do not include `Access-Control-Allow-Origin`.
+- [x] The home card shows the sentence for each situation in English and in 中文, and only the buttons listed above. The page does not link to Kubo.
+- [x] The UI fetches relative `/api/node` and `/health`. The Vite dev server proxies both to the manager.
+- [x] `go test ./...` covers the supervisor with a fake `ipfs` binary: the unsafe-address refusal, and two overlapping starts producing one child.
+- [x] No file route, pin route, or second-node route or page is added.
+- [x] Both locale files contain every new key.
 
 Manual check, not required in CI: with a real `ipfs` on `PATH`, Start ends on "The node is running." and a peer id, Stop ends on "The node is stopped.", and both languages show those sentences. `curl` to `127.0.0.1:5001` can succeed while the node is up. The page does not document or perform that curl.
 
-### Where the code will land
-
-Not in the design pull request.
+### Where the code lives
 
 | Path | Responsibility |
 | --- | --- |
@@ -363,9 +361,9 @@ Tests follow the style of `services/manager/internal/api/health_test.go`: `httpt
 
 ## 中文
 
-**状态：只有设计。** 本文里的行为都还没写进代码。这次改动不会启动、停止或重启 Kubo。以后代码和本文不一致时，以本文为准，直到有 pull request 改这份说明。
+**状态：已实现。** 本文仍然是规格。以后代码和本文不一致时，以本文为准，直到有 pull request 改这份说明。manager 可以启动、停止和重启本机上的一个 Kubo。登录仍然不属于这一片。
 
-下一片只做本机上的一个 Kubo：启动、停止、重启，以及新手能用一句话读懂的健康概览。[路线图](ROADMAP.md)里这是第 2 片。登录仍是第 1 片，本文不设计登录。
+这一片只做本机上的一个 Kubo：启动、停止、重启，以及新手能用一句话读懂的健康概览。[路线图](ROADMAP.md)里这是第 2 片。登录仍是第 1 片，本文不设计登录。
 
 ### 用词
 
@@ -683,28 +681,26 @@ Kubo API 留在回环。网关留在回环。任一检查失败，manager 就拒
 
 实现那次 pull request，下面每一条都成立才算做完。
 
-- [ ] `GET /health` 仍是 `{"status":"ok","service":"manager"}`，Content-Type 为 `application/json; charset=utf-8`。
-- [ ] 未设置 `MANAGER_ADDR` 时，manager 听在 `127.0.0.1:8080`。
-- [ ] 子进程的 `IPFS_PATH` 是面板仓库。manager 上已经存在的 `IPFS_PATH` 不能把子进程指走。
-- [ ] 对还没有 `config` 的仓库，第一次启动会跑 `ipfs init`，把 API 设为回环 5001，把网关设为回环 8081（仅当 manager 占用 8081 时用 8082），然后不带额外参数跑 `ipfs daemon`。
-- [ ] 状态已是 `up` 或 `starting` 时再启动，不会拉起第二个 daemon。
-- [ ] 任一 API 或网关地址不是回环，或其中之一占用了 manager 的端口，就拒绝启动。配置里的 Swarm 行保持原样。
-- [ ] 停止时只向 manager 启动或收养的子进程发信号。别人的锁是 `repo_busy`，那个进程之后仍在运行。
-- [ ] 从 `up` 重启，会经过停止再进入启动，最后停在 `up` 或 `failed`。
-- [ ] 拉起后 30 秒内 `ipfs id` 没有成功，子进程已经被杀掉，状态是 `failed`，代码 `health_timeout`。
-- [ ] `GET /api/node` 和三个 POST 返回概览，其中没有 API URL、网关 URL、multiaddr，也没有端口 5001。
-- [ ] POST 没有 `Content-Type: application/json` 时返回 415。响应里没有 `Access-Control-Allow-Origin`。
-- [ ] 首页卡片用英文和中文显示每种情况的那一句，并且只有上面列出的按钮。页面不链到 Kubo。
-- [ ] 界面请求相对路径 `/api/node` 和 `/health`。Vite 开发服务器把两者代理到 manager。
-- [ ] `go test ./...` 用一个假的 `ipfs` 二进制覆盖监督逻辑：拒绝不安全地址，以及两次重叠的启动只产生一个子进程。
-- [ ] 不增加文件路由、pin 路由、第二节点的路由或页面。
-- [ ] 两个语言文件都包含每一个新键。
+- [x] `GET /health` 仍是 `{"status":"ok","service":"manager"}`，Content-Type 为 `application/json; charset=utf-8`。
+- [x] 未设置 `MANAGER_ADDR` 时，manager 听在 `127.0.0.1:8080`。
+- [x] 子进程的 `IPFS_PATH` 是面板仓库。manager 上已经存在的 `IPFS_PATH` 不能把子进程指走。
+- [x] 对还没有 `config` 的仓库，第一次启动会跑 `ipfs init`，把 API 设为回环 5001，把网关设为回环 8081（仅当 manager 占用 8081 时用 8082），然后不带额外参数跑 `ipfs daemon`。
+- [x] 状态已是 `up` 或 `starting` 时再启动，不会拉起第二个 daemon。
+- [x] 任一 API 或网关地址不是回环，或其中之一占用了 manager 的端口，就拒绝启动。配置里的 Swarm 行保持原样。
+- [x] 停止时只向 manager 启动或收养的子进程发信号。别人的锁是 `repo_busy`，那个进程之后仍在运行。
+- [x] 从 `up` 重启，会经过停止再进入启动，最后停在 `up` 或 `failed`。
+- [x] 拉起后 30 秒内 `ipfs id` 没有成功，子进程已经被杀掉，状态是 `failed`，代码 `health_timeout`。
+- [x] `GET /api/node` 和三个 POST 返回概览，其中没有 API URL、网关 URL、multiaddr，也没有端口 5001。
+- [x] POST 没有 `Content-Type: application/json` 时返回 415。响应里没有 `Access-Control-Allow-Origin`。
+- [x] 首页卡片用英文和中文显示每种情况的那一句，并且只有上面列出的按钮。页面不链到 Kubo。
+- [x] 界面请求相对路径 `/api/node` 和 `/health`。Vite 开发服务器把两者代理到 manager。
+- [x] `go test ./...` 用一个假的 `ipfs` 二进制覆盖监督逻辑：拒绝不安全地址，以及两次重叠的启动只产生一个子进程。
+- [x] 不增加文件路由、pin 路由、第二节点的路由或页面。
+- [x] 两个语言文件都包含每一个新键。
 
 手工检查，不放进 CI：`PATH` 上有真的 `ipfs` 时，启动最后显示「节点正在运行。」和一个 Peer ID，停止最后显示「节点已停止。」两种语言都能看到这些句子。节点在跑时，对 `127.0.0.1:5001` 的 `curl` 可以成功。页面既不写这个地址，也不自己去请求它。
 
-### 代码将来放哪
-
-不在这份设计的 pull request 里。
+### 代码放哪
 
 | 路径 | 职责 |
 | --- | --- |

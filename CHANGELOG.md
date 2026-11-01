@@ -9,4 +9,5 @@ Releases are tagged from `main` only. The heading `## [X.Y.Z]` has to be in this
 
 ## [Unreleased]
 
+- Start, stop, and restart one local Kubo from the panel, with a one-sentence status in English and 中文.
 - Git Flow, CI, governance docs, and release automation.

@@ -18,14 +18,14 @@ The tree you can clone today is the foundation, not slice 1.
 
 What is here:
 
-- an empty panel shell
+- a panel shell with a Node card
 - English and 中文, with the language switch saved in the browser
 - `GET /health` on the manager, loopback by default
+- start, stop, and restart for one local Kubo, with a one-sentence status
 
 What is not here:
 
 - auth
-- starting or stopping Kubo
 - files, pins, or scenes
 - more than one node
 
@@ -41,7 +41,7 @@ Done when you can sign in, the shell renders in both languages, and a request wi
 
 Show whether Kubo is up. Start it. Stop it. Restart it. The status is a sentence (up, down, starting, stopping, failed), not a dump of the RPC response.
 
-The spec is [Node lifecycle](DESIGN-node-lifecycle.md). That file is design only. The behavior is not in the code yet.
+The spec is [Node lifecycle](DESIGN-node-lifecycle.md). The manager and the Node card implement it. Login is still not built; this slice does not add it.
 
 Done when you can change whether the local node is running from the panel, and the panel tells the truth when it fails.
 
@@ -95,14 +95,14 @@ This waits until slices 1–5 feel dull. Dull is the goal.
 
 已经有的：
 
-- 一个空的面板壳
+- 带节点卡片的面板壳
 - 英文和中文，语言开关会记在浏览器里
 - manager 上的 `GET /health`，默认只听本机
+- 启动、停止、重启本机上的一个 Kubo，状态是一句话
 
 还没有的：
 
 - 登录
-- 启动或停止 Kubo
 - 文件、pin、场景
 - 多个节点
 
@@ -118,7 +118,7 @@ This waits until slices 1–5 feel dull. Dull is the goal.
 
 看出 Kubo 在不在。启动它。停止它。重启它。状态是一句话（在跑、停了、正在启动、正在停止、失败了），不是把 RPC 响应倒出来。
 
-规格在 [节点启停](DESIGN-node-lifecycle.md)。那份文件只有设计，行为还没进代码。
+规格在 [节点启停](DESIGN-node-lifecycle.md)。manager 和节点卡片已经按它实现。登录还没做；这一片不加登录。
 
 做完的样子：你可以在面板上改变本机节点是否在跑，失败时面板说的是实话。
 

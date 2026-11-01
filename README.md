@@ -10,7 +10,7 @@ This repo is a panel for Kubo. Open it on the machine that runs the node, or ope
 
 **winx.run** is the portal. **This repository is the product.**
 
-The browser never talks to Kubo RPC (usually `127.0.0.1:5001`). That port stays on the machine. Our own manager is the API. It will check who you are before it does anything real. Today it only answers a health check, and it binds to loopback unless you override it. Do not publish it. There is no auth yet.
+The browser never talks to Kubo RPC (usually `127.0.0.1:5001`). That port stays on the machine. Our own manager is the API. It will check who you are before it does anything real. Today it can report its own health and start, stop, or restart one local Kubo. It binds to loopback unless you override it. Do not publish it. There is no auth yet.
 
 ## Layout
 
@@ -27,15 +27,9 @@ docs                why we are building this, and in what order
 | `docs/VISION.md` | What this is, and what we will not turn it into. |
 | `docs/ROADMAP.md` | Vertical slices. Finish one before starting the next. |
 
-## Run the empty shell
+## Run the panel
 
-UI:
-
-```bash
-cd apps/web
-npm install
-npm run dev
-```
+The manager starts and stops one local Kubo. The browser talks to the manager. Kubo (`ipfs`) needs to be on `PATH`, or set `IPFS_PANEL_KUBO_BIN` to the binary. The panel keeps its own repo. The default is `$XDG_DATA_HOME/ipfs-panel/kubo`, or `~/.local/share/ipfs-panel/kubo` when `XDG_DATA_HOME` is unset. It does not use `~/.ipfs`.
 
 Manager:
 
@@ -45,7 +39,17 @@ go run ./cmd/manager
 curl -s http://127.0.0.1:8080/health
 ```
 
-You should see `{"status":"ok","service":"manager"}`. This does not start Kubo. The page does not call the manager yet either. Connecting them is a later slice.
+You should see `{"status":"ok","service":"manager"}`. That check is the manager process, not Kubo. With `MANAGER_ADDR` unset, the manager listens on `127.0.0.1:8080`. Optional flags: `-addr`, `-repo`, and `-kubo-bin`. Each one overrides the matching environment variable when you pass it. Do not publish the manager. There is no auth yet.
+
+UI, in another terminal:
+
+```bash
+cd apps/web
+npm install
+npm run dev
+```
+
+Open the printed local URL. The Node card starts, stops, and restarts the node. The dev server proxies `/api` and `/health` to `http://127.0.0.1:8080`.
 
 Checks CI runs for the UI:
 
@@ -74,7 +78,7 @@ Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). Go 1.22 is enough
 
 - [Vision](docs/VISION.md)
 - [Roadmap](docs/ROADMAP.md)
-- [Node lifecycle (design only)](docs/DESIGN-node-lifecycle.md)
+- [Node lifecycle](docs/DESIGN-node-lifecycle.md)
 - [Contributing](CONTRIBUTING.md) (Git Flow, CI, hotfixes)
 - [Org setup](docs/ORG-SETUP.md) (repository settings checklist)
 - [Governance](GOVERNANCE.md)
@@ -93,7 +97,7 @@ IPFS 值得用。Kubo 默认的用法不太值得折腾。你拿到的是命令�
 
 **winx.run** 是门户。**这个仓库才是产品。**
 
-浏览器不和 Kubo RPC 说话（一般是 `127.0.0.1:5001`）。那个端口留在机器上。对外的是我们自己的 manager。它以后会先确认你是谁，再去做真正的事。现在它只会回答健康检查，而且默认只听本机回环地址。先别把它暴露出去，认证还没做。
+浏览器不和 Kubo RPC 说话（一般是 `127.0.0.1:5001`）。那个端口留在机器上。对外的是我们自己的 manager。它以后会先确认你是谁，再去做真正的事。现在它可以回答自己的健康检查，并启动、停止或重启本机上的一个 Kubo。默认只听本机回环地址。先别把它暴露出去，认证还没做。
 
 ## 目录
 
@@ -110,15 +114,9 @@ docs                为什么做、按什么顺序做
 | `docs/VISION.md` | 这是什么，以及我们不会把它做成什么。 |
 | `docs/ROADMAP.md` | 垂直切片。做完一片再开始下一片。 |
 
-## 把空壳跑起来
+## 把面板跑起来
 
-界面：
-
-```bash
-cd apps/web
-npm install
-npm run dev
-```
+manager 负责启动和停止本机上的一个 Kubo。浏览器只跟 manager 说话。Kubo（`ipfs`）要在 `PATH` 上，或者用 `IPFS_PANEL_KUBO_BIN` 指向那个二进制。面板用自己的仓库。默认是 `$XDG_DATA_HOME/ipfs-panel/kubo`；没设 `XDG_DATA_HOME` 时是 `~/.local/share/ipfs-panel/kubo`。它不会去用 `~/.ipfs`。
 
 管理服务：
 
@@ -128,7 +126,17 @@ go run ./cmd/manager
 curl -s http://127.0.0.1:8080/health
 ```
 
-你应该看到 `{"status":"ok","service":"manager"}`。这不会启动 Kubo。页面现在也不会去请求 manager。把两边接上是后面的切片。
+你应该看到 `{"status":"ok","service":"manager"}`。这个检查只说明 manager 这个进程在，不说明 Kubo 在不在。没设 `MANAGER_ADDR` 时，manager 听在 `127.0.0.1:8080`。可选参数：`-addr`、`-repo`、`-kubo-bin`。传了参数就覆盖对应的环境变量。先别把 manager 暴露出去，认证还没做。
+
+界面，另开一个终端：
+
+```bash
+cd apps/web
+npm install
+npm run dev
+```
+
+打开它打印出来的本机地址。节点卡片可以启动、停止和重启节点。开发服务器把 `/api` 和 `/health` 代理到 `http://127.0.0.1:8080`。
 
 和 CI 一样的界面检查：
 
@@ -157,7 +165,7 @@ go build -o /dev/null ./cmd/manager
 
 - [愿景](docs/VISION.md)
 - [路线图](docs/ROADMAP.md)
-- [节点启停（只有设计）](docs/DESIGN-node-lifecycle.md)
+- [节点启停](docs/DESIGN-node-lifecycle.md)
 - [参与方式](CONTRIBUTING.md)（Git Flow、CI、热修）
 - [组织设置](docs/ORG-SETUP.md)（仓库设置清单）
 - [治理](GOVERNANCE.md)
