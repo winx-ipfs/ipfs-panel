@@ -4,7 +4,7 @@
 
 这是 `winx-ipfs/ipfs-panel` 的设置清单。治理 pull request 进入 `main` 之后，在 GitHub 网页上逐项打开。CI 用的令牌改不了这些设置（`permissions.admin` 为 false）。不要再加一套经典的分支保护。ruleset 和经典保护会一起生效，两套叠在一起很容易设错。
 
-产品上的规矩在 [参与方式](../CONTRIBUTING.md)。谁可以绕过 `main` 写在 [治理](../GOVERNANCE.md)。
+产品上的规矩在 [参与方式](../CONTRIBUTING.zh-CN.md)。谁可以绕过 `main` 写在 [治理](../GOVERNANCE.zh-CN.md)。
 
 旧的必须检查 `web typecheck and build` 已经不用了。不要再要求它。
 
@@ -84,7 +84,7 @@ Release 工作流不解析合并提交的说明。它从 API 读取已合并的 
 
 - 需要的批准人数：**0**
 - **Dismiss stale pull request approvals when new commits are pushed（有新提交时驳回过期的批准）：** 开
-- **Require review from Code Owners：** 关。[CODEOWNERS](../.github/CODEOWNERS) 仍然会请求审阅。把它设为必须，会挡住唯一维护者自己的 pull request。等 [治理](../GOVERNANCE.md) 里有了第二名维护者再打开，同时把批准人数改成 1。
+- **Require review from Code Owners：** 关。[CODEOWNERS](../.github/CODEOWNERS) 仍然会请求审阅。把它设为必须，会挡住唯一维护者自己的 pull request。等 [治理](../GOVERNANCE.zh-CN.md) 里有了第二名维护者再打开，同时把批准人数改成 1。
 - **Require approval of the most recent reviewable push：** 关。只有一名维护者时，这条会卡死。
 - **Require conversation resolution before merging（合并前必须解决对话）：** 开
 - **Allowed merge methods（允许的合并方式）：** 只留 **Merge**。取消 Squash 和 Rebase。
@@ -195,7 +195,7 @@ Dependabot 的版本更新写在 [dependabot.yml](../.github/dependabot.yml)：`
 
 公开仓库可以用 secret scanning 和 push protection。如果某个开关不存在，就是当前计划没有这项。不要为了它卡住这份清单的其余部分。记下缺了哪个开关。
 
-私下漏洞报告就是 [安全](../SECURITY.md) 里的那个链接。在告诉别人使用通告表单之前，先把它打开。
+私下漏洞报告就是 [安全](../SECURITY.zh-CN.md) 里的那个链接。在告诉别人使用通告表单之前，先把它打开。
 
 ## 8. 核对
 
@@ -224,7 +224,7 @@ Dependabot 的版本更新写在 [dependabot.yml](../.github/dependabot.yml)：`
 
 ## 现在先不要做
 
-- 在 [治理](../GOVERNANCE.md) 有第二名维护者之前，不要要求第二名审阅者或 code owner 审阅。
+- 在 [治理](../GOVERNANCE.zh-CN.md) 有第二名维护者之前，不要要求第二名审阅者或 code owner 审阅。
 - 签名提交。
 - 合并队列。
 - 组织级 ruleset。一个公开仓库不需要，而且组织级 ruleset 不是免费计划上该走的路。
