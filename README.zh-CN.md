@@ -10,7 +10,7 @@ IPFS 值得用。Kubo 默认的用法不太值得折腾。你拿到的是命令�
 
 **winx.run** 是门户。**这个仓库才是产品。**
 
-浏览器不和 Kubo RPC 说话（一般是 `127.0.0.1:5001`）。那个端口留在机器上。对外的是我们自己的 manager。它会先确认你是谁，再去启动或停止 Kubo。默认只听本机回环地址。在读过[认证](docs/design/auth.md)之前，别把它暴露出去。
+浏览器不和 Kubo RPC 说话（一般是 `127.0.0.1:5001`）。那个端口留在机器上。对外的是我们自己的 manager。它会先确认你是谁，再去启动或停止 Kubo。默认只听本机回环地址。在读过[认证](docs/design/auth.zh-CN.md)之前，别把它暴露出去。
 
 ## 目录
 
@@ -43,7 +43,7 @@ curl -s http://127.0.0.1:8080/health
 
 第一次打开面板时，它会让你创建管理员账号。密码用 argon2id 哈希，存在 `<data>/auth.json`（权限 `0600`），和 Kubo 仓库并列，不在仓库里面。默认数据目录是 `$XDG_DATA_HOME/ipfs-panel`，没设 `XDG_DATA_HOME` 时是 `~/.local/share/ipfs-panel`。之后面板会要求登录。没有会话的 `/api` 请求是 `401`。`GET /health` 仍然开放。
 
-如果忘了密码，先停掉 manager，再运行 `go run ./cmd/manager reset-admin`。它删掉账号。它不在命令行上接受密码。然后再启动 manager，重新创建账号。从另一台机器设置时，还需要新进程打印的一次性口令。原因和其余规则在[认证](docs/design/auth.md)。
+如果忘了密码，先停掉 manager，再运行 `go run ./cmd/manager reset-admin`。它删掉账号。它不在命令行上接受密码。然后再启动 manager，重新创建账号。从另一台机器设置时，还需要新进程打印的一次性口令。原因和其余规则在[认证](docs/design/auth.zh-CN.md)。
 
 界面，另开一个终端：
 
@@ -53,7 +53,7 @@ npm install
 npm run dev
 ```
 
-打开它打印出来的本机地址。节点卡片可以启动、停止和重启节点。文件页可以在这个节点上添加、下载、重命名、移动、复制和删除文件。固定页可以看到这个节点留着什么，可以按内容标识或文件来固定，也可以取消固定。开发服务器把 `/api` 和 `/health` 代理到 `http://127.0.0.1:8080`。单次上传默认最大 512 MiB，可以用 `-max-file-bytes` 或 `IPFS_PANEL_MAX_FILE_BYTES` 改。需要从网络获取的固定在后台跑，最长 30 分钟（`-pins-timeout` 或 `IPFS_PANEL_PINS_TIMEOUT`）。规则在[文件](docs/design/files.md)和[固定](docs/design/pins.md)。
+打开它打印出来的本机地址。节点卡片可以启动、停止和重启节点。文件页可以在这个节点上添加、下载、重命名、移动、复制和删除文件。固定页可以看到这个节点留着什么，可以按内容标识或文件来固定，也可以取消固定。开发服务器把 `/api` 和 `/health` 代理到 `http://127.0.0.1:8080`。单次上传默认最大 512 MiB，可以用 `-max-file-bytes` 或 `IPFS_PANEL_MAX_FILE_BYTES` 改。需要从网络获取的固定在后台跑，最长 30 分钟（`-pins-timeout` 或 `IPFS_PANEL_PINS_TIMEOUT`）。规则在[文件](docs/design/files.zh-CN.md)和[固定](docs/design/pins.zh-CN.md)。
 
 和 CI 一样的界面检查：
 
@@ -80,7 +80,7 @@ go build -o /dev/null ./cmd/manager
 
 ## 看一眼
 
-外壳、令牌，以及新画面要遵守的规矩，在[设计系统](docs/DESIGN-SYSTEM.md)。
+外壳、令牌，以及新画面要遵守的规矩，在[设计系统](docs/DESIGN-SYSTEM.zh-CN.md)。
 
 ![节点正在运行，浅色，英文](docs/screenshots/node-running-light-en.png)
 
@@ -100,15 +100,15 @@ go build -o /dev/null ./cmd/manager
 
 ## 接着读
 
-- [愿景](docs/VISION.md)
-- [路线图](docs/ROADMAP.md)
-- [设计系统](docs/DESIGN-SYSTEM.md)
-- [认证](docs/design/auth.md)
-- [文件](docs/design/files.md)
-- [固定](docs/design/pins.md)
-- [节点启停](docs/DESIGN-node-lifecycle.md)
+- [愿景](docs/VISION.zh-CN.md)
+- [路线图](docs/ROADMAP.zh-CN.md)
+- [设计系统](docs/DESIGN-SYSTEM.zh-CN.md)
+- [认证](docs/design/auth.zh-CN.md)
+- [文件](docs/design/files.zh-CN.md)
+- [固定](docs/design/pins.zh-CN.md)
+- [节点启停](docs/DESIGN-node-lifecycle.zh-CN.md)
 - [参与方式](CONTRIBUTING.md)（Git Flow、CI、热修）
-- [组织设置](docs/ORG-SETUP.md)（仓库设置清单）
+- [组织设置](docs/ORG-SETUP.zh-CN.md)（仓库设置清单）
 - [治理](GOVERNANCE.md)
 - [安全](SECURITY.md)
 - [支持](SUPPORT.md)

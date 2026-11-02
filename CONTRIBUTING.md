@@ -193,7 +193,7 @@ Say which roadmap slice the change belongs to. Use "foundation" for repo hygiene
 
 If you change UI copy, change `apps/web/src/locales/en.ts` and `apps/web/src/locales/zh.ts` in the same pull request. The keys match. `zh` is Simplified Chinese.
 
-The README ships as two files: `README.md` in English, `README.zh-CN.md` in 中文. Change both in the same pull request. Every other doc keeps both languages in one file, English first.
+Every doc ships as two files: `NAME.md` in English, `NAME.zh-CN.md` in 中文. Change both in the same pull request. The README and every file under `docs/` are already split this way. `CONTRIBUTING`, `GOVERNANCE`, `SECURITY`, `SUPPORT`, and `CODE_OF_CONDUCT` still keep both languages in one file.
 
 Anything that talks to Kubo goes through `services/manager`. Do not add a screen, a sample, or a paragraph that tells people to put Kubo RPC (port 5001) on a public address.
 
@@ -400,7 +400,7 @@ Dependabot 按生态系统（npm、Go 模块、GitHub Actions）每周向默认�
 
 改界面文案时，同一个 pull request 里同时改 `apps/web/src/locales/en.ts` 和 `apps/web/src/locales/zh.ts`。键要一致。`zh` 是简体中文。
 
-README 是两个文件：`README.md` 是英文，`README.zh-CN.md` 是中文。改动时在同一个 pull request 里两边一起改。其他文档仍然是一个文件放两种语言，英文在前。
+每篇文档都是两个文件：`NAME.md` 是英文，`NAME.zh-CN.md` 是中文。改动时在同一个 pull request 里两边一起改。README 和 `docs/` 下的都已经这样拆好了。`CONTRIBUTING`、`GOVERNANCE`、`SECURITY`、`SUPPORT`、`CODE_OF_CONDUCT` 目前仍然是一个文件放两种语言。
 
 和 Kubo 说话的代码放在 `services/manager`。不要加页面、示例或说明，去教别人把 Kubo RPC（5001 端口）开到公网地址上。
 
