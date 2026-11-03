@@ -9,6 +9,7 @@ Releases are tagged from `main` only. The heading `## [X.Y.Z]` has to be in this
 
 ## [Unreleased]
 
+- Every doc ships as two files, one per language, with a switch at the top of each: the README, `docs/`, `CONTRIBUTING`, `GOVERNANCE`, `SECURITY`, and `SUPPORT`. `CODE_OF_CONDUCT.md` stays English, with a Chinese note.
 - Pins page for what this node is keeping. Add a pin by content ID, upload a file and pin it, pin an item from Files, and unpin. A fetch from the network is a background job with progress and cancel. A stopped node returns `503 node_not_running`.
 - Files page for the node's mutable files. Upload, download, rename, move, copy, and delete go through the manager to Kubo on loopback. A stopped node returns `503 node_not_running`. The narrow file list is a compact card, and the content-ID note uses the panel's disclosure.
 - Login and setup passwords can be shown or hidden. A failed login keeps the username. Setup stays disabled until the form is valid.
