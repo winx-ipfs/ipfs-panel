@@ -1,8 +1,8 @@
 # ipfs-panel
 
-[![CI](https://github.com/winx-ipfs/ipfs-panel/actions/workflows/ci.yml/badge.svg)](https://github.com/winx-ipfs/ipfs-panel/actions/workflows/ci.yml)
+**English** · [中文](README.zh-CN.md)
 
-English below. 中文在后半部分。
+[![CI](https://github.com/winx-ipfs/ipfs-panel/actions/workflows/ci.yml/badge.svg)](https://github.com/winx-ipfs/ipfs-panel/actions/workflows/ci.yml)
 
 IPFS is worth using. The usual way to run Kubo is not. You get a CLI, a long JSON config, and a local RPC port that must stay private. A lot of people give up before the node feels real.
 
@@ -10,7 +10,7 @@ This repo is a panel for Kubo. Open it on the machine that runs the node, or ope
 
 **winx.run** is the portal. **This repository is the product.**
 
-The browser never talks to Kubo RPC (usually `127.0.0.1:5001`). That port stays on the machine. Our own manager is the API. It will check who you are before it does anything real. Today it only answers a health check, and it binds to loopback unless you override it. Do not publish it. There is no auth yet.
+The browser never talks to Kubo RPC (usually `127.0.0.1:5001`). That port stays on the machine. Our own manager is the API. It checks who you are before it starts or stops Kubo. It binds to loopback unless you override it. Do not publish it until you have read [Auth](docs/design/auth.md).
 
 ## Layout
 
@@ -27,15 +27,9 @@ docs                why we are building this, and in what order
 | `docs/VISION.md` | What this is, and what we will not turn it into. |
 | `docs/ROADMAP.md` | Vertical slices. Finish one before starting the next. |
 
-## Run the empty shell
+## Run the panel
 
-UI:
-
-```bash
-cd apps/web
-npm install
-npm run dev
-```
+The manager starts and stops one local Kubo. The browser talks to the manager. Kubo (`ipfs`) needs to be on `PATH`, or set `IPFS_PANEL_KUBO_BIN` to the binary. The panel keeps its own repo. The default is `$XDG_DATA_HOME/ipfs-panel/kubo`, or `~/.local/share/ipfs-panel/kubo` when `XDG_DATA_HOME` is unset. It does not use `~/.ipfs`.
 
 Manager:
 
@@ -45,7 +39,21 @@ go run ./cmd/manager
 curl -s http://127.0.0.1:8080/health
 ```
 
-You should see `{"status":"ok","service":"manager"}`. This does not start Kubo. The page does not call the manager yet either. Connecting them is a later slice.
+You should see `{"status":"ok","service":"manager"}`. That check is the manager process, not Kubo. With `MANAGER_ADDR` unset, the manager listens on `127.0.0.1:8080`. Optional flags: `-addr`, `-repo`, `-data`, `-kubo-bin`, and `-trust-proxy`. Each one overrides the matching environment variable when you pass it.
+
+The first time you open the panel, it asks you to create the admin account. The password is hashed with argon2id and stored in `<data>/auth.json` (mode `0600`), next to the Kubo repo, not inside it. The default data directory is `$XDG_DATA_HOME/ipfs-panel`, or `~/.local/share/ipfs-panel`. After that, the panel asks you to sign in. A request to `/api` without a session is `401`. `GET /health` stays open.
+
+If you forget the password, stop the manager and run `go run ./cmd/manager reset-admin`. It deletes the account. It does not take a password on the command line. Start the manager again and create the account. From another machine, setup also needs the one-time token the new process prints. The reason, and the rest of the rules, are in [Auth](docs/design/auth.md).
+
+UI, in another terminal:
+
+```bash
+cd apps/web
+npm install
+npm run dev
+```
+
+Open the printed local URL. The Node card starts, stops, and restarts the node. Files adds, downloads, renames, moves, copies, and deletes files on that node. Pins shows what this node is keeping, lets you pin a content ID or a file, and lets you unpin. The dev server proxies `/api` and `/health` to `http://127.0.0.1:8080`. The largest upload is 512 MiB unless you set `-max-file-bytes` or `IPFS_PANEL_MAX_FILE_BYTES`. A pin that has to be fetched from the network runs in the background for up to 30 minutes (`-pins-timeout` or `IPFS_PANEL_PINS_TIMEOUT`). The rules are in [Files](docs/design/files.md) and [Pins](docs/design/pins.md).
 
 Checks CI runs for the UI:
 
@@ -68,13 +76,37 @@ go test -race ./...
 go build -o /dev/null ./cmd/manager
 ```
 
-Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). Go 1.22 is enough for the manager.
+Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). The manager module needs Go 1.26, which is what `services/manager/go.mod` asks for. CI installs that version.
+
+## Look
+
+The shell, the tokens, and the rules for new screens are in [Design system](docs/DESIGN-SYSTEM.md).
+
+![Node running, light theme, English](docs/screenshots/node-running-light-en.png)
+
+![Node running, dark theme, 中文](docs/screenshots/node-running-dark-zh.png)
+
+![Node stopped, light theme, 中文, narrow](docs/screenshots/node-stopped-light-zh-mobile.png)
+
+![Files, light theme, 中文](docs/screenshots/files-list-light-zh-1440.png)
+
+![Files, dark theme, English](docs/screenshots/files-list-dark-en-1440.png)
+
+![Files, light theme, 中文, narrow](docs/screenshots/files-list-light-zh-390.png)
+
+![Pins, light theme, 中文](docs/screenshots/pins-list-light-zh-1440.png)
+
+![Add pin, dark theme, English](docs/screenshots/pins-add-dark-en-1440.png)
 
 ## Read next
 
 - [Vision](docs/VISION.md)
 - [Roadmap](docs/ROADMAP.md)
-- [Node lifecycle (design only)](docs/DESIGN-node-lifecycle.md)
+- [Design system](docs/DESIGN-SYSTEM.md)
+- [Auth](docs/design/auth.md)
+- [Files](docs/design/files.md)
+- [Pins](docs/design/pins.md)
+- [Node lifecycle](docs/DESIGN-node-lifecycle.md)
 - [Contributing](CONTRIBUTING.md) (Git Flow, CI, hotfixes)
 - [Org setup](docs/ORG-SETUP.md) (repository settings checklist)
 - [Governance](GOVERNANCE.md)
@@ -82,86 +114,3 @@ Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). Go 1.22 is enough
 - [Support](SUPPORT.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)
 - License: [MIT](LICENSE)
-
----
-
-# ipfs-panel（中文）
-
-IPFS 值得用。Kubo 默认的用法不太值得折腾。你拿到的是命令行、一份很长的 JSON，还有一个必须留在本机的 RPC 端口。很多人在「节点到底算不算跑起来了」之前就放弃了。
-
-这个仓库是 Kubo 的面板。可以开在跑节点的那台机器上，也可以在别的设备的浏览器里打开，但远程要先登录。新手看到的是几件说得清的事。熟手要的深层设置会晚一点出现，而且是故意晚一点。这不是一个小号的主机面板。不管网站，不管数据库，也不管整台服务器。我们只管 Kubo。
-
-**winx.run** 是门户。**这个仓库才是产品。**
-
-浏览器不和 Kubo RPC 说话（一般是 `127.0.0.1:5001`）。那个端口留在机器上。对外的是我们自己的 manager。它以后会先确认你是谁，再去做真正的事。现在它只会回答健康检查，而且默认只听本机回环地址。先别把它暴露出去，认证还没做。
-
-## 目录
-
-```text
-apps/web            面板界面
-services/manager    API 网关（Go）
-docs                为什么做、按什么顺序做
-```
-
-| 路径 | 里面是什么 |
-| --- | --- |
-| `apps/web` | Vue 3、Vite、TypeScript、Vue Router、Pinia、vue-i18n。第一屏就有英文和中文。 |
-| `services/manager` | Go，标准库。以后只有这个进程应该去叫 Kubo。 |
-| `docs/VISION.md` | 这是什么，以及我们不会把它做成什么。 |
-| `docs/ROADMAP.md` | 垂直切片。做完一片再开始下一片。 |
-
-## 把空壳跑起来
-
-界面：
-
-```bash
-cd apps/web
-npm install
-npm run dev
-```
-
-管理服务：
-
-```bash
-cd services/manager
-go run ./cmd/manager
-curl -s http://127.0.0.1:8080/health
-```
-
-你应该看到 `{"status":"ok","service":"manager"}`。这不会启动 Kubo。页面现在也不会去请求 manager。把两边接上是后面的切片。
-
-和 CI 一样的界面检查：
-
-```bash
-cd apps/web
-npm ci
-npm run lint
-npm run typecheck
-npm test
-npm run build
-```
-
-管理服务的检查：
-
-```bash
-cd services/manager
-gofmt -l .
-go vet ./...
-go test -race ./...
-go build -o /dev/null ./cmd/manager
-```
-
-界面用 Node 22 就行（22.18 或更新，或者 Node 24.12+）。管理服务用 Go 1.22 就行。
-
-## 接着读
-
-- [愿景](docs/VISION.md)
-- [路线图](docs/ROADMAP.md)
-- [节点启停（只有设计）](docs/DESIGN-node-lifecycle.md)
-- [参与方式](CONTRIBUTING.md)（Git Flow、CI、热修）
-- [组织设置](docs/ORG-SETUP.md)（仓库设置清单）
-- [治理](GOVERNANCE.md)
-- [安全](SECURITY.md)
-- [支持](SUPPORT.md)
-- [行为准则](CODE_OF_CONDUCT.md)
-- 许可证：[MIT](LICENSE)

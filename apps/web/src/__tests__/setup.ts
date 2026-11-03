@@ -1,22 +1,25 @@
 const memory = new Map<string, string>()
 
-Object.defineProperty(globalThis, 'localStorage', {
-  configurable: true,
-  value: {
-    getItem: (key: string) => memory.get(key) ?? null,
-    setItem: (key: string, value: string) => {
-      memory.set(key, value)
-    },
-    removeItem: (key: string) => {
-      memory.delete(key)
-    },
-    clear: () => {
-      memory.clear()
-    },
+const storage = {
+  getItem: (key: string) => memory.get(key) ?? null,
+  setItem: (key: string, value: string) => {
+    memory.set(key, value)
   },
-})
+  removeItem: (key: string) => {
+    memory.delete(key)
+  },
+  clear: () => {
+    memory.clear()
+  },
+}
 
-Object.defineProperty(globalThis, 'navigator', {
-  configurable: true,
-  value: { language: 'en-US' },
-})
+function define(name: string, value: unknown) {
+  try {
+    Object.defineProperty(globalThis, name, { configurable: true, value })
+  } catch {
+    // happy-dom already provides this.
+  }
+}
+
+define('localStorage', storage)
+define('navigator', { language: 'en-US' })
