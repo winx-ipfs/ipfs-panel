@@ -151,27 +151,33 @@ func TestAddProgressCancelAndNameFallback(t *testing.T) {
 }
 
 func TestUploadStreamsAndLimits(t *testing.T) {
-	var got []byte
-	var chunked bool
+	// The handler runs on the server goroutine, so it reports through a
+	// channel and never calls t.Fatal/t.Errorf. The client aborts the upload
+	// once the limit is hit, which tears the multipart body down mid-part;
+	// that is the expected behaviour and not a handler error.
+	results := make(chan uploadResult, 4)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		res := uploadResult{path: r.URL.Path}
 		if !strings.HasSuffix(r.URL.Path, "/add") {
-			t.Errorf("path %s", r.URL.Path)
+			results <- res
+			return
 		}
-		if r.URL.Query().Get("pin") != "true" || r.URL.Query().Get("cid-version") != "1" {
-			t.Errorf("query %s", r.URL.RawQuery)
-		}
-		chunked = r.ContentLength < 0
+		res.query = r.URL.RawQuery
+		res.chunked = r.ContentLength < 0
 		mr, err := r.MultipartReader()
 		if err != nil {
-			t.Errorf("multipart %v", err)
+			res.err = err
+			results <- res
 			return
 		}
 		part, err := mr.NextPart()
 		if err != nil {
-			t.Errorf("part %v", err)
+			res.err = err
+			results <- res
 			return
 		}
-		got, _ = io.ReadAll(part)
+		res.body, res.err = io.ReadAll(part)
+		results <- res
 		_, _ = io.WriteString(w, `{"Name":"notes.txt","Hash":"`+sampleCIDv1()+`","Size":"5"}`)
 	}))
 	defer srv.Close()
@@ -180,14 +186,36 @@ func TestUploadStreamsAndLimits(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(got) != "hello" || !chunked || pin.CID != sampleCIDv1() || pin.Size == nil || *pin.Size != 5 {
-		t.Fatalf("got %q chunked %v pin %#v", got, chunked, pin)
+	first := <-results
+	if first.err != nil {
+		t.Fatalf("handler: %v", first.err)
 	}
+	if !strings.HasSuffix(first.path, "/add") {
+		t.Fatalf("path %s", first.path)
+	}
+	if !strings.Contains(first.query, "pin=true") || !strings.Contains(first.query, "cid-version=1") {
+		t.Fatalf("query %s", first.query)
+	}
+	if string(first.body) != "hello" || !first.chunked {
+		t.Fatalf("got %q chunked %v", first.body, first.chunked)
+	}
+	if pin.CID != sampleCIDv1() || pin.Size == nil || *pin.Size != 5 {
+		t.Fatalf("pin %#v", pin)
+	}
+
 	limited := newPinClient(t, srv.URL)
 	limited.maxBytes = 4
 	if _, err := limited.Upload(context.Background(), "notes.txt", strings.NewReader("hello")); CodeOf(err) != "too_large" {
 		t.Fatalf("limit %v", err)
 	}
+}
+
+type uploadResult struct {
+	path    string
+	query   string
+	chunked bool
+	body    []byte
+	err     error
 }
 
 func TestRemoveIndirectAndNotFound(t *testing.T) {

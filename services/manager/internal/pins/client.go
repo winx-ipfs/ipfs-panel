@@ -12,6 +12,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/kuborpc"
 )
 
 const (
@@ -62,7 +64,7 @@ type Support struct {
 
 // New checks the base URL and builds a client that dials loopback only.
 func New(opt Options) (*Client, error) {
-	base, err := parseBase(opt.BaseURL)
+	base, err := kuborpc.ParseBase(opt.BaseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +79,7 @@ func New(opt Options) (*Client, error) {
 	}
 	return &Client{
 		base:     base,
-		http:     loopbackClient(),
+		http:     kuborpc.Client(),
 		maxBytes: opt.MaxBytes,
 		op:       opt.OpTimeout,
 		transfer: opt.TransferTimeout,

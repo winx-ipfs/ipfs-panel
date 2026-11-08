@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/atomicfile"
 )
 
 const labelFileName = "pin-names.json"
@@ -133,58 +135,5 @@ func (s *Labels) flushLocked() error {
 		return err
 	}
 	body = append(body, '\n')
-	return writeAtomic(s.path, body)
-}
-
-func writeAtomic(path string, data []byte) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return err
-	}
-	tmp, err := os.CreateTemp(dir, ".pin-name-*.tmp")
-	if err != nil {
-		return err
-	}
-	tmpName := tmp.Name()
-	cleanup := true
-	defer func() {
-		if cleanup {
-			_ = os.Remove(tmpName)
-		}
-	}()
-	if err := tmp.Chmod(0o600); err != nil {
-		_ = tmp.Close()
-		return err
-	}
-	if _, err := tmp.Write(data); err != nil {
-		_ = tmp.Close()
-		return err
-	}
-	if err := tmp.Sync(); err != nil {
-		_ = tmp.Close()
-		return err
-	}
-	if err := tmp.Close(); err != nil {
-		return err
-	}
-	if err := os.Rename(tmpName, path); err != nil {
-		_ = os.Remove(path)
-		if err2 := os.Rename(tmpName, path); err2 != nil {
-			return err2
-		}
-	}
-	cleanup = false
-	if err := os.Chmod(path, 0o600); err != nil {
-		return err
-	}
-	dirFile, err := os.Open(dir)
-	if err != nil {
-		return err
-	}
-	syncErr := dirFile.Sync()
-	closeErr := dirFile.Close()
-	if syncErr != nil {
-		return syncErr
-	}
-	return closeErr
+	return atomicfile.Write(s.path, body, 0o600)
 }

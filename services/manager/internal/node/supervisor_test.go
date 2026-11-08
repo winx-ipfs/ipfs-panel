@@ -256,9 +256,7 @@ func TestFirstStartPinsLoopbackAndOneDaemon(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if info.Mode().Perm() != 0o600 {
-		t.Fatalf("pid mode %o", info.Mode().Perm())
-	}
+	requireOwnerOnly(t, info)
 
 	again, err := sup.Start(context.Background())
 	if err != nil {
