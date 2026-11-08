@@ -100,10 +100,29 @@ jobs:
         working-directory: services/manager
         run: go vet ./...
       - name: golangci-lint
+        id: lint
         uses: golangci/golangci-lint-action@v9
+        continue-on-error: true
         with:
           version: v2.15.0
           working-directory: services/manager
+      # The action fetches its binary from the GitHub release assets and does
+      # not retry. Two consecutive runs (42470476837 and 42471051582) failed
+      # with HTTP 504 before a single linter ran, so a transient outage read
+      # as a code failure. A second attempt separates the two.
+      - name: golangci-lint (retry)
+        id: lint-retry
+        if: steps.lint.outcome == 'failure'
+        uses: golangci/golangci-lint-action@v9
+        continue-on-error: true
+        with:
+          version: v2.15.0
+          working-directory: services/manager
+      - name: Require a clean lint result
+        if: steps.lint.outcome == 'failure' && steps.lint-retry.outcome == 'failure'
+        run: |
+          echo "golangci-lint failed on both attempts; see the two steps above" >&2
+          exit 1
       - name: Test
         working-directory: services/manager
         run: go test -race -count=1 ./...
