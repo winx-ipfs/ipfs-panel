@@ -6,69 +6,10 @@ import (
 	"errors"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
-	"syscall"
-	"time"
+
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/kuborpc"
 )
-
-func parseBase(raw string) (*url.URL, error) {
-	u, err := url.Parse(raw)
-	if err != nil || u.Host == "" || u.User != nil {
-		return nil, &OpError{Code: "unavailable"}
-	}
-	if u.Scheme != "http" || (u.Path != "" && u.Path != "/") || u.RawQuery != "" || u.Fragment != "" {
-		return nil, &OpError{Code: "unavailable"}
-	}
-	if u.Port() == "" {
-		return nil, &OpError{Code: "unavailable"}
-	}
-	ip := net.ParseIP(u.Hostname())
-	if ip == nil || !ip.IsLoopback() {
-		return nil, &OpError{Code: "unavailable"}
-	}
-	u.Path = ""
-	return u, nil
-}
-
-func loopbackClient() *http.Client {
-	dialer := &net.Dialer{Timeout: 5 * time.Second}
-	return &http.Client{
-		Transport: &http.Transport{
-			Proxy: nil,
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				return dialLoopback(ctx, dialer, network, addr)
-			},
-			DialTLSContext: func(context.Context, string, string) (net.Conn, error) {
-				return nil, errors.New("kubo rpc tls is not used")
-			},
-			DisableCompression: true,
-			ForceAttemptHTTP2:  false,
-			MaxIdleConns:       4,
-			IdleConnTimeout:    30 * time.Second,
-		},
-		CheckRedirect: func(*http.Request, []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-}
-
-func dialLoopback(ctx context.Context, dialer *net.Dialer, network, addr string) (net.Conn, error) {
-	host, port, err := net.SplitHostPort(addr)
-	if err != nil {
-		return nil, err
-	}
-	ip := net.ParseIP(host)
-	if ip == nil || !ip.IsLoopback() {
-		return nil, errors.New("refusing non-loopback kubo rpc")
-	}
-	if ip.To4() != nil {
-		network = "tcp4"
-	} else if network == "tcp" {
-		network = "tcp6"
-	}
-	return dialer.DialContext(ctx, network, net.JoinHostPort(ip.String(), port))
-}
 
 func classify(err error) error {
 	if err == nil {
@@ -87,7 +28,7 @@ func classify(err error) error {
 	if errors.As(err, &netErr) && netErr.Timeout() {
 		return &OpError{Code: "timeout"}
 	}
-	if errors.Is(err, syscall.ECONNREFUSED) || strings.Contains(strings.ToLower(err.Error()), "connection refused") {
+	if kuborpc.IsRefused(err) {
 		return &OpError{Code: "node_not_running"}
 	}
 	return &OpError{Code: "unavailable"}

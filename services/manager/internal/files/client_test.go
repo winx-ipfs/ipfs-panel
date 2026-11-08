@@ -102,7 +102,10 @@ func TestListWriteRead(t *testing.T) {
 }
 
 func TestWriteLimitAndConflicts(t *testing.T) {
-	var received int
+	// The handler runs on its own goroutine, so the byte count it records
+	// is shared state. Send it back over a channel instead of reading the
+	// variable from the test goroutine.
+	received := make(chan int, 1)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case strings.HasSuffix(r.URL.Path, "/files/stat"):
@@ -118,7 +121,10 @@ func TestWriteLimitAndConflicts(t *testing.T) {
 				return
 			}
 			buf, _ := io.ReadAll(part)
-			received = len(buf)
+			select {
+			case received <- len(buf):
+			default:
+			}
 			w.WriteHeader(http.StatusOK)
 		case strings.HasSuffix(r.URL.Path, "/files/rm"):
 			w.WriteHeader(http.StatusOK)
@@ -132,8 +138,16 @@ func TestWriteLimitAndConflicts(t *testing.T) {
 	if CodeOf(err) != "too_large" {
 		t.Fatalf("%v", err)
 	}
-	if received > 4 {
-		t.Fatalf("buffered %d bytes", received)
+	// The handler posts the count before it writes the response, so a value
+	// is already buffered here whenever the write request was made at all.
+	// No request means no buffering, which is also within the limit.
+	buffered := 0
+	select {
+	case buffered = <-received:
+	default:
+	}
+	if buffered > 4 {
+		t.Fatalf("buffered %d bytes", buffered)
 	}
 
 	exists := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

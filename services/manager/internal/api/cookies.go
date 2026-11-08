@@ -46,19 +46,22 @@ func writeAuthErr(w http.ResponseWriter, err error) {
 	}
 }
 
+// secureCookie reports whether the Set-Cookie header may carry Secure. A TLS
+// connection is enough. Behind a trusted reverse proxy only the first
+// X-Forwarded-Proto value counts, and a client-supplied header is ignored
+// unless that trust was turned on. The panel itself serves plain HTTP on
+// loopback, where a Secure cookie would not be stored at all, so the answer
+// is "secure only when the browser sees HTTPS".
 func secureCookie(r *http.Request, trustProxy bool) bool {
 	if r.TLS != nil {
 		return true
 	}
-	if !trustProxy {
-		return false
+	proto := ""
+	if trustProxy {
+		proto = r.Header.Get("X-Forwarded-Proto")
 	}
-	proto := r.Header.Get("X-Forwarded-Proto")
-	if proto == "" {
-		return false
-	}
-	first := strings.TrimSpace(strings.Split(proto, ",")[0])
-	return strings.EqualFold(first, "https")
+	first, _, _ := strings.Cut(proto, ",")
+	return strings.EqualFold(strings.TrimSpace(first), "https")
 }
 
 func setSessionCookie(w http.ResponseWriter, r *http.Request, raw string, trustProxy bool) {
@@ -85,13 +88,25 @@ func setCSRFCookie(w http.ResponseWriter, r *http.Request, token string, trustPr
 	})
 }
 
-func clearCookie(w http.ResponseWriter, r *http.Request, name string, httpOnly, trustProxy bool) {
+func clearSessionCookie(w http.ResponseWriter, r *http.Request, trustProxy bool) {
 	http.SetCookie(w, &http.Cookie{
-		Name:     name,
+		Name:     auth.SessionCookieName,
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1,
-		HttpOnly: httpOnly,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Secure:   secureCookie(r, trustProxy),
+	})
+}
+
+func clearCSRFCookie(w http.ResponseWriter, r *http.Request, trustProxy bool) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     auth.CSRFCookieName,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: false,
 		SameSite: http.SameSiteStrictMode,
 		Secure:   secureCookie(r, trustProxy),
 	})

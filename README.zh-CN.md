@@ -78,6 +78,8 @@ go build -o /dev/null ./cmd/manager
 
 界面用 Node 22 就行（22.18 或更新，或者 Node 24.12+）。管理服务模块需要 Go 1.26，`services/manager/go.mod` 里写的就是这个版本。CI 会装它。
 
+`go test -race` 依赖 cgo，所以要有 C 工具链（`CGO_ENABLED=1`，外加 gcc 或 clang）。Windows 上没有的话，`go test ./...` 照样跑，只是少了竞态检测。管理服务会发布 linux、macOS 和 Windows 三种二进制；改动碰到文件写入、Kubo 拨号或文件权限时，必须在 Windows 上也验一遍，这三处在那边的行为不一样。
+
 ## 看一眼
 
 外壳、令牌，以及新画面要遵守的规矩，在[设计系统](docs/DESIGN-SYSTEM.zh-CN.md)。

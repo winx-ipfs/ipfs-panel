@@ -78,6 +78,8 @@ go build -o /dev/null ./cmd/manager
 
 Node 22 is enough for the UI (22.18 or newer, or Node 24.12+). The manager module needs Go 1.26, which is what `services/manager/go.mod` asks for. CI installs that version.
 
+`go test -race` needs cgo, so it needs a C toolchain (`CGO_ENABLED=1`, plus gcc or clang). On Windows without one, `go test ./...` still runs everything except the race detector. The manager ships linux, macOS, and Windows binaries; a change that touches file writes, the Kubo dialer, or file permissions has to be checked on Windows too, because those three behave differently there.
+
 ## Look
 
 The shell, the tokens, and the rules for new screens are in [Design system](docs/DESIGN-SYSTEM.md).

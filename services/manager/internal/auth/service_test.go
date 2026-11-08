@@ -214,16 +214,12 @@ func TestCredentialFileModeAndRepoGuard(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if info.Mode().Perm() != 0o600 {
-		t.Fatalf("mode %o", info.Mode().Perm())
-	}
+	requireOwnerOnly(t, info)
 	dirInfo, err := os.Stat(data)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if dirInfo.Mode().Perm() != 0o700 {
-		t.Fatalf("dir mode %o", dirInfo.Mode().Perm())
-	}
+	requireOwnerOnlyDir(t, dirInfo)
 	body, err := os.ReadFile(AuthPath(data))
 	if err != nil {
 		t.Fatal(err)

@@ -118,8 +118,8 @@ func (h *authHTTP) logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.svc.Logout(p.raw, clientIP(r, h.svc.TrustProxy()))
-	clearCookie(w, r, auth.SessionCookieName, true, h.svc.TrustProxy())
-	clearCookie(w, r, auth.CSRFCookieName, false, h.svc.TrustProxy())
+	clearSessionCookie(w, r, h.svc.TrustProxy())
+	clearCSRFCookie(w, r, h.svc.TrustProxy())
 	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(http.StatusNoContent)
 }
