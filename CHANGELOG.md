@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases are tagged from `main` only. The heading `## [X.Y.Z]` has to be in this file on the `release/X.Y.Z` or `hotfix/X.Y.Z` pull request. See [Contributing](CONTRIBUTING.md#releases).
 
-## [Unreleased]
+## [0.1.0] - 2026-11-08
+
+First tagged release. Slices 1–4 of the roadmap are in: shell and languages, node start/stop with health, files on the mutable file system, and pins.
 
 - Every doc ships as two files, one per language, with a switch at the top of each: the README, `docs/`, `CONTRIBUTING`, `GOVERNANCE`, `SECURITY`, and `SUPPORT`. `CODE_OF_CONDUCT.md` stays English, with a Chinese note.
 - Pins page for what this node is keeping. Add a pin by content ID, upload a file and pin it, pin an item from Files, and unpin. A fetch from the network is a background job with progress and cancel. A stopped node returns `503 node_not_running`.
