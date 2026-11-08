@@ -119,10 +119,14 @@ jobs:
           version: v2.15.0
           working-directory: services/manager
       - name: Require a clean lint result
-        if: steps.lint.outcome == 'failure' && steps.lint-retry.outcome == 'failure'
+        if: steps.lint.outcome == 'failure' && steps.lint-retry.outcome != 'success'
         run: |
           echo "golangci-lint failed on both attempts; see the two steps above" >&2
           exit 1
+      - name: Report a transient lint outage
+        if: steps.lint.outcome == 'failure' && steps.lint-retry.outcome == 'success'
+        run: |
+          echo "golangci-lint failed to download on the first attempt and passed on the retry; the code is clean" >> "$GITHUB_STEP_SUMMARY"
       - name: Test
         working-directory: services/manager
         run: go test -race -count=1 ./...
