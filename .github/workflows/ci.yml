@@ -104,6 +104,13 @@ jobs:
         with:
           version: v2.15.0
           working-directory: services/manager
+          # The default install mode downloads a prebuilt binary from the
+          # GitHub release assets, which returned HTTP 504 on two consecutive
+          # runs (42470476837, 42471051582) before a single linter ran.
+          # goinstall builds the pinned version from the Go module proxy
+          # instead, so a release-asset outage cannot fail the job while the
+          # action's annotations and caching still apply.
+          install-mode: goinstall
       - name: Test
         working-directory: services/manager
         run: go test -race -count=1 ./...
