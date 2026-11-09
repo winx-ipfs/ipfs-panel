@@ -46,5 +46,6 @@ __pycache__/
 /bin/
 /vendor/
 
-# Local reference material: cloned upstream sources for study, never committed
-reference/
+# Local reference material: cloned upstream sources for study, never committed.
+# Anchored to the repo root so a future docs/reference/ is not silently ignored.
+/reference/
