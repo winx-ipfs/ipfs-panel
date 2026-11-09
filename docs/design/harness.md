@@ -82,10 +82,16 @@ Two options for later, not now:
 
 Neither is worth building until the first version runs green on every platform.
 
+## History: what this replaced
+
+An earlier draft of this file recommended the opposite: run Kubo as a library in the test process, under `internal/kubotest`, with the released-binary test left opt-in. It was replaced because the thing being tested is Kubo's own `/api/v0` surface, and that compatibility promise is made about *released binaries users install*. A library import pinned at a commit tests a moving target and cannot see a release regression. The requirement for this change was that CI time is acceptable and the test must be complete, which is what settled it.
+
+If a future reader finds the in-process idea in a branch, an old review, or a draft, this section is why it is not the current design. Do not add it back as a second path: two harnesses would mean two answers to "does the manager work against Kubo".
+
 ## Not in this design
 
 - Replacing `fakeipfs`. It tests a different layer and does it correctly.
-- An in-process `github.com/ipfs/kubo` import. Rejected above; it would put a large dependency in `go.mod` to test something other than what users install.
+- An in-process `github.com/ipfs/kubo` import. Rejected in [History](#history-what-this-replaced) above; it would put a large dependency in `go.mod` to test something other than what users install.
 - Testing the gateway. The manager does not serve or configure it in slices 1–4.
 - Multi-node tests. Roadmap slice 6.
 
