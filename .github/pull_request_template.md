@@ -4,6 +4,19 @@
 
 Foundation, or roadmap slice 1–6.
 
+## Verification
+
+Required, and CI fails without it. AGENTS.md asks for three things in this order; put the commands and their real output here.
+
+1. **The product runs.** Start it, exercise the changed path, paste the output. A green suite is not this step.
+2. **The suite is green.** The exact commands from README.md.
+3. **The claim matches.** If you say a stopped node returns `node_not_running`, run it while stopped and show the response.
+
+```text
+$ <command>
+<output>
+```
+
 ## Checklist
 
 - [ ] UI copy is updated in both `en` and `zh`, or there is no UI copy change
