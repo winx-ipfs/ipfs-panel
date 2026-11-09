@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases are tagged from `main` only. The heading `## [X.Y.Z]` has to be in this file on the `release/X.Y.Z` or `hotfix/X.Y.Z` pull request. See [Contributing](CONTRIBUTING.md#releases).
 
+## [0.1.1] - 2026-11-09
+
+Two fixes that only matter for how the repository is maintained, not for the panel itself.
+
+- **Dependabot targets `develop`.** GitHub reads `.github/dependabot.yml` from the default branch, which here is `main`. The configuration on `develop` is never read, so every dependency pull request it opened targeted `main` and was rejected by `branch-policy`, which only allows `release/X.Y.Z` and `hotfix/X.Y.Z` into `main`. The three `package-ecosystem` entries now carry `target-branch: develop`.
+- **`minimatch` is pinned to 11.0.1** through an `overrides` entry. The old 10.2.6 has an attacker-controlled pattern amplification in `firstPhasePreProcess` when `optimizationLevel >= 2` (affected range `>= 7.0.0, < 11.0.1`, Dependabot alert 3). Every consumer in the tree requires `^10.x`, so npm cannot resolve the patched version on its own. This is a development dependency; nothing here reaches the shipped bundle.
+
 ## [0.1.0] - 2026-11-08
 
 First tagged release. Slices 1–4 of the roadmap are in: shell and languages, node start/stop with health, files on the mutable file system, and pins.
