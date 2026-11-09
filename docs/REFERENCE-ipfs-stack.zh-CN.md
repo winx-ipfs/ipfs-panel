@@ -28,14 +28,15 @@
 | `ipfs/ipfs-docs` | `1261c016f2b6c700e9354e46cedcdf38c9ad7b91` | 2026-09-27 | — |
 | `ipfs/specs` | `3000be69497e47c399cdb719440d0809f085388b` | 2026-09-17 | — |
 
-刷新：
+按这些确切 commit 建立或刷新克隆：
 
 ```bash
-cd reference
-for r in kubo boxo helia ipfs-docs specs; do
-  git -C "$r" fetch --depth 1 origin && git -C "$r" reset --hard origin/HEAD
-done
+.github/scripts/fetch-reference.sh
 ```
+
+脚本是幂等的：已在指定 commit 的跳过、缺失的克隆、过期的移到指定 commit。**不要**在这些目录里跑 `git reset --hard origin/HEAD`——那会移到 `master`，本文件里所有行号立刻失效。
+
+提升钉定版本是一次有意的变更：改脚本里的 commit、更新上面的表，并重新核对每条引用（见[写之前怎么验证](#写之前怎么验证)）。
 
 `git ls-remote --tags https://github.com/ipfs/kubo` 给出已发布版本。写作时最新为 `v0.43.1`（2026-09-15）。克隆的 `kubo/version.go:31` 是 `0.44.0-dev`，所以**克隆领先于发布**——永远不要拿 `master` 当测试基线。
 
@@ -118,6 +119,15 @@ Kubo 自己的 `AGENTS.md` 写明了规则，值得记住，因为它直接告�
 3. **确认克隆是不是发布版。** 对 kubo 跑 `git ls-remote --tags`。`master` 带 `-dev` 版本号。
 4. **线上格式以 spec 为准。** `reference/specs/` 的权威高于任何实现，包括 Kubo。
 5. **未核实就写"未核实"。** 一个标注过的未知，比一个自信的错误更值钱——本仓库已经纠正过三条后者。
+
+机械性的那一半由两个脚本兜住：
+
+| 脚本 | 在哪跑 | 检查什么 |
+| --- | --- | --- |
+| `.github/scripts/check-docs.sh` | CI，任何 `docs/**` 变更 | 每份文档都有 `.zh-CN` 配对、语言切换存在、相对链接可解析 |
+| `.github/scripts/check-doc-citations.sh` | 本地，需要 `reference/` | 本目录文档里每个 `file:line` 都能解析且不越界 |
+
+改完文档、或改了 `fetch-reference.sh` 里的钉定 commit 之后，跑第二个。引用指向不存在的文件、或越过文件末尾时它以非零退出——那比没有引用更糟。
 
 ## 不要从本文得出
 

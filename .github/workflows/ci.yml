@@ -31,6 +31,7 @@ jobs:
     outputs:
       web: ${{ steps.filter.outputs.web }}
       manager: ${{ steps.filter.outputs.manager }}
+      docs: ${{ steps.filter.outputs.docs }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -45,6 +46,22 @@ jobs:
             manager:
               - 'services/manager/**'
               - '.github/workflows/ci.yml'
+            docs:
+              - 'docs/**'
+              - '.github/scripts/check-docs.sh'
+
+  docs:
+    name: docs
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      # Every doc ships in English and 中文, and relative links between them
+      # resolve. Needs no network and no reference clones.
+      - name: Check bilingual pairs and links
+        run: bash .github/scripts/check-docs.sh
 
   web:
     name: web
@@ -211,6 +228,7 @@ jobs:
     if: ${{ !cancelled() }}
     needs:
       - changes
+      - docs
       - web
       - manager
       - pr-title
@@ -221,6 +239,7 @@ jobs:
       - name: Require every job to pass or skip
         env:
           CHANGES: ${{ needs.changes.result }}
+          DOCS: ${{ needs.docs.result }}
           WEB: ${{ needs.web.result }}
           MANAGER: ${{ needs.manager.result }}
           PR_TITLE: ${{ needs.pr-title.result }}
@@ -229,7 +248,7 @@ jobs:
         run: |
           set -eu
           fail=0
-          for name in CHANGES WEB MANAGER PR_TITLE BRANCH_POLICY DEPENDENCY_REVIEW; do
+          for name in CHANGES DOCS WEB MANAGER PR_TITLE BRANCH_POLICY DEPENDENCY_REVIEW; do
             value="${!name}"
             echo "$name=$value"
             case "$value" in

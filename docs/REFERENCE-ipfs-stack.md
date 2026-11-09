@@ -28,14 +28,15 @@ Cloned to `reference/` (gitignored, never committed). These exact commits are wh
 | `ipfs/ipfs-docs` | `1261c016f2b6c700e9354e46cedcdf38c9ad7b91` | 2026-09-27 | — |
 | `ipfs/specs` | `3000be69497e47c399cdb719440d0809f085388b` | 2026-09-17 | — |
 
-To refresh:
+To build or refresh the clones at exactly these commits:
 
 ```bash
-cd reference
-for r in kubo boxo helia ipfs-docs specs; do
-  git -C "$r" fetch --depth 1 origin && git -C "$r" reset --hard origin/HEAD
-done
+.github/scripts/fetch-reference.sh
 ```
+
+It is idempotent: a repo already at its pinned commit is skipped, a missing one is cloned, a stale one is moved to the pin. Do **not** run `git reset --hard origin/HEAD` in those directories — that moves to `master` and every line number in this file stops matching.
+
+Bumping a pin is a deliberate change. Move the commit in the script, update the table above, and re-check every citation (see [How to verify a claim](#how-to-verify-a-claim-before-writing-it)).
 
 `git ls-remote --tags https://github.com/ipfs/kubo` gives the released versions. At the time of writing the latest is `v0.43.1` (2026-09-15). `kubo/version.go:31` on the clone says `0.44.0-dev`, so **the clone is ahead of the release** — never use `master` as a test baseline.
 
@@ -118,6 +119,15 @@ So Helia, Kubo, and any panel talking to either are all on the same libp2p netwo
 3. **Check whether the clone is the release.** `git ls-remote --tags` for kubo. `master` carries `-dev` versions.
 4. **Prefer the spec** for anything on the wire. `reference/specs/` outranks any implementation, including Kubo.
 5. **Say "unverified" when it is unverified.** A labelled unknown is worth more than a confident error; three of those were already corrected in this repository.
+
+Two scripts enforce the mechanical half:
+
+| Script | Runs where | Checks |
+| --- | --- | --- |
+| `.github/scripts/check-docs.sh` | CI, on any `docs/**` change | every doc has a `.zh-CN` pair, the language switch is present, relative links resolve |
+| `.github/scripts/check-doc-citations.sh` | locally, needs `reference/` | every `file:line` in these docs resolves and is within the file |
+
+Run the second one after editing a doc or moving a pin in `fetch-reference.sh`. It exits non-zero when a citation points at a file that does not exist or a line past the end, which is worse than no citation.
 
 ## What not to conclude from this file
 
