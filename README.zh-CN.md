@@ -109,6 +109,9 @@ go build -o /dev/null ./cmd/manager
 - [文件](docs/design/files.zh-CN.md)
 - [固定](docs/design/pins.zh-CN.md)
 - [节点启停](docs/DESIGN-node-lifecycle.zh-CN.md)
+- [IPFS Go 技术栈：该读什么，以及什么是真的](docs/REFERENCE-ipfs-stack.zh-CN.md)
+- [Kubo 集成：进程边界还是插件](docs/design/kubo-integration.zh-CN.md)
+- [测试基线：CI 里的真实发行 Kubo](docs/design/harness.zh-CN.md)
 - [参与方式](CONTRIBUTING.zh-CN.md)（Git Flow、CI、热修）
 - [组织设置](docs/ORG-SETUP.zh-CN.md)（仓库设置清单）
 - [治理](GOVERNANCE.zh-CN.md)
