@@ -48,7 +48,27 @@ jobs:
               - '.github/workflows/ci.yml'
             docs:
               - 'docs/**'
+              - 'AGENTS.md'
+              - 'AGENTS.zh-CN.md'
               - '.github/scripts/check-docs.sh'
+
+  pr-body:
+    name: pr-body
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      # AGENTS.md requires the product to run, the suite to be green, and the
+      # printed claim to match observed behaviour. This checks the weakest part
+      # of that: the description has a Verification section with evidence in
+      # it, rather than an untouched template.
+      - name: Test the body checker
+        run: bash .github/scripts/check-pr-body.test.sh
+      - name: Require evidence in Verification
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: bash .github/scripts/check-pr-body.sh
 
   docs:
     name: docs
@@ -229,6 +249,7 @@ jobs:
     needs:
       - changes
       - docs
+      - pr-body
       - web
       - manager
       - pr-title
@@ -240,6 +261,7 @@ jobs:
         env:
           CHANGES: ${{ needs.changes.result }}
           DOCS: ${{ needs.docs.result }}
+          PR_BODY: ${{ needs.pr-body.result }}
           WEB: ${{ needs.web.result }}
           MANAGER: ${{ needs.manager.result }}
           PR_TITLE: ${{ needs.pr-title.result }}
@@ -248,7 +270,7 @@ jobs:
         run: |
           set -eu
           fail=0
-          for name in CHANGES DOCS WEB MANAGER PR_TITLE BRANCH_POLICY DEPENDENCY_REVIEW; do
+          for name in CHANGES DOCS PR_BODY WEB MANAGER PR_TITLE BRANCH_POLICY DEPENDENCY_REVIEW; do
             value="${!name}"
             echo "$name=$value"
             case "$value" in
