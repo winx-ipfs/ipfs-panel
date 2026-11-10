@@ -4,17 +4,21 @@
 
 Read this first, then `AGENTS.md`. This file is the state of the work: what shipped, what is decided, what is open, and what to do next. It is not a tutorial and not a plan; it is the answer to "what is true right now".
 
-Last updated with `develop` at `5a9a648`.
+No commit hashes in this file. They go stale the moment the pull request that updates this file is merged, so a hash here would be wrong by construction. Read the branches instead:
+
+```bash
+git log --oneline -1 origin/main origin/develop && git tag -l
+```
 
 ## Where the repository stands
 
 | | |
 | --- | --- |
-| `main` | `5105641` — the v0.1.0 release commit |
-| `develop` | `5a9a648` |
-| Latest tag | `v0.1.0` |
+| `main` | the branch that ships. Every commit on it is a release; the latest is v0.1.1 |
+| `develop` | the integration branch. Feature work lands here first |
+| Latest tag | v0.1.1 |
 | Open pull requests | none |
-| Roadmap | slices 1–4 shipped; slice 5 (scenes) not started; slice 6 (expert mode, multi-node) later |
+| Roadmap | slices 1–4 shipped in v0.1.0; slice 5 (scenes) not started; slice 6 (expert mode, multi-node) later |
 
 Shipped in v0.1.0: the panel shell in English and 中文, first-run admin setup and session login, node start/stop/restart with a one-sentence status, files on the node's mutable file system, and pins. Binaries for linux, macOS, and Windows, plus a web bundle, published as a GitHub Release with checksums.
 
@@ -34,7 +38,7 @@ Each of these needs a decision, not code.
 1. **Does the panel need the node's bitswap for anything a gateway call cannot do?** This is the question that decides whether a Kubo plugin has a feature behind it. If the answer is no, the plugin model has nothing to carry and the boundary stands. Answer it before writing plugin code.
 2. **Slice 5 (scenes) has no design yet.** `docs/ROADMAP.md` says what it is for: a named setup the panel can describe in one sentence and then write into Kubo's config. It needs a `docs/design/scenes.md` before implementation, including which config keys each scene writes, which changes need a restart, and what happens when the node is running.
 3. **The integration harness is designed but not built.** `docs/design/harness.md` specifies a CI job that downloads a released Kubo binary and runs the existing `TestRealKuboOptional` against it. Today that test skips unless a developer sets `IPFS_PANEL_INTEGRATION=1` and has `ipfs` on `PATH`, so CI never exercises the RPC surface.
-4. **Whether to release 0.1.1 for the minimatch advisory.** The fix is on `develop` (`8dc1b86`) and `main` still has the old version, so the Dependabot alert stays open. The advisory is a development dependency only; nothing reaches the shipped bundle. A `hotfix/0.1.1` was prepared and then dropped, deliberately, pending a decision on whether a patch release is worth it.
+4. **Whether Dependabot actually retargets.** v0.1.1 put `target-branch: develop` on `main`, which is the copy GitHub reads. Dependabot's own runs now show `head_branch: develop`, so it took effect. The remaining check is the next pull request it opens: if that one still targets `main`, the setting is being ignored and the alternative is to make `develop` the default branch (`docs/ORG-SETUP.md` step 3).
 
 ## Known gaps worth naming
 
