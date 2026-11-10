@@ -53,7 +53,7 @@ npm install
 npm run dev
 ```
 
-打开它打印出来的本机地址。节点卡片可以启动、停止和重启节点。文件页可以在这个节点上添加、下载、重命名、移动、复制和删除文件。固定页可以看到这个节点留着什么，可以按内容标识或文件来固定，也可以取消固定。开发服务器把 `/api` 和 `/health` 代理到 `http://127.0.0.1:8080`。单次上传默认最大 512 MiB，可以用 `-max-file-bytes` 或 `IPFS_PANEL_MAX_FILE_BYTES` 改。需要从网络获取的固定在后台跑，最长 30 分钟（`-pins-timeout` 或 `IPFS_PANEL_PINS_TIMEOUT`）。规则在[文件](docs/design/files.zh-CN.md)和[固定](docs/design/pins.zh-CN.md)。
+打开它打印出来的本机地址。节点卡片可以启动、停止和重启节点。文件页可以在这个节点上添加、下载、重命名、移动、复制和删除文件。固定页可以看到这个节点留着什么，可以按内容标识或文件来固定，也可以取消固定。探索页看一个内容标识的里面，以及这一块里的链接。开发服务器把 `/api` 和 `/health` 代理到 `http://127.0.0.1:8080`。单次上传默认最大 512 MiB，可以用 `-max-file-bytes` 或 `IPFS_PANEL_MAX_FILE_BYTES` 改。需要从网络获取的固定在后台跑，最长 30 分钟（`-pins-timeout` 或 `IPFS_PANEL_PINS_TIMEOUT`）。规则在[文件](docs/design/files.zh-CN.md)、[固定](docs/design/pins.zh-CN.md)和[探索](docs/design/explore.zh-CN.md)。
 
 和 CI 一样的界面检查：
 
@@ -108,6 +108,7 @@ go build -o /dev/null ./cmd/manager
 - [认证](docs/design/auth.zh-CN.md)
 - [文件](docs/design/files.zh-CN.md)
 - [固定](docs/design/pins.zh-CN.md)
+- [探索](docs/design/explore.zh-CN.md)
 - [节点启停](docs/DESIGN-node-lifecycle.zh-CN.md)
 - [IPFS Go 技术栈：该读什么，以及什么是真的](docs/REFERENCE-ipfs-stack.zh-CN.md)
 - [Kubo 集成：进程边界还是插件](docs/design/kubo-integration.zh-CN.md)

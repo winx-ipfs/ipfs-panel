@@ -18,7 +18,7 @@ git log --oneline -1 origin/main origin/develop && git tag -l
 | `develop` | 集成分支。功能先落这里 |
 | 最新 tag | v0.1.1 |
 | 打开的 PR | 无 |
-| 路线图 | 切片 1–4 已在 v0.1.0 发布；切片 5（场景）在这次工作之后位于 `develop`；切片 6（专家模式、多节点）更晚 |
+| 路线图 | 切片 1–4 已在 v0.1.0 发布；切片 5（场景）在 `develop`；探索在这次工作之后位于 `develop`；切片 6（专家模式、多节点）更晚 |
 
 v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与会话登录、节点启停与一句话状态、可变文件系统上的文件页、固定（pins）页。linux、macOS、Windows 三平台二进制加 web 包，作为 GitHub Release 发布并附校验和。
 
@@ -32,6 +32,7 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 - **依赖是钉定的，参考克隆也钉在确切 commit。** 表格在 `docs/REFERENCE-ipfs-stack.zh-CN.md`；`.github/scripts/fetch-reference.sh` 可复现。对照清单用的 ipfs-webui v4.13.0 也钉在那里。
 - **面板不需要节点的 bitswap。** 网关读取已经用到它，面板要做的事没有一件需要账本或进程内代码。见 `docs/design/kubo-integration.zh-CN.md`。不要做插件。
 - **场景是四种有名字的用法。** `quiet`、`share`、`pinset`、`gateway`。键、重启规则，以及只读公共网关的例外，在 `docs/design/scenes.zh-CN.md`。控制 API 保持 loopback。
+- **探索看的是一个内容标识的里面。** manager 在回环上调用 `dag/resolve` 和 `dag/get`。浏览器不去请求网关，也拿不到 RPC 地址。规格是 `docs/design/explore.zh-CN.md`。
 
 ## 还开着的事
 
@@ -39,7 +40,7 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 
 1. **集成测试基线已设计但未实现。** `docs/design/harness.zh-CN.md` 规定了一个 CI 任务：下载发行版 Kubo 二进制，用它跑现有的 `TestRealKuboOptional`。今天那个测试除非开发者设 `IPFS_PANEL_INTEGRATION=1` 且 `PATH` 上有 `ipfs`，否则跳过，**所以 CI 从未碰过 RPC 面**。
 2. **Dependabot 是否真的改道。** v0.1.1 把 `target-branch: develop` 放到了 `main` 上——那才是 GitHub 读取的那一份。Dependabot 自己的运行现在显示 `head_branch: develop`，说明生效了。剩下的检查是它下一次开的 PR：如果那个仍指向 `main`，说明设置被忽略，替代方案是把 `develop` 设为默认分支（`docs/ORG-SETUP.zh-CN.md` 第 3 步）。
-3. **和 webui 的差距还在，顺序是这些。** 探索、对等节点页（地图或表格，不只是数量）、原始配置编辑器。清单在 `docs/design/webui-parity.zh-CN.md`。不要在改场景的同一个改动里开始这些。原始编辑器是专家模式，等切片 1–5 变得没劲。
+3. **和 webui 的差距还在，顺序是这些。** 对等节点页（地图或表格，不只是数量）、原始配置编辑器。清单在 `docs/design/webui-parity.zh-CN.md`。原始编辑器是专家模式，仍然要等。不要在做对等节点页的同一个改动里开始它。
 
 ## 值得点名的缺口
 
@@ -52,10 +53,10 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 
 如果你只有一个会话且没有别的指示：
 
-1. 读 `AGENTS.zh-CN.md`，再读 `docs/design/scenes.zh-CN.md`，不要把四个场景重开一遍。
-2. 下一块要做的是 `docs/design/harness.zh-CN.md` 里的集成基线；如果目标是补齐 webui，就做探索。不要在做基线的同一个改动里加对等节点地图或原始配置编辑器。
+1. 读 `AGENTS.zh-CN.md`，再读 `docs/design/explore.zh-CN.md`，不要把探索或四个场景重开一遍。
+2. 下一块要做的是 `docs/design/harness.zh-CN.md` 里的集成基线；如果目标是补齐 webui，就做对等节点页。不要在同一个改动里加原始配置编辑器。原始编辑器仍然要等。
 
-场景已经在。bitswap 的问题已经回答。不要开始插件工作。
+场景已经在。探索已经在。bitswap 的问题已经回答。不要开始插件工作。
 
 ## 这份文件怎么保持真实
 

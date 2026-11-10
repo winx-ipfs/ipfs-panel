@@ -53,7 +53,7 @@ npm install
 npm run dev
 ```
 
-Open the printed local URL. The Node card starts, stops, and restarts the node. Files adds, downloads, renames, moves, copies, and deletes files on that node. Pins shows what this node is keeping, lets you pin a content ID or a file, and lets you unpin. The dev server proxies `/api` and `/health` to `http://127.0.0.1:8080`. The largest upload is 512 MiB unless you set `-max-file-bytes` or `IPFS_PANEL_MAX_FILE_BYTES`. A pin that has to be fetched from the network runs in the background for up to 30 minutes (`-pins-timeout` or `IPFS_PANEL_PINS_TIMEOUT`). The rules are in [Files](docs/design/files.md) and [Pins](docs/design/pins.md).
+Open the printed local URL. The Node card starts, stops, and restarts the node. Files adds, downloads, renames, moves, copies, and deletes files on that node. Pins shows what this node is keeping, lets you pin a content ID or a file, and lets you unpin. Explore looks inside a content ID and the links in that block. The dev server proxies `/api` and `/health` to `http://127.0.0.1:8080`. The largest upload is 512 MiB unless you set `-max-file-bytes` or `IPFS_PANEL_MAX_FILE_BYTES`. A pin that has to be fetched from the network runs in the background for up to 30 minutes (`-pins-timeout` or `IPFS_PANEL_PINS_TIMEOUT`). The rules are in [Files](docs/design/files.md), [Pins](docs/design/pins.md), and [Explore](docs/design/explore.md).
 
 Checks CI runs for the UI:
 
@@ -108,6 +108,7 @@ The shell, the tokens, and the rules for new screens are in [Design system](docs
 - [Auth](docs/design/auth.md)
 - [Files](docs/design/files.md)
 - [Pins](docs/design/pins.md)
+- [Explore](docs/design/explore.md)
 - [Node lifecycle](docs/DESIGN-node-lifecycle.md)
 - [The IPFS Go stack: what to read, and what is true](docs/REFERENCE-ipfs-stack.md)
 - [Kubo integration: process boundary or plugin](docs/design/kubo-integration.md)

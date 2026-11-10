@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/auth"
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/explore"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/node"
 )
 
@@ -15,14 +16,14 @@ type healthBody struct {
 
 // NewMux is the manager HTTP API.
 // GET /health reports this process only.
-// Node routes do not proxy Kubo. Files and pins routes proxy Kubo
+// Node routes do not proxy Kubo. Files, pins, and explore routes call Kubo
 // on loopback and never return that address.
 // Every /api route except setup-status, setup, and login requires a session.
 func NewMux(sup *node.Supervisor, svc *auth.Service) http.Handler {
-	return newMux(sup, svc, nil, nil)
+	return newMux(sup, svc, nil, nil, nil)
 }
 
-func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pinsHandler *pinsHTTP) http.Handler {
+func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pinsHandler *pinsHTTP, exploreHandler *exploreHTTP) http.Handler {
 	maxBytes, op, transfer := sup.FileLimits()
 	if filesHandler == nil {
 		filesHandler = &filesHTTP{
@@ -45,6 +46,11 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 		}
 	} else if pinsHandler.sup == nil {
 		pinsHandler.sup = sup
+	}
+	if exploreHandler == nil {
+		exploreHandler = &exploreHTTP{sup: sup, timeout: explore.DefaultTimeout}
+	} else if exploreHandler.sup == nil {
+		exploreHandler.sup = sup
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", health)
@@ -87,6 +93,7 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 	mux.HandleFunc("GET /api/pins/jobs", pinsHandler.jobsList)
 	mux.HandleFunc("GET /api/pins/jobs/{id}", pinsHandler.jobGet)
 	mux.HandleFunc("POST /api/pins/jobs/{id}/cancel", pinsHandler.jobCancel)
+	mux.HandleFunc("GET /api/explore", exploreHandler.get)
 	return protect(svc, mux)
 }
 

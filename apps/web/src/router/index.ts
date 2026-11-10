@@ -3,6 +3,7 @@ import { decide, type AuthPhase } from '@/auth/guard'
 import type { MessageSchema } from '@/locales/en'
 import { onUnauthorized } from '@/lib/session'
 import { useAuthStore } from '@/stores/auth'
+import ExploreView from '@/views/ExploreView.vue'
 import FilesView from '@/views/FilesView.vue'
 import PinsView from '@/views/PinsView.vue'
 import LoginView from '@/views/LoginView.vue'
@@ -23,6 +24,7 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'node', component: NodeView, meta: { titleKey: 'nodePageTitle' } },
     { path: '/files', name: 'files', component: FilesView, meta: { titleKey: 'filesTitle' } },
+    { path: '/explore', name: 'explore', component: ExploreView, meta: { titleKey: 'exploreTitle' } },
     { path: '/pins', name: 'pins', component: PinsView, meta: { titleKey: 'pinsTitle' } },
     { path: '/scenes', name: 'scenes', component: ScenesView, meta: { titleKey: 'scenesTitle' } },
     { path: '/settings', name: 'settings', component: SettingsView, meta: { titleKey: 'settingsTitle' } },

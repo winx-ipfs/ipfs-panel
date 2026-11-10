@@ -10,7 +10,7 @@ A Kubo panel a beginner can actually use, where an expert is not locked out of t
 
 Kubo runs. The happy path is still a pile of flags and one big JSON file. People get stuck on "is the node even up?" and leave.
 
-The panel puts the common jobs on one screen: is the node up, where is the file, what is pinned, which way is this node set up. The words should make sense. Both languages ship together. The home page does not open with every Kubo field on it.
+The panel puts the common jobs on one screen: is the node up, where is the file, what is pinned, what a content ID points at, which way is this node set up. The words should make sense. Both languages ship together. The home page does not open with every Kubo field on it.
 
 ## Like Baota or 1Panel, and only for Kubo
 

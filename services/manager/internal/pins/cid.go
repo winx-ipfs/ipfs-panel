@@ -31,6 +31,72 @@ func ParseTarget(raw string) (string, error) {
 	return normalizeCID(s)
 }
 
+// CIDInfo is the part of a content ID the Explore page can say out loud.
+type CIDInfo struct {
+	Version int
+	Codec   uint64
+	Hash    uint64
+}
+
+// Inspect reads the version, codec, and multihash code of a CID or /ipfs/ path.
+func Inspect(raw string) (CIDInfo, error) {
+	target, err := ParseTarget(raw)
+	if err != nil {
+		return CIDInfo{}, err
+	}
+	bin, err := cidBytes(RootCID(target))
+	if err != nil {
+		return CIDInfo{}, err
+	}
+	if cidV0(bin) {
+		return CIDInfo{Version: 0, Codec: 0x70, Hash: 0x12}, nil
+	}
+	ver, n, err := readUvarint(bin)
+	if err != nil || n == 0 {
+		return CIDInfo{}, invalidCID()
+	}
+	bin = bin[n:]
+	codec, n, err := readUvarint(bin)
+	if err != nil || n == 0 {
+		return CIDInfo{}, invalidCID()
+	}
+	bin = bin[n:]
+	hash, n, err := readUvarint(bin)
+	if err != nil || n == 0 {
+		return CIDInfo{}, invalidCID()
+	}
+	return CIDInfo{Version: int(ver), Codec: codec, Hash: hash}, nil
+}
+
+func cidBytes(cid string) ([]byte, error) {
+	if strings.HasPrefix(cid, "Qm") {
+		raw, err := decodeBase58(cid)
+		if err != nil || !cidV0(raw) {
+			return nil, invalidCID()
+		}
+		return raw, nil
+	}
+	if len(cid) < 2 {
+		return nil, invalidCID()
+	}
+	var raw []byte
+	var err error
+	switch cid[0] {
+	case 'b':
+		raw, err = decodeBase32(cid[1:])
+	case 'z':
+		raw, err = decodeBase58(cid[1:])
+	case 'f':
+		raw, err = decodeBase16(cid[1:])
+	default:
+		return nil, invalidCID()
+	}
+	if err != nil || !cidV1(raw) {
+		return nil, invalidCID()
+	}
+	return raw, nil
+}
+
 // RootCID is the CID at the start of a target. A bare CID is itself.
 func RootCID(target string) string {
 	if strings.HasPrefix(target, "/ipfs/") {

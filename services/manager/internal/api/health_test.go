@@ -85,7 +85,7 @@ func TestNotFound(t *testing.T) {
 	}
 	assertNoCORS(t, rr.Header())
 
-	for _, path := range []string{"/api/files", "/api/pins", "/api/nodes"} {
+	for _, path := range []string{"/api/files", "/api/pins", "/api/explore", "/api/nodes"} {
 		req := httptest.NewRequest(http.MethodGet, path, nil)
 		rr := httptest.NewRecorder()
 		mux.ServeHTTP(rr, req)
