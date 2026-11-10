@@ -124,9 +124,7 @@ func jsonPeers(list List) (string, error) {
 		Peers []row `json:"peers"`
 	}{Total: list.Total, Peers: make([]row, 0, len(list.Peers))}
 	for _, peer := range list.Peers {
-		out.Peers = append(out.Peers, row{
-			PeerID: peer.PeerID, Direction: peer.Direction, LatencyMs: peer.LatencyMs, Agent: peer.Agent,
-		})
+		out.Peers = append(out.Peers, row(peer))
 	}
 	buf, err := json.Marshal(out)
 	return string(buf), err
