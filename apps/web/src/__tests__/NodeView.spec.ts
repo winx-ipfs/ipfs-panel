@@ -2,6 +2,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createRouter, createMemoryHistory } from 'vue-router'
 import { createI18n } from 'vue-i18n'
 import { en } from '@/locales/en'
 import { zh } from '@/locales/zh'
@@ -19,6 +20,21 @@ function overview(patch: Partial<NodeOverview> = {}): NodeOverview {
   }
 }
 
+function plugins(locale: 'en' | 'zh' = 'en') {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', name: 'node', component: NodeView },
+      { path: '/peers', name: 'peers', component: { template: '<div />' } },
+    ],
+  })
+  return [
+    createPinia(),
+    router,
+    createI18n({ legacy: false, locale, messages: { en, zh } }),
+  ]
+}
+
 function mountCard(body: NodeOverview | null, locale: 'en' | 'zh' = 'en', fail = false) {
   const fetchMock = vi.fn().mockImplementation(() => {
     if (fail || !body) return Promise.reject(new Error('offline'))
@@ -31,12 +47,7 @@ function mountCard(body: NodeOverview | null, locale: 'en' | 'zh' = 'en', fail =
   })
   vi.stubGlobal('fetch', fetchMock)
   const wrapper = mount(NodeView, {
-    global: {
-      plugins: [
-        createPinia(),
-        createI18n({ legacy: false, locale, messages: { en, zh } }),
-      ],
-    },
+    global: { plugins: plugins(locale) },
   })
   return { wrapper, fetchMock }
 }
@@ -113,9 +124,7 @@ describe('NodeView', () => {
     vi.stubGlobal('fetch', fetchMock)
     vi.useFakeTimers()
     const wrapper = mount(NodeView, {
-      global: {
-        plugins: [createPinia(), createI18n({ legacy: false, locale: 'en', messages: { en, zh } })],
-      },
+      global: { plugins: plugins() },
     })
     await flushPromises()
     expect(wrapper.get('[role="status"]').text()).toBe('The node is running.')
@@ -175,9 +184,7 @@ describe('NodeView', () => {
       .mockImplementationOnce(() => pending)
     vi.stubGlobal('fetch', fetchMock)
     const wrapper = mount(NodeView, {
-      global: {
-        plugins: [createPinia(), createI18n({ legacy: false, locale: 'en', messages: { en, zh } })],
-      },
+      global: { plugins: plugins() },
     })
     await flushPromises()
     const pendingClick = wrapper.get('[data-node-action="start"]').trigger('click')

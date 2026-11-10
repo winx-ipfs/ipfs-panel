@@ -206,7 +206,7 @@ POST 的规则：
 卡片按这个顺序：
 
 1. 一句说明当前情况的话。
-2. `up` 时：「连接」卡片显示版本和 Peer ID。宽屏时它在状态卡片旁边，窄屏时在下面。屏幕上的 Peer ID 是缩短的。复制按钮写下的、以及辅助技术读到的，是完整值。有 `activity` 时，卡片再加上对等节点数；速率也有时，再加上入和出。节点不是 `up` 时这两项都藏起来。这张卡片不显示网关地址，也不显示 API 地址。概览里没有这两项。节点不是 `up`，或两次调用都没回答时，省略 `activity`。速率缺失表示带宽不可用（`Swarm.DisableBandwidthMetrics`，或 `core/commands/stat.go:104-106` 的报告器错误）。对等节点数是 `swarm/peers` 里不同的 peer id 个数（`core/commands/swarm.go:234`，`core/commands/swarm.go:447`）。那些行上的地址（`core/commands/swarm.go:433`）丢掉。速率是 `stats/bw` 的 `RateIn` 和 `RateOut`（`core/commands/stat.go:46-50`，`core/commands/stat.go:158`）。
+2. `up` 时：「连接」卡片显示版本和 Peer ID。宽屏时它在状态卡片旁边，窄屏时在下面。屏幕上的 Peer ID 是缩短的。复制按钮写下的、以及辅助技术读到的，是完整值。有 `activity` 时，卡片再加上对等节点数；速率也有时，再加上入和出。节点不是 `up` 时这两项都藏起来。这张卡片不显示网关地址，也不显示 API 地址。概览里没有这两项。节点不是 `up`，或两次调用都没回答时，省略 `activity`。速率缺失表示带宽不可用（`Swarm.DisableBandwidthMetrics`，或 `core/commands/stat.go:104-106` 的报告器错误）。对等节点数是 `swarm/peers` 里不同的 peer id 个数（`core/commands/swarm.go:234`，`core/commands/swarm.go:447`）。那些行上的地址（`core/commands/swarm.go:433`）丢掉。这个数量链到对等节点页。数字本身不变。速率是 `stats/bw` 的 `RateIn` 和 `RateOut`（`core/commands/stat.go:46-50`，`core/commands/stat.go:158`）。
 3. 知道 `repoPath` 时，显示节点文件夹。
 4. `error.detail` 非空时，在句子下面放一块预格式文本，标题是「详情」。
 5. 下面表格里的管理动作。某一行事实上可以有复制按钮。不要别的管理动作。

@@ -84,7 +84,7 @@ This page keeps the paste box, the breadcrumb, the kind of block, and the links.
 
 ## UI
 
-Explore sits in the nav after Files: Node, Files, Explore, Pins, Scenes, Settings.
+Explore sits in the nav after Files: Node, Files, Explore, Peers, Pins, Scenes, Settings.
 
 The page has a title, one sentence, and a closed disclosure that says a content ID names one block and that opening it does not change the node. Then a card: one field, and Explore as the only primary button. The hint says to paste a content ID or a path that starts with `/ipfs/`. An empty field does not call the manager. A value the page can already reject does not either.
 
@@ -106,7 +106,7 @@ Web: the path and link helpers, the page states in English, and the aligned loca
 
 ## Out of scope
 
-- A peers page, a raw config editor, diagnostics, and the integration harness.
+- A raw config editor, diagnostics, and the integration harness. Peers has its own spec.
 - The graph, the hex digest, featured public datasets, CAR import, and IPNS.
 - A public gateway link, or fetching any gateway from the browser.
 - Turning on `Gateway.AllowCodecConversion`.

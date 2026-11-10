@@ -5,6 +5,7 @@ import { onUnauthorized } from '@/lib/session'
 import { useAuthStore } from '@/stores/auth'
 import ExploreView from '@/views/ExploreView.vue'
 import FilesView from '@/views/FilesView.vue'
+import PeersView from '@/views/PeersView.vue'
 import PinsView from '@/views/PinsView.vue'
 import LoginView from '@/views/LoginView.vue'
 import NodeView from '@/views/NodeView.vue'
@@ -25,6 +26,7 @@ const router = createRouter({
     { path: '/', name: 'node', component: NodeView, meta: { titleKey: 'nodePageTitle' } },
     { path: '/files', name: 'files', component: FilesView, meta: { titleKey: 'filesTitle' } },
     { path: '/explore', name: 'explore', component: ExploreView, meta: { titleKey: 'exploreTitle' } },
+    { path: '/peers', name: 'peers', component: PeersView, meta: { titleKey: 'peersTitle' } },
     { path: '/pins', name: 'pins', component: PinsView, meta: { titleKey: 'pinsTitle' } },
     { path: '/scenes', name: 'scenes', component: ScenesView, meta: { titleKey: 'scenesTitle' } },
     { path: '/settings', name: 'settings', component: SettingsView, meta: { titleKey: 'settingsTitle' } },

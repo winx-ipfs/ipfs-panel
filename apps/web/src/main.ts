@@ -17,6 +17,7 @@ import './styles/shell.css'
 import './styles/auth.css'
 import './styles/files.css'
 import './styles/explore.css'
+import './styles/peers.css'
 import './styles/pins.css'
 import './styles/scenes.css'
 

@@ -106,7 +106,7 @@ func exploreMux(t *testing.T, h *exploreHTTP) http.Handler {
 		t.Fatal(err)
 	}
 	useSession(res.Session, res.CSRF)
-	return newMux(sup, svc, nil, nil, h)
+	return newMux(sup, svc, nil, nil, h, nil)
 }
 
 func upExplore(t *testing.T, apiBase string) *exploreHTTP {

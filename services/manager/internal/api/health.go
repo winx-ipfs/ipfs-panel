@@ -16,14 +16,14 @@ type healthBody struct {
 
 // NewMux is the manager HTTP API.
 // GET /health reports this process only.
-// Node routes do not proxy Kubo. Files, pins, and explore routes call Kubo
-// on loopback and never return that address.
+// Node routes do not proxy Kubo. Files, pins, explore, and peers routes call
+// Kubo on loopback and never return that address.
 // Every /api route except setup-status, setup, and login requires a session.
 func NewMux(sup *node.Supervisor, svc *auth.Service) http.Handler {
-	return newMux(sup, svc, nil, nil, nil)
+	return newMux(sup, svc, nil, nil, nil, nil)
 }
 
-func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pinsHandler *pinsHTTP, exploreHandler *exploreHTTP) http.Handler {
+func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pinsHandler *pinsHTTP, exploreHandler *exploreHTTP, peersHandler *peersHTTP) http.Handler {
 	maxBytes, op, transfer := sup.FileLimits()
 	if filesHandler == nil {
 		filesHandler = &filesHTTP{
@@ -51,6 +51,11 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 		exploreHandler = &exploreHTTP{sup: sup, timeout: explore.DefaultTimeout}
 	} else if exploreHandler.sup == nil {
 		exploreHandler.sup = sup
+	}
+	if peersHandler == nil {
+		peersHandler = &peersHTTP{sup: sup}
+	} else if peersHandler.sup == nil {
+		peersHandler.sup = sup
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", health)
@@ -94,6 +99,8 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 	mux.HandleFunc("GET /api/pins/jobs/{id}", pinsHandler.jobGet)
 	mux.HandleFunc("POST /api/pins/jobs/{id}/cancel", pinsHandler.jobCancel)
 	mux.HandleFunc("GET /api/explore", exploreHandler.get)
+	mux.HandleFunc("GET /api/peers", peersHandler.list)
+	mux.HandleFunc("POST /api/peers/connect", peersHandler.connect)
 	return protect(svc, mux)
 }
 

@@ -15,7 +15,7 @@ The panel keeps its own beginner tone ([Vision](../VISION.md)) and its own desig
 | Status `/` and `/status*` | Connected sentence, peer id, agent version, repo size, peer count, bandwidth chart and rates | **Shipped**, plus a small addition in this slice. The Node page already has the sentence, version, and peer id ([Node lifecycle](../DESIGN-node-lifecycle.md)). This slice adds the peer count and the in/out rates, and hides both while the node is stopped. Repo size, the chart, and the analytics banner stay deferred. |
 | Files `/files*`, `/ipfs*`, `/ipns*` | MFS browser: upload, folders, download, rename, delete, share link, pin, inspect, CAR import, add by path | **Shipped** for the beginner path ([Files](files.md)): add, download, rename, move, copy, delete, local link, and pin from a row. Inspect, CAR import, add-by-path, and browsing `/ipfs` or `/ipns` paths are deferred. |
 | Explore `/explore*` | IPLD explorer over the gateway | **Shipped** for the beginner path ([Explore](explore.md)): paste a content ID or an `/ipfs/` path, see the block, and open a link. The manager calls `dag/get` on loopback. The graph, the hex digest, featured public datasets, CAR import, and IPNS stay out. |
-| Peers `/peers` | World map, peer table, manual connect | **Deferred.** A peer map and a connect box are not in this pull request. The Node page shows only the count. |
+| Peers `/peers` | World map, peer table, manual connect | **Shipped** for the beginner path ([Peers](peers.md)): a table of who is connected, and a one-time dial. No map. Connected peer addresses stay off the browser. Permanent peering stays deferred with the raw editor. |
 | Pins `/pins*` | In-progress pin jobs. Not in the nav | **Shipped**, and broader than this route. [Pins](pins.md) lists what the node keeps, adds a pin, and cancels a job. |
 | Settings `/settings*` | Kubo RPC address, local gateway URL, share-link shape, IPNS keys, remote pinning services, retrieval check URL, language, analytics, CLI tutor, raw JSON editor | **Partly shipped.** Language and theme are in Settings. This slice's scenes replace the need to edit JSON for the four setups in the vision. A raw config editor, IPNS keys, remote pinning services, and an analytics toggle are deferred. The panel does not add a form for the Kubo RPC address. |
 | Settings analytics `/settings/analytics` | Analytics opt-in | **Deferred.** |
@@ -33,7 +33,11 @@ The manager calls the same two RPC commands and keeps only a count and two rates
 
 The webui fetches raw blocks from the local gateway and decodes them in the browser (`ipfs-webui/src/bundles/gateway.js:77-86`). Codec conversion on the gateway is off by default, so this panel does not ask the gateway for dag-json. The manager calls `dag/get` instead. The page, the path, and the response are in [Explore](explore.md).
 
+## What Peers keeps
+
+The webui page is a map, a table, and a connect dialog (`ipfs-webui/src/peers/PeersPage.js:39-46`). The map plots public IPs from peer multiaddrs (`ipfs-webui/src/bundles/peer-locations.js:335-337`). Those addresses are the field this panel already discards. This slice keeps the table and a one-time `swarm/connect`. It does not keep the map, the multiaddr, or the permanent `Peering.Peers` write (`ipfs-webui/src/bundles/peers.js:40-61`). The page, the path, and the response are in [Peers](peers.md).
+
 ## What stays out on purpose
 
-- The peers map, and a raw config editor. They are the remaining webui gaps. The raw editor still waits.
+- A raw config editor. It is the remaining webui gap. It still waits.
 - Any screen that gives the browser a Kubo RPC address. The webui settings page has one (`ipfs-webui/src/settings/SettingsPage.js:60`). This panel does not.

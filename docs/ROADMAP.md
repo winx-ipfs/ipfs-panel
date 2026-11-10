@@ -25,6 +25,7 @@ What is here:
 - see what the node is pinning, pin a content ID or a file, and unpin, without the command line
 - pick one of four scenes, see what it will change, apply it, and revert it, without opening Kubo's JSON
 - look inside a content ID: what the block is, and what it points at
+- see who the node is connected to, and dial one peer by an address
 
 What is not here:
 
@@ -68,11 +69,17 @@ Done when a common setup does not mean opening the JSON file. That is the curren
 
 Look inside one content ID. The spec is [Explore](design/explore.md). It is webui parity, not a new numbered slice.
 
-Done when a beginner can paste a content ID or an `/ipfs/` path, see the block, and open a link, in English and in 中文. That is the current tree. A peers page and a raw config editor are still not here. The raw editor waits.
+Done when a beginner can paste a content ID or an `/ipfs/` path, see the block, and open a link, in English and in 中文. That is the current tree.
+
+## Peers
+
+See who this node is connected to, and dial one address once. The spec is [Peers](design/peers.md). It is webui parity, not a new numbered slice.
+
+Done when a beginner can open the list, in English and in 中文, and connect by an address the page allows, without a map and without seeing another node's address. That is the current tree. The raw config editor is still not here. It waits. Permanent peering waits with it.
 
 ## 6. Expert mode, then more than one node
 
-Raw config, logs, swarm and peering. After that, more than one Kubo behind the same panel.
+Raw config, logs, and permanent peering. The peers page above is the beginner list and one dial, not this. After that, more than one Kubo behind the same panel.
 
 This waits until slices 1–5 feel dull. Dull is the goal.
 

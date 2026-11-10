@@ -196,7 +196,7 @@ Web: the four cards, the preview lines, the Chinese sentence after apply, and no
 
 ## Out of scope
 
-- Explore, a peers map, and a raw config editor. See [ipfs-webui parity](webui-parity.md).
+- A raw config editor. See [ipfs-webui parity](webui-parity.md). Explore and Peers are separate pages.
 - Choosing which folder the share scene announces. It announces MFS.
 - A public gateway that fetches arbitrary CIDs.
 - Binding the gateway to one chosen public IP.
