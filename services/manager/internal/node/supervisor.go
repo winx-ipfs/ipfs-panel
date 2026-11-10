@@ -122,7 +122,9 @@ func (s *Supervisor) FileLimits() (maxBytes int64, op, transfer time.Duration) {
 }
 
 // DataDir is the manager data directory. Pin labels live here, not in the Kubo repo.
-func (s *Supervisor) DataDir() string { return s.cfg.DataDir }
+func (s *Supervisor) DataDir() string     { return s.cfg.DataDir }
+func (s *Supervisor) RepoPath() string    { return s.cfg.RepoPath }
+func (s *Supervisor) ManagerAddr() string { return s.cfg.ManagerAddr }
 
 // PinTimeout is the deadline for one pin/add job.
 func (s *Supervisor) PinTimeout() time.Duration { return s.cfg.PinsTimeout }

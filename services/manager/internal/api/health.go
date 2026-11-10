@@ -66,6 +66,10 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 	mux.HandleFunc("POST /api/node/restart", nodes.post(func(r *http.Request) (node.Overview, error) {
 		return sup.Restart(r.Context())
 	}))
+	mux.HandleFunc("GET /api/scenes", nodes.scenesList)
+	mux.HandleFunc("GET /api/scenes/preview", nodes.scenesPreview)
+	mux.HandleFunc("POST /api/scenes/apply", nodes.scenesApply)
+	mux.HandleFunc("POST /api/scenes/revert", nodes.scenesRevert)
 	mux.HandleFunc("GET /api/files", filesHandler.list)
 	mux.HandleFunc("GET /api/files/stat", filesHandler.stat)
 	mux.HandleFunc("GET /api/files/download", filesHandler.download)

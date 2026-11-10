@@ -20,7 +20,7 @@ export function devMockFromLocation(
     down: { ...base, state: 'down' },
     starting: { ...base, state: 'starting' },
     stopping: { ...base, state: 'stopping' },
-    up: { ...base, state: 'up', peerId, version },
+    up: { ...base, state: 'up', peerId, version, activity: { peers: 12, rateIn: 1536, rateOut: 420 } },
     failed: {
       ...base,
       state: 'failed',

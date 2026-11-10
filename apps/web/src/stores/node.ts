@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { csrfHeaders } from '@/lib/csrf'
 import { notifyUnauthorized } from '@/lib/session'
-import type { NodeOverview, NodeState } from '@/node/types'
+import type { NodeActivity, NodeOverview, NodeState } from '@/node/types'
 
 const devMockEnabled = import.meta.env.DEV
 
@@ -29,7 +29,18 @@ export function parseOverview(value: unknown): NodeOverview | null {
     version: typeof body.version === 'string' ? body.version : null,
     repoPath: typeof body.repoPath === 'string' ? body.repoPath : '',
     error,
+    activity: parseActivity(body.activity),
   }
+}
+
+function parseActivity(value: unknown): NodeActivity | null {
+  if (!value || typeof value !== 'object') return null
+  const body = value as Record<string, unknown>
+  const peers = typeof body.peers === 'number' ? body.peers : null
+  const rateIn = typeof body.rateIn === 'number' ? body.rateIn : null
+  const rateOut = typeof body.rateOut === 'number' ? body.rateOut : null
+  if (peers === null && rateIn === null && rateOut === null) return null
+  return { peers, rateIn, rateOut }
 }
 
 export const useNodeStore = defineStore('node', () => {

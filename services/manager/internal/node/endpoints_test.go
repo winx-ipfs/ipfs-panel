@@ -47,6 +47,17 @@ func TestLoopbackEndpoints(t *testing.T) {
 		t.Fatal("public api accepted")
 	}
 
+	openGW := writeRepoConfig(t, `{
+		"Addresses": {
+			"API": "/ip4/127.0.0.1/tcp/5001",
+			"Gateway": ["/ip4/0.0.0.0/tcp/8081", "/ip6/::/tcp/8081"]
+		}
+	}`)
+	api, gw, err = LoopbackEndpoints(openGW)
+	if err != nil || api != "http://127.0.0.1:5001" || gw != "" {
+		t.Fatalf("public gateway api %s gateway %q err %v", api, gw, err)
+	}
+
 	noGW := writeRepoConfig(t, `{"Addresses":{"API":"/ip4/127.0.0.1/tcp/5001"}}`)
 	api, gw, err = LoopbackEndpoints(noGW)
 	if err != nil || api != "http://127.0.0.1:5001" || gw != "" {

@@ -11,6 +11,7 @@ const failedSentences: Record<string, SentenceKey> = {
   init_failed: 'nodeErrorInit',
   api_not_loopback: 'nodeErrorApiPublic',
   gateway_not_loopback: 'nodeErrorGatewayPublic',
+  gateway_not_readonly: 'nodeErrorGatewayReadonly',
   panel_port_conflict: 'nodeErrorPanelPort',
   port_in_use: 'nodeErrorPortInUse',
   repo_busy: 'nodeErrorRepoBusy',

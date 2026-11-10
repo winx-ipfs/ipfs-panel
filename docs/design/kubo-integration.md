@@ -2,7 +2,7 @@
 
 **English** · [中文](kubo-integration.zh-CN.md)
 
-**Status: decision required.** No code. This file compares the two ways the panel can sit next to Kubo, states what each costs, and recommends one. The recommendation is not yet applied; the current tree implements the first model.
+**Status: decided.** The panel stays on the process boundary. This file compares the two ways the panel can sit next to Kubo. The bitswap question below is answered. Do not start plugin work.
 
 Every claim carries its evidence. Sources are cloned under `reference/` at the commits listed in [REFERENCE-ipfs-stack](../REFERENCE-ipfs-stack.md).
 
@@ -92,8 +92,14 @@ Keep model 1 as the product, and add a small `PluginDaemon` adapter later only i
 
 If a future feature genuinely needs in-process access, the narrowest form is a `PluginDaemon` that hands the panel a handle, not an `PluginFx` that rewires the graph, and not a `PluginDaemonInternal`.
 
+## The bitswap question, answered
+
+No. A gateway read is served by the node's blockservice (`core/node/core.go:38-40`), and that service's exchange is the node's bitswap when bitswap is enabled (`core/node/bitswap.go:208-220`); `Gateway.NoFetch` swaps in an offline exchange instead (`core/corehttp/gateway.go:160-161`). The panel's jobs are Kubo RPC or a config write, and none of them needs the bitswap ledger, the wantlist, or code inside the Kubo process, so the plugin model still has no feature behind it.
+
+Scenes write the config file. They do not call bitswap. See [Scenes](scenes.md).
+
 ## Open questions
 
-- **Does the panel need the node's bitswap for anything a gateway call cannot do?** If not, model 2 has no feature behind it yet.
+- **Does the panel need the node's bitswap for anything a gateway call cannot do?** No. Answered above. Model 2 still has no feature behind it.
 - **Would a Windows preloaded plugin mean shipping our own Kubo build?** Yes, and that needs an answer on who updates it and how it is verified.
 - **Does a plugin change the auth model?** A plugin cannot be reached over HTTP by the browser directly, so `docs/design/auth.md` still applies to whatever the panel exposes; but the plugin itself runs unsandboxed. That needs writing down before any plugin code lands.

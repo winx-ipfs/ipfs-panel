@@ -2,12 +2,15 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"mime"
 	"net/http"
+	"time"
 
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/activity"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/node"
 )
 
@@ -33,7 +36,24 @@ func (n *nodeAPI) get(w http.ResponseWriter, r *http.Request) {
 		writeProblem(w, &statusError{code: http.StatusInternalServerError, msg: "unavailable"})
 		return
 	}
+	if ov.State == node.StateUp {
+		ov.Activity = n.readActivity(r.Context(), ov.RepoPath)
+	}
 	writeOverview(w, ov)
+}
+
+func (n *nodeAPI) readActivity(ctx context.Context, repo string) *node.Activity {
+	apiBase, _, err := node.LoopbackEndpoints(repo)
+	if err != nil || apiBase == "" {
+		return nil
+	}
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	act, err := activity.Fetch(ctx, apiBase)
+	if err != nil {
+		return nil
+	}
+	return act
 }
 
 func (n *nodeAPI) post(fn func(r *http.Request) (node.Overview, error)) http.HandlerFunc {

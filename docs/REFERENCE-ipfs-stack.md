@@ -27,6 +27,7 @@ Cloned to `reference/` (gitignored, never committed). These exact commits are wh
 | `ipfs/helia` | `cba1ed69b4369924790d9eccdb8c9089435f4f20` | 2026-09-29 | Apache-2.0 + MIT |
 | `ipfs/ipfs-docs` | `1261c016f2b6c700e9354e46cedcdf38c9ad7b91` | 2026-09-27 | — |
 | `ipfs/specs` | `3000be69497e47c399cdb719440d0809f085388b` | 2026-09-17 | — |
+| `ipfs/ipfs-webui` | `c51d980920d60e9d41f53f461886d6e1ea046298` | 2026-07-16 | MIT |
 
 To build or refresh the clones at exactly these commits:
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { FolderOpen, LayoutGrid, Pin, Server, Settings } from '@lucide/vue'
-import { computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import BrandMark from '@/components/BrandMark.vue'
@@ -16,8 +15,6 @@ async function logout() {
   await auth.logout()
   await router.push({ name: 'login' })
 }
-
-const later = computed(() => [{ to: '/scenes', label: t('navScenes'), icon: LayoutGrid }])
 
 function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
   navigate(event)
@@ -72,18 +69,16 @@ function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
         <span class="nav-text">{{ t('navPins') }}</span>
       </a>
     </RouterLink>
-    <p class="nav-label">{{ t('navLater') }}</p>
-    <RouterLink v-for="item in later" :key="item.to" v-slot="{ href, navigate, isActive }" :to="item.to" custom>
+    <RouterLink v-slot="{ href, navigate, isActive }" to="/scenes" custom>
       <a
         :href="href"
-        class="nav-link is-later"
+        class="nav-link"
         :class="{ active: isActive }"
-        aria-disabled="true"
         :aria-current="isActive ? 'page' : undefined"
         @click="go(navigate, $event)"
       >
-        <component :is="item.icon" :size="18" :stroke-width="1.75" aria-hidden="true" />
-        <span class="nav-text">{{ item.label }}</span>
+        <LayoutGrid :size="18" :stroke-width="1.75" aria-hidden="true" />
+        <span class="nav-text">{{ t('navScenes') }}</span>
       </a>
     </RouterLink>
     <RouterLink v-slot="{ href, navigate, isActive }" to="/settings" custom>

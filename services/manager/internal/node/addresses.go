@@ -9,6 +9,12 @@ import (
 	"strings"
 )
 
+// GatewayListenPort is the gateway port the panel chose for this manager
+// address: 8081, or 8082 when the manager is already on 8081.
+func GatewayListenPort(managerAddr string) int {
+	return gatewayPort(managerAddr)
+}
+
 func gatewayPort(managerAddr string) int {
 	port, err := managerPort(managerAddr)
 	if err == nil && port == 8081 {
@@ -117,13 +123,22 @@ type addressDoc struct {
 	Gateway json.RawMessage `json:"Gateway"`
 }
 
-func validateAddressDoc(doc addressDoc, managerAddr string) *codedError {
+// gatewayFlags is the read-only public gateway allowance.
+// routingOff is true only when ExposeRoutingAPI is explicitly false.
+type gatewayFlags struct {
+	known      bool
+	noFetch    bool
+	noDNSLink  bool
+	routingOff bool
+}
+
+func validateAddressDoc(doc addressDoc, flags gatewayFlags, managerAddr string) *codedError {
 	_, api, err := addressValues(doc.API)
 	if err != nil || !allLoopback(api) {
 		return codeErr(CodeAPINotLoopback, "API address is not loopback")
 	}
 	_, gw, err := addressValues(doc.Gateway)
-	if err != nil || !allLoopback(gw) {
+	if err != nil {
 		return codeErr(CodeGatewayNotLoopback, "gateway address is not loopback")
 	}
 	port, err := managerPort(managerAddr)
@@ -132,6 +147,94 @@ func validateAddressDoc(doc addressDoc, managerAddr string) *codedError {
 	}
 	if usesPort(api, port) || usesPort(gw, port) {
 		return codeErr(CodePanelPortConflict, "API or gateway uses the manager port")
+	}
+	if allLoopback(gw) {
+		return nil
+	}
+	if publicGatewayShape(gw, GatewayListenPort(managerAddr)) {
+		if flags.known && flags.noFetch && flags.noDNSLink && flags.routingOff {
+			return nil
+		}
+		return codeErr(CodeGatewayNotReadonly, "public gateway is not read-only")
+	}
+	return codeErr(CodeGatewayNotLoopback, "gateway address is not loopback")
+}
+
+func publicGatewayShape(addrs []string, port int) bool {
+	if len(addrs) == 0 {
+		return false
+	}
+	saw := false
+	for _, addr := range addrs {
+		if isLoopback(addr) {
+			continue
+		}
+		if addr != fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port) && addr != fmt.Sprintf("/ip6/::/tcp/%d", port) {
+			return false
+		}
+		saw = true
+	}
+	return saw
+}
+
+func flagsFromConfig(data []byte) gatewayFlags {
+	var root map[string]json.RawMessage
+	if err := json.Unmarshal(data, &root); err != nil {
+		return gatewayFlags{}
+	}
+	raw := bytes.TrimSpace(root["Gateway"])
+	if len(raw) == 0 || raw[0] != '{' {
+		return gatewayFlags{}
+	}
+	var gw struct {
+		NoFetch          *bool `json:"NoFetch"`
+		NoDNSLink        *bool `json:"NoDNSLink"`
+		ExposeRoutingAPI *bool `json:"ExposeRoutingAPI"`
+	}
+	if err := json.Unmarshal(raw, &gw); err != nil {
+		return gatewayFlags{}
+	}
+	flags := gatewayFlags{known: true}
+	if gw.NoFetch != nil {
+		flags.noFetch = *gw.NoFetch
+	}
+	if gw.NoDNSLink != nil {
+		flags.noDNSLink = *gw.NoDNSLink
+	}
+	if gw.ExposeRoutingAPI != nil && !*gw.ExposeRoutingAPI {
+		flags.routingOff = true
+	}
+	return flags
+}
+
+// ConfigError is a stable code from checking a Kubo config file.
+type ConfigError struct {
+	Code   string
+	Detail string
+}
+
+func (e *ConfigError) Error() string {
+	if e == nil {
+		return ""
+	}
+	if e.Detail == "" {
+		return e.Code
+	}
+	return e.Code + ": " + e.Detail
+}
+
+// AssessConfig reports whether the panel is willing to start a daemon with
+// this config file. The API must be loopback. A public gateway is allowed
+// only in the read-only shape from the scenes spec.
+func AssessConfig(data []byte, managerAddr string) error {
+	var root struct {
+		Addresses addressDoc `json:"Addresses"`
+	}
+	if err := json.Unmarshal(data, &root); err != nil {
+		return &ConfigError{Code: CodeUnknown, Detail: "config is not JSON"}
+	}
+	if err := validateAddressDoc(root.Addresses, flagsFromConfig(data), managerAddr); err != nil {
+		return &ConfigError{Code: err.code, Detail: err.detail}
 	}
 	return nil
 }

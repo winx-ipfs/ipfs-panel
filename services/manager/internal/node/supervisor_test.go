@@ -360,7 +360,7 @@ func TestRefuseUnsafeAddresses(t *testing.T) {
 	}{
 		{"public api", "/ip4/0.0.0.0/tcp/5001", []string{"/ip4/127.0.0.1/tcp/8081"}, CodeAPINotLoopback},
 		{"not exactly loopback", "/ip4/127.0.0.2/tcp/5001", []string{"/ip4/127.0.0.1/tcp/8081"}, CodeAPINotLoopback},
-		{"public gateway", "/ip4/127.0.0.1/tcp/5001", []string{"/ip4/0.0.0.0/tcp/8081"}, CodeGatewayNotLoopback},
+		{"public gateway", "/ip4/127.0.0.1/tcp/5001", []string{"/ip4/0.0.0.0/tcp/8081"}, CodeGatewayNotReadonly},
 		{"manager port", "/ip4/127.0.0.1/tcp/8080", []string{"/ip4/127.0.0.1/tcp/8081"}, CodePanelPortConflict},
 	}
 	for _, tc := range cases {
@@ -381,6 +381,27 @@ func TestRefuseUnsafeAddresses(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestReadonlyPublicGatewayStarts(t *testing.T) {
+	sup, repo, logPath := newTestSupervisor(t, nil)
+	body := []byte(`{
+		"Addresses": {
+			"API": "/ip4/127.0.0.1/tcp/5001",
+			"Gateway": ["/ip4/0.0.0.0/tcp/8081", "/ip6/::/tcp/8081"],
+			"Swarm": ["/ip4/0.0.0.0/tcp/4001"]
+		},
+		"Gateway": {"NoFetch": true, "NoDNSLink": true, "ExposeRoutingAPI": false}
+	}`)
+	if err := os.WriteFile(filepath.Join(repo, "config"), body, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	mustStart(t, sup)
+	waitState(t, sup, StateUp)
+	if countCmd(readLog(t, logPath), "daemon") != 1 {
+		t.Fatal("daemon did not start")
+	}
+	assertNoLeak(t, waitState(t, sup, StateUp))
 }
 
 func TestLoopbackIPv6Starts(t *testing.T) {

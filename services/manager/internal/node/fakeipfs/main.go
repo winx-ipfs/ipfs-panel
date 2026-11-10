@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -59,6 +60,19 @@ func loadConfig(repo string) (repoConfig, error) {
 	b, err := os.ReadFile(configPath(repo))
 	if err != nil {
 		return repoConfig{}, err
+	}
+	var probe map[string]json.RawMessage
+	if err := json.Unmarshal(b, &probe); err != nil {
+		return repoConfig{}, err
+	}
+	// A full Kubo config keeps addresses under Addresses. The lifecycle
+	// tests still write the addresses object itself.
+	if raw := bytes.TrimSpace(probe["Addresses"]); len(raw) > 0 && raw[0] == '{' {
+		var cfg repoConfig
+		if err := json.Unmarshal(raw, &cfg); err != nil {
+			return repoConfig{}, err
+		}
+		return cfg, nil
 	}
 	var cfg repoConfig
 	if err := json.Unmarshal(b, &cfg); err != nil {

@@ -31,9 +31,15 @@ docs = [
     "docs/design/harness.zh-CN.md",
     "docs/design/kubo-integration.md",
     "docs/design/kubo-integration.zh-CN.md",
+    "docs/design/scenes.md",
+    "docs/design/scenes.zh-CN.md",
+    "docs/design/webui-parity.md",
+    "docs/design/webui-parity.zh-CN.md",
+    "docs/DESIGN-node-lifecycle.md",
+    "docs/DESIGN-node-lifecycle.zh-CN.md",
 ]
 # file.ext:LINE or file.ext:START-END
-cite = re.compile(r'([\w./-]+\.(?:go|md|sh|ts|json|yml))\s*:\s*(\d+)(?:-(\d+))?')
+cite = re.compile(r'([\w./-]+\.(?:go|md|sh|tsx|ts|jsx|js|json|yml))\s*:\s*(\d+)(?:-(\d+))?')
 
 
 def resolve(path):

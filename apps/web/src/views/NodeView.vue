@@ -11,6 +11,7 @@ import Skeleton from '@/components/Skeleton.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import Table from '@/components/Table.vue'
 import Tooltip from '@/components/Tooltip.vue'
+import { formatBytes } from '@/files/model'
 import { shortenMiddle } from '@/lib/inline'
 import { hintKey, sentenceKey, statusLabelKey, statusTone, visibleActions } from '@/node/present'
 import { useNodeStore } from '@/stores/node'
@@ -55,6 +56,10 @@ const detail = computed(() => node.overview?.error?.detail ?? '')
 const folderParts = computed(() => (node.overview?.repoPath ?? '').split('/'))
 const showVersion = computed(() => node.overview?.state === 'up' && !!node.overview.version)
 const showPeer = computed(() => node.overview?.state === 'up' && !!node.overview.peerId)
+const peers = computed(() => (connected.value ? node.overview?.activity?.peers ?? null : null))
+const rateIn = computed(() => (connected.value ? node.overview?.activity?.rateIn ?? null : null))
+const rateOut = computed(() => (connected.value ? node.overview?.activity?.rateOut ?? null : null))
+const showTraffic = computed(() => rateIn.value !== null && rateOut.value !== null)
 const pulsing = computed(
   () => !node.unreachable && (node.overview?.state === 'starting' || node.overview?.state === 'stopping'),
 )
@@ -228,6 +233,17 @@ async function copy(kind: string, value: string | null | undefined) {
               </div>
               <p class="peer-hint">{{ t('peerHint') }}</p>
             </dd>
+          </div>
+          <div v-if="peers !== null">
+            <dt>{{ t('nodePeers') }}</dt>
+            <dd>
+              <span class="mono">{{ peers }}</span>
+              <p class="peer-hint">{{ t('nodePeersHint') }}</p>
+            </dd>
+          </div>
+          <div v-if="showTraffic">
+            <dt>{{ t('nodeTraffic') }}</dt>
+            <dd>{{ t('nodeTrafficIn') }} {{ formatBytes(rateIn ?? 0) }}/s · {{ t('nodeTrafficOut') }} {{ formatBytes(rateOut ?? 0) }}/s</dd>
           </div>
         </dl>
       </Card>

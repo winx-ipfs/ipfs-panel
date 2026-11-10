@@ -97,7 +97,7 @@ func decodeOverview(t *testing.T, rr *httptest.ResponseRecorder) map[string]any 
 	}
 	for key := range body {
 		switch key {
-		case "state", "peerId", "version", "repoPath", "error":
+		case "state", "peerId", "version", "repoPath", "error", "activity":
 		default:
 			t.Fatalf("unexpected key %s in %s", key, rr.Body.Bytes())
 		}

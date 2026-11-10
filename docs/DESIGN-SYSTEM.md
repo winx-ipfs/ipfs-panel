@@ -150,14 +150,14 @@ Rules:
 - Do not ellipsize a sentence, a button label, a peer id, a path, or an error. Wrapping is the layout. A long detail block may scroll inside its well. The text is still in the page.
 - Folder paths get a break opportunity after each `/`. Peer ids have no breaks in them, so they wrap anywhere.
 - Buttons may grow and wrap onto a second line. Do not fix their width in `ch` of the English word. Chinese labels are often shorter. English hints are often longer. The column is `min(760px, 100%)` so neither language has a line that runs the full desktop.
-- The sidebar labels wrap instead of clipping. Scenes sits under "Coming soon" / "即将推出", at lower opacity, with `aria-disabled`. It has no badge. Files and Pins are normal items.
+- The sidebar labels wrap instead of clipping. Node, Files, Pins, and Scenes are normal items.
 
 ## Shell
 
 - Sidebar from 880px up. Below that, a menu button opens the drawer.
 - Top bar: English / 中文, and a theme button. The button cycles light, dark, and match-device. Its icon and, from 720px up, its label show the current mode. The accessible name and the tooltip say the same mode. Both choices persist in `localStorage` (`ipfs-panel.lang`, `ipfs-panel.theme`). The theme is applied from a small script in `index.html` before paint, so the first frame is not the wrong theme.
 - From 1200px the node page is two columns. The status card is on the left. On the right, while the node is up, a Connection card shows the version and a shortened peer id. The copy button copies the full peer id. The overview does not include a gateway address or an API address, so the card does not invent them. Otherwise the right card explains what a node is and links to the IPFS docs.
-- Nav: Node, Files, Pins, then Later (Scenes), then Settings. Files and Pins are real pages. Scenes stays under "Coming soon". Expert mode is not a nav item.
+- Nav: Node, Files, Pins, Scenes, then Settings. Files, Pins, and Scenes are real pages. Expert mode is not a nav item.
 - `winx.run` sits in the sidebar footer. It opens in a new tab. It is the portal, labeled as such.
 
 Dev-only, the node page reads `?mock=` when `import.meta.env.DEV` is true: `down`, `starting`, `up`, `stopping`, `failed`, or `unreachable`. The production bundle does not include those fixtures. The Vite proxy to the manager is unchanged.
@@ -170,7 +170,7 @@ From `apps/web`, after `npx playwright install chromium`:
 npm run shots
 ```
 
-That writes the node page in all five states, the files page (list, empty, uploading, delete dialog, node stopped), the pins page (list, add dialog with a validation error, a job in progress, empty), the setup screen, the login screen with an error, and the settings password form, light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture. The files page uses `?files=`. The pins page uses `?pins=`.
+That writes the node page in all five states, the files page (list, empty, uploading, delete dialog, node stopped), the pins page (list, add dialog with a validation error, a job in progress, empty), the scenes page (list, preview, applied), the setup screen, the login screen with an error, and the settings password form, light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture. The files page uses `?files=`. The pins page uses `?pins=`. The scenes page uses `?scenes=`.
 
 This is not a CI job. A Chromium install and the machine's CJK fonts make a pixel run slow and easy to flake, and `ci-ok` should stay the fast check. The unit tests still cover the sentences, the manager actions, and the form controls. Re-run `npm run shots` when the shell or the node card changes, and look at the pictures.
 
