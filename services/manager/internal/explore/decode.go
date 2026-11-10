@@ -88,8 +88,8 @@ func interpret(info pins.CIDInfo, body []byte, focus string) (Block, error) {
 		Focus:   focus,
 		Links:   []Link{},
 	}
-	switch {
-	case codec == "raw":
+	switch codec {
+	case "raw":
 		raw, ok := asBytes(value)
 		if !ok {
 			block.Kind = "bytes"
@@ -100,7 +100,7 @@ func interpret(info pins.CIDInfo, body []byte, focus string) (Block, error) {
 		block.Size = &n
 		block.Text = previewText(raw)
 		return block, nil
-	case codec == "dag-pb":
+	case "dag-pb":
 		return fillPB(block, value), nil
 	default:
 		if codec == "unknown" {
