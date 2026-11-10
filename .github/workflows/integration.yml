@@ -1,0 +1,59 @@
+# Released-Kubo harness. Called from CI. Not its own required check.
+#
+# ci-ok is the only required status check, because a skipped required check
+# blocks merges. This workflow is workflow_call so the integration job is a
+# needs: of ci-ok. It runs only when that job's if is true: a pull request
+# into develop. Push, and a pull request into main, skip the caller, and
+# ci-ok treats that skip as success. See docs/design/harness.md.
+
+name: Integration
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  kubo:
+    name: kubo
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Test the checksum gate
+        run: bash .github/scripts/fetch-kubo.test.sh
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: services/manager/go.mod
+          cache: true
+      - name: Download pinned Kubo
+        id: kubo
+        run: |
+          set -eu
+          dest="${RUNNER_TEMP}/kubo"
+          bin_dir="$(bash .github/scripts/fetch-kubo.sh "$dest")"
+          version="$(cat "$dest/kubo-version")"
+          echo "bin_dir=${bin_dir}" >> "$GITHUB_OUTPUT"
+          echo "IPFS_PANEL_KUBO_VERSION=${version}" >> "$GITHUB_ENV"
+          echo "${bin_dir}" >> "$GITHUB_PATH"
+          "${bin_dir}/ipfs" version
+      - name: Run the real Kubo integration test
+        working-directory: services/manager
+        env:
+          IPFS_PANEL_INTEGRATION: "1"
+        run: |
+          set -eu
+          log="${RUNNER_TEMP}/kubo-integration.txt"
+          set -o pipefail
+          go test -count=1 -timeout 15m -v -run 'TestRealKubo' ./internal/node/ | tee "$log"
+          if grep -q -- '--- SKIP:' "$log"; then
+            echo "integration test skipped; the harness must run"
+            exit 1
+          fi
+          if ! grep -q -- '--- PASS: TestRealKuboOptional' "$log"; then
+            echo "TestRealKuboOptional did not pass"
+            exit 1
+          fi

@@ -94,7 +94,7 @@ The Release workflow does not parse the merge commit message. It reads the merge
 - **Require branches to be up to date before merging:** On
 - Add exactly one check: `ci-ok`
   - The picker may show `CI / ci-ok`. That is the same job. Add that one if `ci-ok` alone is not listed.
-  - Do not add `web`, `manager`, `changes`, `pr-title`, `branch-policy`, or `dependency-review`. Those skip on some events. A skipped required check blocks the merge.
+  - Do not add `web`, `manager`, `changes`, `docs`, `pr-body`, `pr-title`, `branch-policy`, `dependency-review`, or `integration`. Those skip on some events. `integration` runs only on a pull request into `develop`. A skipped required check blocks the merge.
   - Do not add `codeql-go`, `codeql-javascript`, `release`, `nightly-artifacts`, or `sync-labels`.
   - Do not add `web typecheck and build`. That job no longer exists.
   - Source of the check: any source. Do not pin an app until you mean to.
@@ -215,7 +215,7 @@ Require `ci-ok` only.
 | Workflow | Job name | Required |
 | --- | --- | --- |
 | CI | `ci-ok` | Yes |
-| CI | `changes`, `web`, `manager`, `pr-title`, `branch-policy`, `dependency-review` | No. They feed `ci-ok`. |
+| CI | `changes`, `docs`, `pr-body`, `web`, `manager`, `pr-title`, `branch-policy`, `dependency-review`, `integration` | No. They feed `ci-ok`. |
 | CodeQL | `codeql-go`, `codeql-javascript` | No |
 | Release | `release` | No. It runs after the merge to `main`, or on a tag push. |
 | Nightly | `nightly-artifacts` | No |

@@ -181,15 +181,18 @@ go run ./cmd/manager
 
 | 任务 | 什么时候跑 |
 | --- | --- |
-| `changes` | 总是跑。判断 web 或 manager 的文件有没有变。 |
+| `changes` | 总是跑。判断 web、manager 或文档有没有变。 |
+| `docs` | `docs/**`、`AGENTS.md` 或文档检查脚本变了。双语配对和相对链接。 |
+| `pr-body` | pull request。Verification 一节里有证据。 |
 | `web` | `apps/web/**` 或 CI 工作流变了。`npm ci`、lint、类型检查、vitest、生产构建。 |
 | `manager` | `services/manager/**` 或 CI 工作流变了。`gofmt`、`go vet`、`golangci-lint`、`go test -race`、`go build`。 |
 | `pr-title` | pull request。检查 Conventional Commits 标题。 |
 | `branch-policy` | pull request。上面的 Git Flow 规则，外加脚本自己的测试。 |
 | `dependency-review` | pull request。依赖图打开之后，新引入高危或严重漏洞时失败。图还没开时，它记下这一点并保持绿色。 |
+| `integration` | 指向 `develop` 的 pull request。下载钉定的 Kubo v0.43.1，核对官方 sha512，跑 `TestRealKuboOptional`。跳过即失败。其他事件上这个任务跳过。 |
 | `ci-ok` | 除非这次运行被取消，否则总是跑。上面每个任务成功或被跳过时，它才通过。 |
 
-分支保护只要求 **`ci-ok`**。其他名字在有些事件上会被跳过。把一个会被跳过的检查设为必须，合并会被卡住。不要把 `web` 或 `manager` 单独设为必须。
+分支保护只要求 **`ci-ok`**。其他名字在有些事件上会被跳过。把一个会被跳过的检查设为必须，合并会被卡住。不要把 `web`、`manager` 或 `integration` 单独设为必须。
 
 其他工作流，不作为必须检查：
 

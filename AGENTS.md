@@ -49,7 +49,7 @@ Critical paths need a human decision before you proceed: anything that publishes
 | --- | --- |
 | Manager, unit | `cd services/manager && go test ./...` |
 | Manager, race (needs cgo) | `CGO_ENABLED=1 go test -race -count=1 ./...` |
-| Manager, released-binary integration | see [docs/design/harness.md](docs/design/harness.md) — not wired into CI yet |
+| Manager, released-binary integration | `IPFS_PANEL_INTEGRATION=1` and `ipfs` on `PATH`, then `cd services/manager && go test -count=1 -run TestRealKubo ./internal/node/`. CI does this on pull requests into `develop` with the pin in [docs/design/harness.md](docs/design/harness.md). Without the env var or the binary, the test skips. |
 | Web | `cd apps/web && npm run lint && npm run typecheck && npm test && npm run build-only` |
 | Docs | `.github/scripts/check-docs.sh` |
 | Doc citations | `.github/scripts/check-doc-citations.sh` (needs `reference/`) |

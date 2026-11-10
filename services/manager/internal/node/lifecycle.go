@@ -193,6 +193,20 @@ func (s *Supervisor) readAddresses(ctx context.Context, bin string) (addressDoc,
 	return doc, nil
 }
 
+func daemonAPIFile(repo string) bool {
+	f, err := os.Open(filepath.Join(repo, "api"))
+	if err != nil {
+		return false
+	}
+	defer func() { _ = f.Close() }()
+	var buf [64]byte
+	n, err := f.Read(buf[:])
+	if err != nil && n == 0 {
+		return false
+	}
+	return len(strings.TrimSpace(string(buf[:n]))) > 0
+}
+
 func (s *Supervisor) ipfsID(ctx context.Context, bin string) (string, string, error) {
 	res := run(ctx, bin, []string{"id"}, s.cfg.RepoPath)
 	if res.err != nil {
@@ -238,6 +252,19 @@ func (s *Supervisor) waitReady(ctx context.Context, gen uint64, bin string, chil
 			}
 			s.fail(ctx, gen, codeErr(CodeHealthTimeout, detail))
 			return
+		}
+		// Kubo writes <repo>/api when the HTTP API is listening. Until that
+		// file exists, `ipfs id` opens the repo and takes repo.lock, and the
+		// daemon exits because the lock is held. The node is not up until
+		// ipfs id itself succeeds; this only skips the calls that would
+		// steal the lock.
+		if !daemonAPIFile(s.cfg.RepoPath) {
+			select {
+			case <-ctx.Done():
+			case <-child.done:
+			case <-time.After(s.cfg.PollInterval):
+			}
+			continue
 		}
 		idCtx, cancel := context.WithTimeout(ctx, s.cfg.IDTimeout)
 		peer, version, err := s.ipfsID(idCtx, bin)

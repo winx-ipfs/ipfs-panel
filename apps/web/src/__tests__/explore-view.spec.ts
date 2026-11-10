@@ -26,6 +26,12 @@ async function mountExplore(query?: Record<string, string>) {
   const wrapper = mount(ExploreView, {
     global: { plugins: [pinia, router, i18n] },
   })
+  // openRoute awaits this import before it looks anything up. Two
+  // flushPromises do not wait for that load, so a slow import leaves the
+  // page on the empty start state. Files and pins already wait for theirs.
+  await import('@/dev/mockExplore')
+  await flushPromises()
+  await flushPromises()
   return { wrapper, router, i18n }
 }
 
@@ -39,7 +45,6 @@ describe('ExploreView', () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
     const { wrapper } = await mountExplore()
-    await flushPromises()
     expect(wrapper.text()).toContain('Nothing is open yet')
     expect(wrapper.text()).toContain('Explore')
     expect(wrapper.text()).not.toContain('5001')
@@ -66,8 +71,6 @@ describe('ExploreView', () => {
       headers: { 'Content-Type': 'application/json' },
     }))))
     const { wrapper } = await mountExplore({ target: cid })
-    await flushPromises()
-    await flushPromises()
     expect(wrapper.text()).toContain('Folder')
     expect(wrapper.text()).toContain('notes.txt')
     expect(wrapper.text()).toContain('会议记录.txt')
@@ -92,8 +95,6 @@ describe('ExploreView', () => {
       headers: { 'Content-Type': 'application/json' },
     }))))
     const { wrapper } = await mountExplore({ target: cid })
-    await flushPromises()
-    await flushPromises()
     expect(wrapper.text()).toContain('The node could not find that')
     expect(wrapper.text()).not.toContain('5001')
     wrapper.unmount()

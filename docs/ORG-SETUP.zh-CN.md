@@ -97,7 +97,7 @@ Release 工作流不解析合并提交的说明。它从 API 读取已合并的 
   - **后果，而且不明显：** 开了这条，pull request 必须包含目标分支上已有的每一个提交。`develop` 通常有 `main` 没有的提交，所以「头是 `main`、目标是 `develop`」的 pull request 永远更新不到最新，也就永远合不了。这就是 [参与方式](../CONTRIBUTING.zh-CN.md#发行) 第 6 步改成用 `chore/back-merge-X.Y.Z` 分支搬运回并内容的原因。给 `develop` 关掉这条能让「头是 `main`」那条路走通；之所以开着，是因为关掉等于默许合入一个缺少目标分支提交的分支。
 - 只加一个检查：`ci-ok`
   - 选择器里可能显示 `CI / ci-ok`。那是同一个任务。如果单独搜不到 `ci-ok`，就加那一个。
-  - 不要加 `web`、`manager`、`changes`、`pr-title`、`branch-policy` 或 `dependency-review`。它们在有些事件上会被跳过。一个被跳过的必须检查会挡住合并。
+  - 不要加 `web`、`manager`、`changes`、`docs`、`pr-body`、`pr-title`、`branch-policy`、`dependency-review` 或 `integration`。它们在有些事件上会被跳过。`integration` 只在指向 `develop` 的 pull request 上跑。一个被跳过的必须检查会挡住合并。
   - 不要加 `codeql-go`、`codeql-javascript`、`release`、`nightly-artifacts` 或 `sync-labels`。
   - 不要加 `web typecheck and build`。那个任务已经不存在了。
   - 检查来源：任意来源。不要在你还没打算锁定某个应用时去钉一个 app。
@@ -217,7 +217,7 @@ Dependabot 的版本更新写在 [dependabot.yml](../.github/dependabot.yml)：`
 | 工作流 | 任务名 | 是否必须 |
 | --- | --- | --- |
 | CI | `ci-ok` | 是 |
-| CI | `changes`、`web`、`manager`、`pr-title`、`branch-policy`、`dependency-review` | 否。它们汇入 `ci-ok`。 |
+| CI | `changes`、`docs`、`pr-body`、`web`、`manager`、`pr-title`、`branch-policy`、`dependency-review`、`integration` | 否。它们汇入 `ci-ok`。 |
 | CodeQL | `codeql-go`、`codeql-javascript` | 否 |
 | Release | `release` | 否。它在合并进 `main` 之后跑，或在推送标签时跑。 |
 | Nightly | `nightly-artifacts` | 否 |

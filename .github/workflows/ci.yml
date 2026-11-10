@@ -3,6 +3,7 @@
 # The other job names in this workflow are real checks, but they are not
 # stable requirements. web and manager skip when their paths do not change.
 # pr-title, branch-policy, and dependency-review skip on push.
+# integration skips except on a pull request into develop.
 # A skipped required check blocks merges, so rulesets require only ci-ok.
 # See docs/ORG-SETUP.md.
 
@@ -198,6 +199,11 @@ jobs:
           GITHUB_EVENT_NAME: pull_request
         run: bash .github/scripts/branch-policy.sh
 
+  integration:
+    name: integration
+    if: github.event_name == 'pull_request' && github.base_ref == 'develop'
+    uses: ./.github/workflows/integration.yml
+
   dependency-review:
     name: dependency-review
     if: github.event_name == 'pull_request'
@@ -255,6 +261,7 @@ jobs:
       - pr-title
       - branch-policy
       - dependency-review
+      - integration
     runs-on: ubuntu-latest
     steps:
       - name: Require every job to pass or skip
@@ -267,10 +274,11 @@ jobs:
           PR_TITLE: ${{ needs.pr-title.result }}
           BRANCH_POLICY: ${{ needs.branch-policy.result }}
           DEPENDENCY_REVIEW: ${{ needs.dependency-review.result }}
+          INTEGRATION: ${{ needs.integration.result }}
         run: |
           set -eu
           fail=0
-          for name in CHANGES DOCS PR_BODY WEB MANAGER PR_TITLE BRANCH_POLICY DEPENDENCY_REVIEW; do
+          for name in CHANGES DOCS PR_BODY WEB MANAGER PR_TITLE BRANCH_POLICY DEPENDENCY_REVIEW INTEGRATION; do
             value="${!name}"
             echo "$name=$value"
             case "$value" in

@@ -181,15 +181,18 @@ The workflow is `.github/workflows/ci.yml`. It runs on pull requests and pushes 
 
 | Job | When it runs |
 | --- | --- |
-| `changes` | Always. Decides whether web or manager files changed. |
+| `changes` | Always. Decides whether web, manager, or docs files changed. |
+| `docs` | `docs/**`, `AGENTS.md`, or the doc checker changed. Bilingual pairs and relative links. |
+| `pr-body` | Pull requests. The Verification section has evidence in it. |
 | `web` | `apps/web/**` or the CI workflow changed. `npm ci`, lint, typecheck, vitest, production build. |
 | `manager` | `services/manager/**` or the CI workflow changed. `gofmt`, `go vet`, `golangci-lint`, `go test -race`, `go build`. |
 | `pr-title` | Pull requests. Conventional Commits title. |
 | `branch-policy` | Pull requests. The Git Flow rules above, plus the script's own tests. |
 | `dependency-review` | Pull requests. Fails on high or critical new vulnerabilities once the dependency graph is enabled. Until then it logs that and stays green. |
+| `integration` | Pull requests into `develop`. Downloads pinned Kubo v0.43.1, checks the published sha512, and runs `TestRealKuboOptional`. A skip fails the job. Other events skip the job. |
 | `ci-ok` | Always, unless the run was cancelled. Passes when every job above succeeded or skipped. |
 
-Branch protection requires **`ci-ok` only**. The other names are skipped on some events. A skipped required check blocks the merge. Do not add `web` or `manager` as their own required checks.
+Branch protection requires **`ci-ok` only**. The other names are skipped on some events. A skipped required check blocks the merge. Do not add `web`, `manager`, or `integration` as their own required checks.
 
 Other workflows, not required:
 
