@@ -133,6 +133,7 @@ Leave off: Restrict creations, Restrict updates, Require signed commits, Require
 
 - **Require branches to be up to date before merging:** On
 - The same single check: `ci-ok` (or `CI / ci-ok` if that is what the picker shows). Nothing else.
+- **Consequence, and it is not obvious:** with this rule on, a pull request must contain every commit already on its base branch. `develop` normally has commits `main` does not, so a pull request with head `main` and base `develop` can never become up to date and can never merge. That is why [Contributing](../CONTRIBUTING.md#releases) step 6 carries the back-merge across on a `chore/back-merge-X.Y.Z` branch instead. Turning this rule off for `develop` would make the `main`-headed route work; it is on because the alternative silently allows merging a branch that is missing commits from its base.
 
 Leave off the same extra rules as `main` (no signed commits, no merge queue, no lock).
 

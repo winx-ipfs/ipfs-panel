@@ -7,7 +7,8 @@
 `main` and `develop` are the only long-lived branches.
 
 - `main` is production. Every commit on it is releasable and tagged `vX.Y.Z`. Only `release/X.Y.Z` and `hotfix/X.Y.Z` pull requests may target it.
-- `develop` is the integration branch and the repository default. Feature work starts here and comes back here.
+- `develop` is the integration branch. Feature work starts here and comes back here.
+- **The repository default branch is still `main`.** `docs/ORG-SETUP.md` step 3 asks for it to become `develop`; until that is applied, anything that reads the default branch reads `main`. Dependabot is the live example: its `.github/dependabot.yml` is read from `main`, which is why the three `package-ecosystem` entries there carry `target-branch: develop`. Removing that override would re-open the problem it fixed.
 
 There is no third long-lived branch. Open a short-lived branch, open a pull request, merge, and delete the branch. GitHub is set to delete the head branch after a merge once [Org setup](docs/ORG-SETUP.md) is applied.
 
@@ -103,7 +104,21 @@ Required approvals are 0. You still need a green `ci-ok` check, and the branch h
    - manager binaries for linux, windows, and darwin, amd64 and arm64
    - `checksums.txt` for those binaries
    - `ipfs-panel-web_X.Y.Z_dist.zip` and `ipfs-panel-web_X.Y.Z_dist.zip.sha256`
-6. If the compare from `main` to `develop` is not empty, open a back-merge pull request: base `develop`, head `main`. **Squash and merge** it. Title: `chore(release): back-merge vX.Y.Z`. `develop` allows squash only, so this cannot be a merge commit. If the compare is empty, skip the back-merge.
+6. If the compare from `main` to `develop` is not empty, carry those commits back. **Do not open a pull request with head `main`.** The `develop` ruleset sets `strict_required_status_checks_policy`, so a pull request must contain every commit already on its base branch. `develop` has commits `main` does not (anything merged after the last release), so a `main`-headed pull request can never satisfy that and stays "out of date with the base branch" permanently. #25 and #26 both died there.
+
+   Instead, branch from `develop` and bring the missing content across:
+
+   ```bash
+   git checkout -b chore/back-merge-X.Y.Z origin/develop
+   git checkout origin/main -- CHANGELOG.md    # and any other file main has
+   git commit -m "chore(release): back-merge vX.Y.Z"
+   ```
+
+   Then open that branch into `develop` and **squash and merge** it. `develop` allows squash only.
+
+   Check what is actually missing before you copy anything: `git log --oneline origin/develop..origin/main`. After a clean release the answer is usually just `CHANGELOG.md`, because everything else reached `develop` first. Copying a file wholesale is safe only when the source version contains everything the destination had; diff the entry lists rather than assuming.
+
+   If the compare is empty, skip this step.
 
 The tag is created by `GITHUB_TOKEN`. That push does not start a second workflow. The same job builds the artifacts. Pushing a tag yourself also works: the Release workflow runs on `vX.Y.Z` tags. The tag ruleset blocks moving or deleting `v*` tags. It does not block creating one.
 
@@ -185,7 +200,7 @@ Other workflows, not required:
 | Nightly | Snapshot binaries and a web build from `develop`, kept 7 days. |
 | Labels | Syncs `.github/labels.json` when that file changes on `main` or `develop`. |
 
-Dependabot opens one grouped weekly pull request per ecosystem (npm, Go modules, GitHub Actions) against the default branch. Those branches use the `dependabot/` prefix and squash into `develop`.
+Dependabot opens one grouped weekly pull request per ecosystem (npm, Go modules, GitHub Actions). It reads `.github/dependabot.yml` from the default branch but honours `target-branch` inside it, so those pull requests land on `develop` because the configuration says so, not because of the default. Their branches use the `dependabot/` prefix and squash into `develop`.
 
 ## Product rules
 

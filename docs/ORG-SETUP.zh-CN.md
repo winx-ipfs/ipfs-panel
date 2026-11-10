@@ -94,6 +94,7 @@ Release 工作流不解析合并提交的说明。它从 API 读取已合并的 
 **Require status checks to pass（状态检查必须通过）。** 开。
 
 - **Require branches to be up to date before merging（合并前分支必须更新到最新）：** 开
+  - **后果，而且不明显：** 开了这条，pull request 必须包含目标分支上已有的每一个提交。`develop` 通常有 `main` 没有的提交，所以「头是 `main`、目标是 `develop`」的 pull request 永远更新不到最新，也就永远合不了。这就是 [参与方式](../CONTRIBUTING.zh-CN.md#发行) 第 6 步改成用 `chore/back-merge-X.Y.Z` 分支搬运回并内容的原因。给 `develop` 关掉这条能让「头是 `main`」那条路走通；之所以开着，是因为关掉等于默许合入一个缺少目标分支提交的分支。
 - 只加一个检查：`ci-ok`
   - 选择器里可能显示 `CI / ci-ok`。那是同一个任务。如果单独搜不到 `ci-ok`，就加那一个。
   - 不要加 `web`、`manager`、`changes`、`pr-title`、`branch-policy` 或 `dependency-review`。它们在有些事件上会被跳过。一个被跳过的必须检查会挡住合并。

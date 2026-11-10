@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases are tagged from `main` only. The heading `## [X.Y.Z]` has to be in this file on the `release/X.Y.Z` or `hotfix/X.Y.Z` pull request. See [Contributing](CONTRIBUTING.md#releases).
 
+## [Unreleased]
+
+Nothing yet. New work lands here until the next `release/X.Y.Z` or `hotfix/X.Y.Z` moves it under a version heading.
+
 ## [0.1.1] - 2026-11-09
 
 Two fixes that only matter for how the repository is maintained, not for the panel itself.

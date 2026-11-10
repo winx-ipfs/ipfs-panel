@@ -7,7 +7,8 @@
 长期分支只有 `main` 和 `develop`。
 
 - `main` 是生产。上面的每次提交都应该可以发行，并打上 `vX.Y.Z`。只有 `release/X.Y.Z` 和 `hotfix/X.Y.Z` 的 pull request 可以指向它。
-- `develop` 是集成分支，也是仓库的默认分支。功能从这里拉出，再合回这里。
+- `develop` 是集成分支。功能从这里拉出，再合回这里。
+- **仓库的默认分支仍然是 `main`。** `docs/ORG-SETUP.zh-CN.md` 第 3 步要求把它改成 `develop`；在落地之前，任何读默认分支的东西读的都是 `main`。Dependabot 就是活例子：它的 `.github/dependabot.yml` 从 `main` 读，所以那边三个 `package-ecosystem` 条目都带 `target-branch: develop`。删掉这个覆盖，它修好的问题会立刻回来。
 
 没有第三条长期分支。开一个短期分支，提 pull request，合并，删掉分支。[组织设置](docs/ORG-SETUP.zh-CN.md) 做完之后，GitHub 会在合并后自动删掉头分支。
 
@@ -103,7 +104,21 @@ GitHub 不能按头分支藏起某个合并按钮。ruleset 是按目标分支�
    - linux、windows、darwin 的 amd64 和 arm64 管理服务二进制
    - 这些二进制的 `checksums.txt`
    - `ipfs-panel-web_X.Y.Z_dist.zip` 和 `ipfs-panel-web_X.Y.Z_dist.zip.sha256`
-6. 如果从 `main` 比到 `develop` 不是空的，开一个回并 pull request：目标 `develop`，头是 `main`。用 **Squash and merge**。标题：`chore(release): back-merge vX.Y.Z`。`develop` 只允许 squash，所以这里不能是 merge commit。比较结果是空的，就不用回并。
+6. 如果从 `main` 比到 `develop` 不是空的，把那些提交搬回去。**不要开头是 `main` 的 pull request。** `develop` 的 ruleset 设了 `strict_required_status_checks_policy`，要求 PR 必须包含其目标分支上已有的每一个提交。`develop` 上有 `main` 没有的提交（上次发布之后合并的一切），所以头是 `main` 的 PR 永远满足不了这条，会永久停在「落后于目标分支」。#25 和 #26 就是这么死的。
+
+   改成从 `develop` 切分支、把缺的内容搬过去：
+
+   ```bash
+   git checkout -b chore/back-merge-X.Y.Z origin/develop
+   git checkout origin/main -- CHANGELOG.md    # 以及其他 main 独有的文件
+   git commit -m "chore(release): back-merge vX.Y.Z"
+   ```
+
+   然后把这个分支开到 `develop`，用 **Squash and merge**。`develop` 只允许 squash。
+
+   复制之前先查清真正缺什么：`git log --oneline origin/develop..origin/main`。一次顺利的发布之后，答案通常只有 `CHANGELOG.md`，因为其他东西都先到 `develop` 了。整文件覆盖只有在源版本包含目标原先的全部内容时才安全；**比对条目列表，不要假设**。
+
+   比较结果是空的，就跳过这一步。
 
 标签由 `GITHUB_TOKEN` 创建。这次推送不会再启动第二个工作流。同一个任务里构建附件。你自己推标签也可以：Release 工作流会在 `vX.Y.Z` 标签上跑。标签 ruleset 禁止移动或删除 `v*`。不禁止新建。
 
@@ -185,7 +200,7 @@ go run ./cmd/manager
 | Nightly | 从 `develop` 出快照二进制和网页构建，保留 7 天。 |
 | Labels | `.github/labels.json` 在 `main` 或 `develop` 上变化时同步标签。 |
 
-Dependabot 按生态系统（npm、Go 模块、GitHub Actions）每周向默认分支开一个分组的 pull request。这些分支用 `dependabot/` 前缀，squash 进 `develop`。
+Dependabot 按生态系统（npm、Go 模块、GitHub Actions）每周开一个分组的 pull request。它从默认分支读 `.github/dependabot.yml`，但会遵循文件里的 `target-branch`，所以这些 PR 落在 `develop` 是因为配置这么写了，不是因为默认分支。它们的分支用 `dependabot/` 前缀，squash 进 `develop`。
 
 ## 产品上的规矩
 
