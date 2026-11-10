@@ -105,6 +105,8 @@ Every command below is an argument list with `IPFS_PATH` set to the panel repo. 
 
 `ipfs id` prints JSON that includes the peer id, the version, and the node's listen addresses. The manager keeps `ID` and `AgentVersion`. It discards addresses and protocols before it builds the HTTP body, so a listen address cannot leak into the browser by accident.
 
+The readiness probe does not call `ipfs id` until the repo's `api` file exists and is non-empty. Kubo writes that file when the HTTP API is listening, and removes it on shutdown. Before the file exists, `ipfs id` opens the repo and takes `repo.lock`, and the daemon exits because the lock is held. The node is still not `up` until `ipfs id` itself succeeds.
+
 **First start**, when the repo has no `config`:
 
 1. `ipfs init` with Kubo's default profile. Scene profiles such as `server` and `lowpower` wait.

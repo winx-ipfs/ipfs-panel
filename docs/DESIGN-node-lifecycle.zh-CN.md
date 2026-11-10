@@ -105,6 +105,8 @@ Swarm 是节点加入 IPFS 网络的方式。默认的 Kubo 会在机器的网�
 
 `ipfs id` 打出的 JSON 里有 Peer ID、版本，还有节点的监听地址。manager 只留下 `ID` 和 `AgentVersion`。编 HTTP 响应之前丢掉地址和协议，避免监听地址偶然进到浏览器。
 
+就绪探测要等仓库里的 `api` 文件存在且非空，才调用 `ipfs id`。Kubo 在 HTTP API 开始监听时写这个文件，停机时删掉。文件还不在时，`ipfs id` 会打开仓库并拿走 `repo.lock`，守护进程因为锁被占用而退出。节点仍然要等 `ipfs id` 自己成功才算 `up`。
+
 **第一次启动**，仓库里还没有 `config`：
 
 1. 用 Kubo 的默认 profile 执行 `ipfs init`。`server`、`lowpower` 这类场景 profile 以后再说。

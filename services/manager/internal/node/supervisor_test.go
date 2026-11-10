@@ -489,6 +489,23 @@ func TestPortInUse(t *testing.T) {
 	}
 }
 
+func TestReadyProbeWaitsForAPIFile(t *testing.T) {
+	t.Setenv("FAKE_NO_API", "1")
+	sup, _, logPath := newTestSupervisor(t, func(cfg *Config) {
+		cfg.ReadyBudget = 200 * time.Millisecond
+		cfg.IDTimeout = 40 * time.Millisecond
+		cfg.PollInterval = 10 * time.Millisecond
+	})
+	mustStart(t, sup)
+	ov := waitState(t, sup, StateFailed)
+	if ov.Error == nil || ov.Error.Code != CodeHealthTimeout {
+		t.Fatalf("%#v", ov)
+	}
+	if countCmd(readLog(t, logPath), "id") != 0 {
+		t.Fatalf("id ran before the api file: %#v", readLog(t, logPath))
+	}
+}
+
 func TestHealthTimeoutKillsChild(t *testing.T) {
 	t.Setenv("FAKE_ID_FAIL", "1")
 	sup, repo, _ := newTestSupervisor(t, func(cfg *Config) {

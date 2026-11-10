@@ -223,6 +223,17 @@ func cmdDaemon() int {
 		return 1
 	}
 	defer func() { _ = os.Remove(pidFile) }()
+	// Real Kubo writes this file when the API is listening. The supervisor
+	// waits for it before `ipfs id`, because an id that cannot see the file
+	// opens the repo and takes the lock. This stand-in does not listen.
+	if os.Getenv("FAKE_NO_API") == "" {
+		apiFile := filepath.Join(repo, "api")
+		if err := os.WriteFile(apiFile, []byte("/ip4/127.0.0.1/tcp/5001\n"), 0o600); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return 1
+		}
+		defer func() { _ = os.Remove(apiFile) }()
+	}
 
 	if os.Getenv("FAKE_IGNORE_TERM") != "" {
 		signal.Ignore(syscall.SIGTERM, syscall.SIGINT)

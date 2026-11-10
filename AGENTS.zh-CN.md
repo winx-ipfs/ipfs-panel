@@ -49,7 +49,7 @@ Kubo（Go 版 IPFS 节点）的面板。`apps/web` 是界面（Vue 3、Vite、Ty
 | --- | --- |
 | Manager 单元测试 | `cd services/manager && go test ./...` |
 | Manager 竞态（需 cgo） | `CGO_ENABLED=1 go test -race -count=1 ./...` |
-| Manager 对发行二进制集成 | 见 [docs/design/harness.zh-CN.md](docs/design/harness.zh-CN.md) —— 尚未接入 CI |
+| Manager 对发行二进制集成 | 设 `IPFS_PANEL_INTEGRATION=1` 且 `PATH` 上有 `ipfs`，然后 `cd services/manager && go test -count=1 -run TestRealKubo ./internal/node/`。指向 `develop` 的 pull request 上，CI 按 [docs/design/harness.zh-CN.md](docs/design/harness.zh-CN.md) 里的钉来做这件事。没有环境变量或没有二进制时，测试跳过。 |
 | 界面 | `cd apps/web && npm run lint && npm run typecheck && npm test && npm run build-only` |
 | 文档 | `.github/scripts/check-docs.sh` |
 | 文档引用 | `.github/scripts/check-doc-citations.sh`（需要 `reference/`） |
