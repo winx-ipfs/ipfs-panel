@@ -498,6 +498,16 @@
   overflow-wrap: anywhere;
 }
 
+.peers-count-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.peers-count-link:hover {
+  text-decoration: underline;
+}
+
 .peer-hint {
   margin: 6px 0 0;
   color: var(--muted);

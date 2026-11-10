@@ -15,7 +15,7 @@
 | 状态 `/` 与 `/status*` | 已连接的一句话、peer id、版本、仓库大小、对等节点数、带宽图和速率 | **已有**，这一片再加一小块。节点页已经有那句话、版本和 peer id（[节点生命周期](../DESIGN-node-lifecycle.zh-CN.md)）。这一片加上对等节点数和入/出速率，节点停着的时候两者都藏起来。仓库大小、图表、分析横幅仍延后。 |
 | 文件 `/files*`、`/ipfs*`、`/ipns*` | 可变文件系统：上传、文件夹、下载、重命名、删除、分享链接、pin、查看、CAR 导入、按路径添加 | **已有**新手这条路（[文件](files.zh-CN.md)）：添加、下载、重命名、移动、复制、删除、本地链接，以及从一行发起 pin。查看、CAR 导入、按路径添加、浏览 `/ipfs` 或 `/ipns` 路径仍延后。 |
 | 探索 `/explore*` | 走网关的 IPLD 浏览器 | **已有**新手这条路（[探索](explore.zh-CN.md)）：粘贴内容标识或 `/ipfs/` 路径，看见这一块，再打开一条链接。manager 在回环上调用 `dag/get`。图、十六进制摘要、公开示例数据集、CAR 导入和 IPNS 仍留在外面。 |
-| 对等节点 `/peers` | 世界地图、节点表、手动连接 | **延后。** 地图和连接框不在这个 PR。节点页只显示数量。 |
+| 对等节点 `/peers` | 世界地图、节点表、手动连接 | **已有**新手这条路（[对等节点](peers.zh-CN.md)）：一张谁连着的表，以及一次拨号。没有地图。已经连上的节点地址不进浏览器。永久对等仍和原始编辑器一起延后。 |
 | 固定 `/pins*` | 进行中的 pin 任务。不在导航里 | **已有**，而且比这条路由宽。[固定](pins.zh-CN.md)列出节点留着什么、添加 pin、取消任务。 |
 | 设置 `/settings*` | Kubo RPC 地址、本地网关 URL、分享链接形状、IPNS 密钥、远程 pin 服务、检索检查 URL、语言、分析、命令行教学、原始 JSON 编辑器 | **部分已有。** 语言和主题在设置里。这一片的场景，让愿景里的四种用法不必去改 JSON。原始配置编辑器、IPNS 密钥、远程 pin 服务、分析开关仍延后。面板不加 Kubo RPC 地址的表单。 |
 | 设置里的分析 `/settings/analytics` | 分析开关 | **延后。** |
@@ -33,7 +33,11 @@ manager 调同样两条 RPC，只留下一个数量和两个速率。响应形�
 
 webui 从本地网关取原始块，在浏览器里解码（`ipfs-webui/src/bundles/gateway.js:77-86`）。网关上的编码转换默认是关的，所以这个面板不向网关要 dag-json，改由 manager 调用 `dag/get`。页面、路径和响应在[探索](explore.zh-CN.md)。
 
+## 对等节点留下的
+
+webui 这一页是地图、表和连接对话框（`ipfs-webui/src/peers/PeersPage.js:39-46`）。地图把节点多地址里的公网 IP 画出来（`ipfs-webui/src/bundles/peer-locations.js:335-337`）。那些地址就是这个面板已经丢掉的字段。这一片留下表和一次 `swarm/connect`。不留下地图、多地址，也不留下对 `Peering.Peers` 的永久写入（`ipfs-webui/src/bundles/peers.js:40-61`）。页面、路径和响应在[对等节点](peers.zh-CN.md)。
+
 ## 有意留在外面的
 
-- 对等节点地图，以及原始配置编辑器。它们是剩下的 webui 缺口。原始编辑器仍要等。
+- 原始配置编辑器。它是剩下的 webui 缺口。它仍要等。
 - 任何把 Kubo RPC 地址交给浏览器的屏幕。webui 的设置页有一张（`ipfs-webui/src/settings/SettingsPage.js:60`）。这个面板没有。

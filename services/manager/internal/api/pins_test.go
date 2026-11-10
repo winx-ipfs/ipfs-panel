@@ -350,7 +350,7 @@ func pinsMux(t *testing.T, h *pinsHTTP) http.Handler {
 		t.Fatal(err)
 	}
 	useSession(res.Session, res.CSRF)
-	return newMux(sup, svc, nil, h, nil)
+	return newMux(sup, svc, nil, h, nil, nil)
 }
 
 func upPins(t *testing.T, apiBase string) *pinsHTTP {

@@ -2,6 +2,7 @@
 import { Check, Copy } from '@lucide/vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 import Button from '@/components/Button.vue'
 import Card from '@/components/Card.vue'
 import IconButton from '@/components/IconButton.vue'
@@ -237,7 +238,10 @@ async function copy(kind: string, value: string | null | undefined) {
           <div v-if="peers !== null">
             <dt>{{ t('nodePeers') }}</dt>
             <dd>
-              <span class="mono">{{ peers }}</span>
+              <RouterLink class="peers-count-link" to="/peers">
+                <span class="mono">{{ peers }}</span>
+                <span class="sr-only">{{ t('nodePeersOpen') }}</span>
+              </RouterLink>
               <p class="peer-hint">{{ t('nodePeersHint') }}</p>
             </dd>
           </div>

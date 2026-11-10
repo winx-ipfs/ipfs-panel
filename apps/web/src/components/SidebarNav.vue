@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Compass, FolderOpen, LayoutGrid, Pin, Server, Settings } from '@lucide/vue'
+import { Compass, FolderOpen, LayoutGrid, Pin, Server, Settings, Users } from '@lucide/vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import BrandMark from '@/components/BrandMark.vue'
@@ -67,6 +67,18 @@ function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
       >
         <Compass :size="18" :stroke-width="1.75" aria-hidden="true" />
         <span class="nav-text">{{ t('navExplore') }}</span>
+      </a>
+    </RouterLink>
+    <RouterLink v-slot="{ href, navigate, isActive }" to="/peers" custom>
+      <a
+        :href="href"
+        class="nav-link"
+        :class="{ active: isActive }"
+        :aria-current="isActive ? 'page' : undefined"
+        @click="go(navigate, $event)"
+      >
+        <Users :size="18" :stroke-width="1.75" aria-hidden="true" />
+        <span class="nav-text">{{ t('navPeers') }}</span>
       </a>
     </RouterLink>
     <RouterLink v-slot="{ href, navigate, isActive }" to="/pins" custom>
