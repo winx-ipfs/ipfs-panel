@@ -31,7 +31,7 @@ These are the choices an implementation should follow. Object to them in the pul
 1. `GET /health` stays a check of the **manager process**. It already returns `{"status":"ok","service":"manager"}`. Node truth is a new route, `GET /api/node`.
 2. The panel keeps its own repo. It does not use `~/.ipfs`.
 3. The manager already listens on `127.0.0.1:8080`. Kubo's default gateway uses that same port. When the panel creates a repo, it sets the API to `127.0.0.1:5001` and the gateway to `127.0.0.1:8081`.
-4. On later starts, the manager checks those addresses. If the API or the gateway is not loopback, it refuses to start. It does not rewrite the config again.
+4. On later starts, the manager checks those addresses. The API must be loopback. The gateway must be loopback, except the read-only public gateway in [Scenes](design/scenes.md): the unspecified listeners on the panel gateway port, and only when `Gateway.NoFetch` and `Gateway.NoDNSLink` are true and `Gateway.ExposeRoutingAPI` is false. Any other public address is refused. The manager does not rewrite the addresses on its own.
 5. Swarm (Kubo's network port, usually 4001) stays at Kubo's default. A quiet node is a scene, which is a later slice.
 6. The states are `down`, `starting`, `up`, `stopping`, and `failed`. Restart is a stop followed by a start. It is not a sixth state.
 7. Login is a separate spec. These routes require a session. The other guards stay: no CORS headers, and a JSON content type on the action routes. A missing session is **401** `{"error":"unauthorized"}`. `GET /health` stays open.
@@ -206,7 +206,7 @@ Copy buttons may sit on the version, the peer id, and the folder. They copy text
 The card shows, in order:
 
 1. One sentence for the situation.
-2. When `up`: a Connection card shows Version and Peer ID. On a wide screen it sits beside the status card. On a narrow screen it sits under it. The peer id is shortened on screen. The full value is what the copy button writes, and what assistive tech reads. The card does not show a gateway address or an API address. The overview does not include them.
+2. When `up`: a Connection card shows Version and Peer ID. On a wide screen it sits beside the status card. On a narrow screen it sits under it. The peer id is shortened on screen. The full value is what the copy button writes, and what assistive tech reads. When `activity` is present, the card also shows the peer count and, when the rates are present, traffic in and out. Both are hidden while the node is not `up`. The card does not show a gateway address or an API address. The overview does not include them. `activity` is omitted when the node is not `up`, or when neither call answered. A missing rate means bandwidth was not available (`Swarm.DisableBandwidthMetrics`, or the reporter error in `core/commands/stat.go:104-106`). The peer count is the number of distinct peer ids from `swarm/peers` (`core/commands/swarm.go:234`, `core/commands/swarm.go:447`). Addresses on those rows (`core/commands/swarm.go:433`) are discarded. Rates are `RateIn` and `RateOut` from `stats/bw` (`core/commands/stat.go:46-50`, `core/commands/stat.go:158`).
 3. The node folder, when `repoPath` is known.
 4. When `error.detail` is non-empty, a preformatted block under the sentence, labeled "Details".
 5. The manager actions in the table below. A copy button may sit on a fact. No other manager actions.
@@ -276,7 +276,8 @@ The dev server proxies `/api` and `/health` to `http://127.0.0.1:8080` (see `app
 | `repo_not_writable` | The panel repo cannot be created or written. | `failed`. No process. |
 | `init_failed` | `ipfs init` exits non-zero, or exceeds 60s. | `failed`. Leave the directory in place. |
 | `api_not_loopback` | Any API address is not loopback. | Do not start. `failed`. |
-| `gateway_not_loopback` | Any gateway address is not loopback. | Do not start. `failed`. |
+| `gateway_not_loopback` | A gateway address is not loopback and is not the read-only public shape in [Scenes](design/scenes.md). | Do not start. `failed`. |
+| `gateway_not_readonly` | The gateway uses the public shape, but it is not limited to content already on the node. | Do not start. `failed`. |
 | `panel_port_conflict` | The API or the gateway uses the manager's port. | Do not start. `failed`. |
 | `port_in_use` | The daemon exits and its output says the listen failed because the address is taken. | `failed`. |
 | `repo_busy` | The repo lock is held by a process we do not own. | `failed`. Do not signal it. |
@@ -318,8 +319,8 @@ Later slices, not this one:
 - Login and sessions. When login exists, these routes take the same session check. The JSON in this document stays.
 - Adding, reading, and listing files. MFS. Pins and unpin.
 - Installing or upgrading the Kubo binary.
-- Scene profiles, swarm edits, bootstrap, peering, a raw config editor.
-- A log page, repo size, peer count, bandwidth.
+- Swarm listen edits, bootstrap, peering, a raw config editor. Scenes are specified in [Scenes](design/scenes.md).
+- A log page, repo size. Peer count and bandwidth rates are on the connection card, above.
 - A second node, or a Kubo on another machine.
 - Deleting the repo.
 - Attaching to a daemon the panel did not start, including a daemon on `~/.ipfs`.
@@ -335,7 +336,7 @@ The implementation pull request is done when every box is true.
 - [x] The child `IPFS_PATH` is the panel repo. An `IPFS_PATH` already set on the manager does not redirect the child.
 - [x] The first start on a repo with no `config` runs `ipfs init`, sets the API to loopback port 5001, sets the gateway to loopback port 8081 (8082 only if the manager is using 8081), then runs `ipfs daemon` with no extra flags.
 - [x] A start while `up` or `starting` does not spawn a second daemon.
-- [x] Start is refused when any API or gateway address is not loopback, or when either uses the manager's port. Swarm lines in the config are unchanged.
+- [x] Start is refused when any API address is not loopback, when the gateway is public but not the read-only shape in [Scenes](design/scenes.md), or when either uses the manager's port. Swarm lines in the config are unchanged.
 - [x] Stop signals only a child the manager spawned or adopted. A foreign lock is `repo_busy`, and that process is still running afterward.
 - [x] Restart from `up` goes through stopping and then starting, and ends at `up` or `failed`.
 - [x] If `ipfs id` does not succeed within 30s of spawn, the child is dead and the state is `failed` with `health_timeout`.

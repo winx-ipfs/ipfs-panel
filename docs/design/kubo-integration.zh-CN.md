@@ -2,7 +2,7 @@
 
 **中文** · [English](kubo-integration.md)
 
-**状态：待决策。** 无代码。这份文件比较面板挨着 Kubo 的两种摆法，说明各自代价，并给出一项建议。建议尚未落地；当前代码树实现的是第一种。
+**状态：已决定。** 面板留在进程边界上。这份文件比较面板挨着 Kubo 的两种摆法。下面的 bitswap 问题已经回答。不要开始插件工作。
 
 每条结论都带证据。来源已克隆到 `reference/`，commit 见 [技术栈参考](../REFERENCE-ipfs-stack.zh-CN.md)。
 
@@ -92,8 +92,14 @@ Kubo 有插件系统，六个接口（`plugin/*.go`）：
 
 若将来确有功能需要进程内访问，最窄的形态是交出句柄的 `PluginDaemon`，不是重接图的 `PluginFx`，更不是 `PluginDaemonInternal`。
 
+## bitswap 问题，已回答
+
+没有。网关的一次读取由节点的 blockservice 提供（`core/node/core.go:38-40`），bitswap 开着时这个服务的 exchange 就是节点的 bitswap（`core/node/bitswap.go:208-220`）；`Gateway.NoFetch` 则换成离线 exchange（`core/corehttp/gateway.go:160-161`）。面板的工作是 Kubo RPC 或写配置，没有一件需要 bitswap 账本、wantlist，或跑在 Kubo 进程里面的代码，所以插件模型背后仍然没有功能。
+
+场景写的是配置文件。它们不调用 bitswap。见[场景](scenes.zh-CN.md)。
+
 ## 待定问题
 
-- **面板是否有任何事必须靠节点的 bitswap，而网关调用做不到？** 若没有，模型 2 目前背后没有功能支撑。
+- **面板是否有任何事必须靠节点的 bitswap，而网关调用做不到？** 没有。上面已回答。模型 2 背后仍然没有功能。
 - **Windows 预加载插件是否意味着我们要发自己的 Kubo 构建？** 是，而且要回答由谁更新、如何验证。
 - **插件是否改变认证模型？** 插件不能被浏览器直接经 HTTP 触达，所以 `docs/design/auth.md` 仍适用于面板暴露的东西；但插件本身不受沙箱约束。这条在任何插件代码落地前必须写下来。

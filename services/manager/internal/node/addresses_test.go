@@ -46,14 +46,19 @@ func TestGatewayPort(t *testing.T) {
 func TestValidateAddresses(t *testing.T) {
 	loopAPI := raw(`"/ip4/127.0.0.1/tcp/5001"`)
 	loopGW := raw(`["/ip4/127.0.0.1/tcp/8081"]`)
-	if err := validateAddressDoc(addressDoc{API: loopAPI, Gateway: loopGW}, "127.0.0.1:8080"); err != nil {
+	if err := validateAddressDoc(addressDoc{API: loopAPI, Gateway: loopGW}, gatewayFlags{}, "127.0.0.1:8080"); err != nil {
 		t.Fatal(err)
 	}
 	ip6 := addressDoc{
 		API:     raw(`"/ip6/::1/tcp/5001"`),
 		Gateway: raw(`["/ip6/::1/tcp/8081"]`),
 	}
-	if err := validateAddressDoc(ip6, "127.0.0.1:8080"); err != nil {
+	if err := validateAddressDoc(ip6, gatewayFlags{}, "127.0.0.1:8080"); err != nil {
+		t.Fatal(err)
+	}
+	readonly := gatewayFlags{known: true, noFetch: true, noDNSLink: true, routingOff: true}
+	public := addressDoc{API: loopAPI, Gateway: raw(`["/ip4/0.0.0.0/tcp/8081","/ip6/::/tcp/8081"]`)}
+	if err := validateAddressDoc(public, readonly, "127.0.0.1:8080"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -82,8 +87,14 @@ func TestValidateAddresses(t *testing.T) {
 			code: CodeAPINotLoopback,
 		},
 		{
-			name: "public gateway",
+			name: "public gateway without read-only flags",
 			doc:  addressDoc{API: loopAPI, Gateway: raw(`["/ip4/0.0.0.0/tcp/8081"]`)},
+			addr: "127.0.0.1:8080",
+			code: CodeGatewayNotReadonly,
+		},
+		{
+			name: "specific public address",
+			doc:  addressDoc{API: loopAPI, Gateway: raw(`["/ip4/203.0.113.5/tcp/8081"]`)},
 			addr: "127.0.0.1:8080",
 			code: CodeGatewayNotLoopback,
 		},
@@ -108,7 +119,7 @@ func TestValidateAddresses(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := validateAddressDoc(tc.doc, tc.addr)
+			err := validateAddressDoc(tc.doc, gatewayFlags{}, tc.addr)
 			if err == nil || err.code != tc.code {
 				t.Fatalf("got %#v", err)
 			}

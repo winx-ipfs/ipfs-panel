@@ -111,7 +111,7 @@ A job that hits its own deadline stays **200** on the status route. The job's `s
 
 ## UI
 
-The Pins item in the nav is enabled. It sits with Files, not under "Coming soon". Scenes stays under "Coming soon".
+The Pins item in the nav is enabled. It sits with Files and Scenes, not under "Coming soon".
 
 The page has a title, one sentence, and a closed disclosure. The disclosure says what pinning means, how it differs from Files, what the two types mean, where names are stored, and why a size can be blank. The disclosure uses a chevron and the token colors. It does not use the browser's default triangle.
 

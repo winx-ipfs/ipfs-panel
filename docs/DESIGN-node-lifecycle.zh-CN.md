@@ -31,7 +31,7 @@
 1. `GET /health` 仍然只表示 **manager 这个进程** 活着。它现在返回 `{"status":"ok","service":"manager"}`。节点到底怎么样，看新的 `GET /api/node`。
 2. 面板用自己的仓库目录，不用 `~/.ipfs`。
 3. manager 已经听在 `127.0.0.1:8080`。Kubo 默认的网关也用这个端口。面板创建仓库时，把 API 设为 `127.0.0.1:5001`，把网关设为 `127.0.0.1:8081`。
-4. 以后每次启动只检查这两个地址。API 或网关不是回环，就拒绝启动，不再改写配置。
+4. 以后每次启动都检查这些地址。API 必须是回环。网关必须是回环，例外只有[场景](design/scenes.zh-CN.md)里的只读公共网关：面板网关端口上的未指定监听，并且 `Gateway.NoFetch` 与 `Gateway.NoDNSLink` 为 true、`Gateway.ExposeRoutingAPI` 为 false。别的公开地址仍然拒绝。manager 不会自己改写这些地址。
 5. Swarm（Kubo 连别的节点的端口，通常是 4001）保持 Kubo 的默认。安静地跑是场景，属于后面的切片。
 6. 状态只有 `down`、`starting`、`up`、`stopping`、`failed`。重启就是先停再启动，不是第六个状态。
 7. 登录是另一份规格。这些路由需要会话。其他防护不变：不发 CORS 头，动作类请求必须带 JSON 的 Content-Type。没有会话是 **401** `{"error":"unauthorized"}`。`GET /health` 仍然开放。
@@ -206,7 +206,7 @@ POST 的规则：
 卡片按这个顺序：
 
 1. 一句说明当前情况的话。
-2. `up` 时：「连接」卡片显示版本和 Peer ID。宽屏时它在状态卡片旁边，窄屏时在下面。屏幕上的 Peer ID 是缩短的。复制按钮写下的、以及辅助技术读到的，是完整值。这张卡片不显示网关地址，也不显示 API 地址。概览里没有这两项。
+2. `up` 时：「连接」卡片显示版本和 Peer ID。宽屏时它在状态卡片旁边，窄屏时在下面。屏幕上的 Peer ID 是缩短的。复制按钮写下的、以及辅助技术读到的，是完整值。有 `activity` 时，卡片再加上对等节点数；速率也有时，再加上入和出。节点不是 `up` 时这两项都藏起来。这张卡片不显示网关地址，也不显示 API 地址。概览里没有这两项。节点不是 `up`，或两次调用都没回答时，省略 `activity`。速率缺失表示带宽不可用（`Swarm.DisableBandwidthMetrics`，或 `core/commands/stat.go:104-106` 的报告器错误）。对等节点数是 `swarm/peers` 里不同的 peer id 个数（`core/commands/swarm.go:234`，`core/commands/swarm.go:447`）。那些行上的地址（`core/commands/swarm.go:433`）丢掉。速率是 `stats/bw` 的 `RateIn` 和 `RateOut`（`core/commands/stat.go:46-50`，`core/commands/stat.go:158`）。
 3. 知道 `repoPath` 时，显示节点文件夹。
 4. `error.detail` 非空时，在句子下面放一块预格式文本，标题是「详情」。
 5. 下面表格里的管理动作。某一行事实上可以有复制按钮。不要别的管理动作。
@@ -276,7 +276,8 @@ POST 的规则：
 | `repo_not_writable` | 面板仓库建不出来或不能写。 | `failed`。没有进程。 |
 | `init_failed` | `ipfs init` 非零退出，或超过 60 秒。 | `failed`。目录留在原地。 |
 | `api_not_loopback` | 有 API 地址不是回环。 | 不启动。`failed`。 |
-| `gateway_not_loopback` | 有网关地址不是回环。 | 不启动。`failed`。 |
+| `gateway_not_loopback` | 有网关地址不是回环，而且也不是[场景](design/scenes.zh-CN.md)里的只读公共形状。 | 不启动。`failed`。 |
+| `gateway_not_readonly` | 网关用了公开形状，但没有限制成只提供这台节点上已有的内容。 | 不启动。`failed`。 |
 | `panel_port_conflict` | API 或网关用了 manager 的端口。 | 不启动。`failed`。 |
 | `port_in_use` | daemon 退出，输出说明监听失败是因为地址已被占用。 | `failed`。 |
 | `repo_busy` | 仓库锁被一个我们不拥有的进程拿着。 | `failed`。不向它发信号。 |
@@ -318,8 +319,8 @@ Kubo API 留在回环。网关留在回环。任一检查失败，manager 就拒
 - 登录和会话。有登录之后，这些路由走同一套会话检查。本文的 JSON 保持不变。
 - 添加、读取、列出文件。MFS。pin 和取消 pin。
 - 安装或升级 Kubo 二进制。
-- 场景 profile、修改 swarm、bootstrap、对等连接、原始配置编辑器。
-- 日志页、仓库大小、连接上的节点数、带宽。
+- 改 swarm 监听、bootstrap、对等连接、原始配置编辑器。场景的规格在[场景](design/scenes.zh-CN.md)。
+- 日志页、仓库大小。对等节点数和带宽速率在连接卡片上，见上。
 - 第二个节点，或另一台机器上的 Kubo。
 - 删除仓库。
 - 接上面板没有启动的 daemon，包括占用 `~/.ipfs` 的那个。
@@ -335,7 +336,7 @@ Kubo API 留在回环。网关留在回环。任一检查失败，manager 就拒
 - [x] 子进程的 `IPFS_PATH` 是面板仓库。manager 上已经存在的 `IPFS_PATH` 不能把子进程指走。
 - [x] 对还没有 `config` 的仓库，第一次启动会跑 `ipfs init`，把 API 设为回环 5001，把网关设为回环 8081（仅当 manager 占用 8081 时用 8082），然后不带额外参数跑 `ipfs daemon`。
 - [x] 状态已是 `up` 或 `starting` 时再启动，不会拉起第二个 daemon。
-- [x] 任一 API 或网关地址不是回环，或其中之一占用了 manager 的端口，就拒绝启动。配置里的 Swarm 行保持原样。
+- [x] 任一 API 地址不是回环、网关公开但不是[场景](design/scenes.zh-CN.md)里的只读形状，或其中之一占用了 manager 的端口，就拒绝启动。配置里的 Swarm 行保持原样。
 - [x] 停止时只向 manager 启动或收养的子进程发信号。别人的锁是 `repo_busy`，那个进程之后仍在运行。
 - [x] 从 `up` 重启，会经过停止再进入启动，最后停在 `up` 或 `failed`。
 - [x] 拉起后 30 秒内 `ipfs id` 没有成功，子进程已经被杀掉，状态是 `failed`，代码 `health_timeout`。

@@ -60,10 +60,18 @@ describe('NodeView', () => {
 
   it('shows version, peer id, Stop, and a quieter Restart while running', async () => {
     const { wrapper } = mountCard(
-      overview({ state: 'up', peerId: '12D3KooWPeer', version: 'kubo/0.32.1/' }),
+      overview({
+        state: 'up',
+        peerId: '12D3KooWPeer',
+        version: 'kubo/0.32.1/',
+        activity: { peers: 4, rateIn: 2048, rateOut: 0 },
+      }),
     )
     await flushPromises()
     expect(wrapper.get('[role="status"]').text()).toBe('The node is running.')
+    expect(wrapper.text()).toContain('Peers')
+    expect(wrapper.text()).toContain('4')
+    expect(wrapper.text()).toContain('In 2.0 KB/s')
     expect(wrapper.text()).toContain('Version')
     expect(wrapper.text()).toContain('kubo/0.32.1/')
     expect(wrapper.get('.peer').text()).toBe('12D3KooWPeer')

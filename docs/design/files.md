@@ -92,7 +92,7 @@ List:
 
 ## UI
 
-The Files item in the nav is enabled. Pins is its own page. Scenes stays under "Coming soon".
+The Files item in the nav is enabled. Pins and Scenes are their own pages.
 
 The page has a title, one sentence, and a closed disclosure for the content ID and the local link. Then a toolbar: Upload (the one primary button), New folder, Refresh, and sort by name, size, or modified time. Sort is a button group, so it works on a phone where the table header is not the control. Name sort keeps folders first. Size and time sort by the value, and a missing time sorts last.
 

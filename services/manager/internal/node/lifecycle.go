@@ -162,7 +162,11 @@ func (s *Supervisor) readAndCheck(ctx context.Context, bin string) *codedError {
 	if cerr != nil {
 		return cerr
 	}
-	return validateAddressDoc(doc, s.cfg.ManagerAddr)
+	flags := gatewayFlags{}
+	if b, err := os.ReadFile(filepath.Join(s.cfg.RepoPath, "config")); err == nil {
+		flags = flagsFromConfig(b)
+	}
+	return validateAddressDoc(doc, flags, s.cfg.ManagerAddr)
 }
 
 func (s *Supervisor) readAddresses(ctx context.Context, bin string) (addressDoc, *codedError) {

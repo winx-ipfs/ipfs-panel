@@ -308,6 +308,39 @@ try {
         }
       }
     }
+    const sceneShots = [
+      { name: 'list', query: 'scenes=list', wait: '[data-scenes="list"]' },
+      { name: 'preview', query: 'scenes=preview', wait: '[data-scenes="preview"]' },
+      { name: 'applied', query: 'scenes=applied', wait: '[data-scenes="applied"]' },
+    ]
+    for (const theme of themes) {
+      for (const locale of locales) {
+        for (const size of widths) {
+          const context = await browser.newContext({
+            viewport: { width: size.width, height: size.height },
+            deviceScaleFactor: 1,
+            colorScheme: theme,
+            reducedMotion: 'reduce',
+          })
+          await context.addInitScript(
+            ({ themePreference, localePreference }) => {
+              localStorage.setItem('ipfs-panel.theme', themePreference)
+              localStorage.setItem('ipfs-panel.lang', localePreference)
+            },
+            { themePreference: theme, localePreference: locale },
+          )
+          const page = await context.newPage()
+          for (const shot of sceneShots) {
+            await page.goto(`${origin}/scenes?${shot.query}`, { waitUntil: 'domcontentloaded' })
+            await page.waitForSelector(shot.wait)
+            const file = path.join(outDir, `scenes-${shot.name}-${theme}-${locale}-${size.name}.png`)
+            await shoot(page, file)
+            index.push(file)
+          }
+          await context.close()
+        }
+      }
+    }
   } finally {
     await browser.close()
   }

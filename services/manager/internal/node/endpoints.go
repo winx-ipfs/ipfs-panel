@@ -48,14 +48,25 @@ func LoopbackEndpoints(repoPath string) (apiBase, gatewayBase string, err error)
 	if err != nil {
 		return "", "", err
 	}
-	if len(gw) == 0 {
-		return apiBase, "", nil
-	}
-	gatewayBase, err = loopbackOrigin(gw)
-	if err != nil {
-		return "", "", err
-	}
+	gatewayBase = loopbackGateway(gw)
 	return apiBase, gatewayBase, nil
+}
+
+// loopbackGateway returns an HTTP origin only for a loopback gateway address.
+// A public gateway has no local link. It is not an error: the API can still
+// be dialed.
+func loopbackGateway(addrs []string) string {
+	for _, addr := range addrs {
+		if !isLoopback(addr) {
+			continue
+		}
+		origin, err := multiaddrHTTP(addr)
+		if err != nil {
+			continue
+		}
+		return origin
+	}
+	return ""
 }
 
 func loopbackOrigin(addrs []string) (string, error) {

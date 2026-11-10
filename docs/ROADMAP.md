@@ -12,7 +12,7 @@ We do not build the whole backend, then the whole UI.
 
 ## Where this repo is
 
-The tree you can clone today has finished slices 1 through 4. Slice 3's files page and slice 4's pins page are both in.
+The tree you can clone today has finished slices 1 through 5. Slice 3's files page, slice 4's pins page, and slice 5's scenes page are in.
 
 What is here:
 
@@ -23,10 +23,10 @@ What is here:
 - start, stop, and restart for one local Kubo, with a one-sentence status, behind that session
 - add, download, rename, move, copy, and delete files on that node, through its mutable file system
 - see what the node is pinning, pin a content ID or a file, and unpin, without the command line
+- pick one of four scenes, see what it will change, apply it, and revert it, without opening Kubo's JSON
 
 What is not here:
 
-- scenes
 - more than one node
 
 ## 1. Shell, auth, and languages
@@ -59,9 +59,9 @@ Done when you can answer "what is pinned?" and remove one pin without the CLI. T
 
 ## 5. Scene settings
 
-Pick a scene. The panel writes the Kubo config for that scene and says, in one sentence per language, what it changed.
+Pick a scene. The panel writes the Kubo config for that scene and says, in one sentence per language, what it changed. The spec is [Scenes](design/scenes.md).
 
-Done when a common setup does not mean opening the JSON file.
+Done when a common setup does not mean opening the JSON file. That is the current tree: a quiet node, sharing a folder, pinning a set of content, and a read-only public gateway.
 
 ## 6. Expert mode, then more than one node
 

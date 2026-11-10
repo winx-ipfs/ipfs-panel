@@ -16,6 +16,7 @@ const (
 	CodeInitFailed         = "init_failed"
 	CodeAPINotLoopback     = "api_not_loopback"
 	CodeGatewayNotLoopback = "gateway_not_loopback"
+	CodeGatewayNotReadonly = "gateway_not_readonly"
 	CodePanelPortConflict  = "panel_port_conflict"
 	CodePortInUse          = "port_in_use"
 	CodeRepoBusy           = "repo_busy"
@@ -29,12 +30,22 @@ const detailLimit = 2000
 
 // Overview is the JSON body of GET /api/node and the node action routes.
 // It has no Kubo API URL, gateway URL, multiaddr, or port.
+// Activity is set only while the node is up, and only by the HTTP handler.
 type Overview struct {
 	State    string     `json:"state"`
 	PeerID   *string    `json:"peerId"`
 	Version  *string    `json:"version"`
 	RepoPath string     `json:"repoPath"`
 	Error    *NodeError `json:"error"`
+	Activity *Activity  `json:"activity,omitempty"`
+}
+
+// Activity is peer count and bandwidth rates. Addresses are not included.
+// A nil rate means the bandwidth reporter did not answer.
+type Activity struct {
+	Peers   *int     `json:"peers,omitempty"`
+	RateIn  *float64 `json:"rateIn,omitempty"`
+	RateOut *float64 `json:"rateOut,omitempty"`
 }
 
 // NodeError is a stable code plus a short detail. The UI translates code.
