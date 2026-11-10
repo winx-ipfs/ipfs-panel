@@ -52,6 +52,30 @@ func TestParseTarget(t *testing.T) {
 	}
 }
 
+func TestInspect(t *testing.T) {
+	v0, err := Inspect(sampleCIDv0())
+	if err != nil || v0.Version != 0 || v0.Codec != 0x70 || v0.Hash != 0x12 {
+		t.Fatalf("v0 %+v err %v", v0, err)
+	}
+	v1, err := Inspect(sampleCIDv1())
+	if err != nil || v1.Version != 1 || v1.Codec != 0x55 || v1.Hash != 0x12 {
+		t.Fatalf("v1 %+v err %v", v1, err)
+	}
+	dagpb := "b" + encodeBase32(append([]byte{0x01, 0x70, 0x12, 0x20}, bytes.Repeat([]byte{0x11}, 32)...))
+	pb, err := Inspect(dagpb)
+	if err != nil || pb.Version != 1 || pb.Codec != 0x70 || pb.Hash != 0x12 {
+		t.Fatalf("dag-pb %+v err %v", pb, err)
+	}
+	// The inlined "hello world" CID from ipfs-webui's explore test.
+	id, err := Inspect("bafkqac3imvwgy3zao5xxe3de")
+	if err != nil || id.Version != 1 || id.Codec != 0x55 || id.Hash != 0x00 {
+		t.Fatalf("identity %+v err %v", id, err)
+	}
+	if _, err := Inspect("/ipfs/" + sampleCIDv1() + "/docs"); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestValidName(t *testing.T) {
 	if err := ValidName(""); err != nil {
 		t.Fatal(err)

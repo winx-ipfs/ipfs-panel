@@ -1,0 +1,263 @@
+.explore-page {
+  width: min(960px, 100%);
+  display: grid;
+  gap: 16px;
+}
+
+.explore-page a.ui-btn {
+  text-decoration: none;
+}
+
+.explore-form {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+}
+
+.explore-form .ui-field {
+  width: 100%;
+}
+
+.explore-form .ui-btn {
+  min-height: 44px;
+}
+
+.explore-idle,
+.explore-note,
+.explore-focus {
+  margin: 14px 0 0;
+  color: var(--muted);
+  line-height: var(--leading-body);
+}
+
+.explore-problem {
+  margin: 14px 0 0;
+  color: var(--danger);
+  line-height: var(--leading-body);
+}
+
+.explore-loading {
+  display: grid;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.explore-crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.explore-crumbs li {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.explore-sep {
+  margin: 0 6px;
+  color: var(--muted);
+}
+
+.explore-crumb {
+  max-width: 100%;
+  padding: 4px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+button.explore-crumb {
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.explore-crumb.is-current {
+  color: var(--text);
+}
+
+.explore-crumbs {
+  margin-bottom: 16px;
+}
+
+.explore-kind {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+:lang(zh) .explore-kind,
+:lang(zh-Hans) .explore-kind {
+  letter-spacing: 0;
+}
+
+.explore-meta {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.explore-lead {
+  margin: 8px 0 0;
+  max-width: 62ch;
+  line-height: var(--leading-body);
+}
+
+.explore-facts {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0 0;
+}
+
+.explore-fact dt {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.explore-fact dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0;
+}
+
+.explore-fact code {
+  flex: 1 1 16rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.explore-well {
+  margin: 16px 0 0;
+  max-height: 240px;
+  padding: 12px 14px;
+  overflow: auto;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.explore-links {
+  margin-top: 22px;
+}
+
+.explore-links h3 {
+  margin: 0 0 8px;
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.explore-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.explore-table th {
+  padding: 8px 10px 8px 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-align: left;
+}
+
+.explore-table td {
+  padding: 8px 12px 8px 0;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.explore-name {
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.explore-name:hover,
+button.explore-crumb:hover {
+  color: var(--primary);
+}
+
+.explore-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.explore-cards {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.explore-card {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.explore-card-name {
+  color: var(--primary);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.explore-card-meta {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.explore-actions {
+  margin-top: 18px;
+}
+
+@media (max-width: 719px) {
+  .explore-table {
+    display: none;
+  }
+
+  .explore-cards {
+    display: grid;
+  }
+}

@@ -24,6 +24,7 @@ What is here:
 - add, download, rename, move, copy, and delete files on that node, through its mutable file system
 - see what the node is pinning, pin a content ID or a file, and unpin, without the command line
 - pick one of four scenes, see what it will change, apply it, and revert it, without opening Kubo's JSON
+- look inside a content ID: what the block is, and what it points at
 
 What is not here:
 
@@ -62,6 +63,12 @@ Done when you can answer "what is pinned?" and remove one pin without the CLI. T
 Pick a scene. The panel writes the Kubo config for that scene and says, in one sentence per language, what it changed. The spec is [Scenes](design/scenes.md).
 
 Done when a common setup does not mean opening the JSON file. That is the current tree: a quiet node, sharing a folder, pinning a set of content, and a read-only public gateway.
+
+## Explore
+
+Look inside one content ID. The spec is [Explore](design/explore.md). It is webui parity, not a new numbered slice.
+
+Done when a beginner can paste a content ID or an `/ipfs/` path, see the block, and open a link, in English and in 中文. That is the current tree. A peers page and a raw config editor are still not here. The raw editor waits.
 
 ## 6. Expert mode, then more than one node
 

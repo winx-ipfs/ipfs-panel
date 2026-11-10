@@ -35,6 +35,8 @@ docs = [
     "docs/design/scenes.zh-CN.md",
     "docs/design/webui-parity.md",
     "docs/design/webui-parity.zh-CN.md",
+    "docs/design/explore.md",
+    "docs/design/explore.zh-CN.md",
     "docs/DESIGN-node-lifecycle.md",
     "docs/DESIGN-node-lifecycle.zh-CN.md",
 ]
