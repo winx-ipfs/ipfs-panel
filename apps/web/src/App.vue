@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { Menu } from '@lucide/vue'
+import { AnimatePresence, motion } from 'motion-v'
 import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterView, useRoute } from 'vue-router'
+import { useMotion } from '@/lib/motion'
 import BrandMark from '@/components/BrandMark.vue'
 import Dialog from '@/components/Dialog.vue'
 import IconButton from '@/components/IconButton.vue'
@@ -14,6 +16,7 @@ import { useAuthStore } from '@/stores/auth'
 const { t } = useI18n()
 const route = useRoute()
 const auth = useAuthStore()
+const { enter, shown, transition } = useMotion()
 
 const navOpen = ref(false)
 const narrow = ref(false)
@@ -61,7 +64,20 @@ watchEffect(() => {
       <LocaleThemeControls />
     </header>
     <main id="content" class="gate-main" tabindex="-1">
-      <RouterView v-if="authReady" />
+      <RouterView v-if="authReady" v-slot="{ Component }">
+        <AnimatePresence mode="wait">
+          <motion.div
+            :key="route.fullPath"
+            class="route-frame"
+            :initial="enter"
+            :animate="shown"
+            :exit="{ opacity: 0 }"
+            :transition="transition"
+          >
+            <component :is="Component" />
+          </motion.div>
+        </AnimatePresence>
+      </RouterView>
       <div v-else class="gate-column gate-loading">
         <span class="gate-badge">
           <BrandMark />
@@ -89,7 +105,20 @@ watchEffect(() => {
         </div>
       </header>
       <main id="content" class="main" tabindex="-1">
-        <RouterView />
+        <RouterView v-slot="{ Component }">
+          <AnimatePresence mode="wait">
+            <motion.div
+              :key="route.fullPath"
+              class="route-frame"
+              :initial="enter"
+              :animate="shown"
+              :exit="{ opacity: 0 }"
+              :transition="transition"
+            >
+              <component :is="Component" />
+            </motion.div>
+          </AnimatePresence>
+        </RouterView>
       </main>
     </div>
     <Dialog

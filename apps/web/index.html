@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#e8ebf0" />
+    <meta name="theme-color" content="#f9fafb" />
     <title>ipfs-panel</title>
     <script>
       try {
@@ -14,7 +14,7 @@
         document.documentElement.dataset.theme = theme
         document.documentElement.style.colorScheme = theme
         var meta = document.querySelector('meta[name="theme-color"]')
-        if (meta) meta.setAttribute('content', theme === 'dark' ? '#12161b' : '#e8ebf0')
+        if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a0a0a' : '#f9fafb')
       } catch (e) {}
     </script>
   </head>

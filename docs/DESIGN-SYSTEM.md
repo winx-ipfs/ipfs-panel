@@ -6,21 +6,19 @@ This is the visual foundation for **ipfs-panel**. The product name stays ipfs-pa
 
 ## What this screen is
 
-A self-hosted open-source ops panel for one Kubo node, in the same family as 宝塔 (BaoTa) and 1Panel. Someone installs it and operates the node from a browser. It is not a SaaS marketing console, and it is not a pastel product site.
+A self-hosted open-source ops panel for one Kubo node. Someone installs it and operates the node from a browser. The same UI is the local seat now and the remote seat later. [Vision](VISION.md) already says that. Do not design a second shell for one of them.
 
-The same UI is the local seat now and the remote seat later. [Vision](VISION.md) already says that: one page, two places you can sit. Do not design a second, more "product" shell for one of them. The top bar says "This machine" while the panel is on the machine that runs Kubo. Remote use, when it exists, keeps this chrome.
+The visual language is [winx.run](https://www.winx.run/), not a generic server panel and not the official IPFS webui. Density can be like 1Panel: a toolbar and a tight table. The colors, the type, and the sidebar cannot. Do not copy 宝塔 or 1Panel trademarks, icons, or layout. Do not use their charcoal rail. Do not use IPFS navy `#073A53` or webui teal `#6BC4CE`. Do not wash the page in mint.
 
-Take the genre from those panels: a solid dark rail, a neutral work surface, compact tables and toolbars, one accent, status you can read without a legend. Do not copy their names, icons, illustrations, or layout pixel for pixel.
-
-What this is not: a Vercel, Linear, or Raycast dashboard. No mint wash, no oversized title, no pill controls, no card that floats in a field of empty color. Density is the normal page, not a later expert mode. Beginners still get one sentence and one next step. They do not get a landing page.
+What this is not: a SaaS marketing site. No hero, no oversized title, no capsule controls, no card floating in a field of empty color. Beginners still get one sentence and one next step.
 
 ## Brand
 
-The mark is the WinX hexagon from [winx-ipfs/Mirror-Web](https://github.com/winx-ipfs/Mirror-Web) `src/assets/winx.svg`, `winx-light.svg`, and `winx-dark.svg`. The in-app mark keeps that geometry and uses `currentColor`, with a heavier stroke so it still reads at 28px. The favicon is a simplified hexagon on a dark tile, drawn in the same teal as `--sidebar-accent`. The full drawing turns to noise at 16px.
+The mark is the WinX hexagon from [winx-ipfs/Mirror-Web](https://github.com/winx-ipfs/Mirror-Web) `src/assets/winx.svg`, `winx-light.svg`, and `winx-dark.svg`. The in-app mark keeps that geometry and uses `currentColor`, with a heavier stroke so it still reads at 28px. The favicon is a simplified hexagon on `#0A0A0A`, stroked in `#20FFA9`. The full drawing turns to noise at 16px.
 
-The accent is a restrained teal, in the neighborhood of the IPFS cube, not a neon mint. Light theme primary is `#0e6b70`. On a dark surface the button and the mark use `#3ec4bc` with dark ink, because the light-theme teal is too dim there. `#20ffa9` is not a token. It fails as text on white, and as a button it reads as a lifestyle product.
+`#20FFA9` is firefly green. It is the logo, the selected bar, a pale tint (`#ECFDF5`, and `#CCFBF1` when a step between is needed), and small tags. It is about 1.3:1 on white, so it is never body text and never a button fill. Icon green is `#059669`. Badge text is `#047857` on `#ECFDF5`.
 
-Running is a separate green (`--success`). The accent means "do this". Green means "the node is up". They are not the same color.
+The primary button is black `#171717` with white ink. In the dark theme the same role flips: a near-white button with near-black ink. The quiet button is a white surface with a hairline. Restart stays quiet. Red still means the node needs attention. Running is `#047857` on `#ECFDF5`, a status, not a second brand fill.
 
 ## Voice
 
@@ -34,13 +32,11 @@ The page sounds like a tool.
 
 ## What we did not adopt
 
-The components are in-house. CSS variables hold the tokens. Vue components in `apps/web/src/components` are thin.
+Shared controls are [shadcn-vue](https://shadcn-vue.com/) copied into `apps/web/src/components/ui`, then themed. The style in `components.json` is Nova (`reka-nova`). Rhea is an official style, and it was not used: its default buttons are 16px rounded, which fights the radii below. Product components in `apps/web/src/components` (`Button`, `Card`, `Input`, `Dialog`, `Table`) sit on those primitives. Do not keep a second visual language beside them.
 
-Naive UI and Element Plus were set aside. They ship a second visual language and a large kit. This panel draws a small set of its own, in the ops-panel genre, without taking on their themes or markup. Restyling a kit would cost more than keeping the controls we already have.
+Naive UI, Element Plus, Ant Design Vue, HeroUI, and DaisyUI stay out. [Contributing](../CONTRIBUTING.md) asks for a yes before a new framework. Tailwind, shadcn-vue, and [Motion for Vue](https://motion.dev/docs/vue) (`motion-v`) are that yes. The select stays a native `<select>`, so a phone gets the system picker.
 
-reka-ui (Radix Vue) was the serious alternative. It would have given a focus trap and a listbox. The set here is small enough to own. The select is a native `<select>`, so a phone gets the system picker and a Chinese IME is not our problem. The dialog's focus trap is local. A headless kit stays the escape hatch if a later slice needs a real combobox. It is not a dependency today.
-
-[Contributing](../CONTRIBUTING.md) asks for a yes before a new framework. This change does not add one.
+Motion covers a button press, a dialog, a toast, a list entering, and the view change. 150–250ms, ease-out, no bounce and no spring. `prefers-reduced-motion: reduce` sets the duration to zero. Do not add a second motion switch.
 
 Icons are [Lucide](https://lucide.dev) via `@lucide/vue`. Import one icon at a time so the bundle can drop the rest. Default size is 18px, stroke width 1.75. Decorative icons are `aria-hidden`. If an icon is the only content of a button, the button has an accessible name.
 
@@ -56,35 +52,34 @@ Mono, for the peer id and the folder path:
 
 Tokens live in `apps/web/src/styles/tokens.css` on `:root`, and again under `:root[data-theme="dark"]`. Names are semantic. Do not use a raw hex in a component. `apps/web/src/stores/theme.ts` and the script in `index.html` copy `--bg` into `theme-color`, because that script runs before CSS.
 
-The canvas is a cool neutral gray. The sidebar is its own charcoal in both themes, darker than the canvas in the dark theme so the rail still separates. Surfaces are white in the light theme and a lifted neutral in the dark theme. There is no green in the canvas, the border, or the muted text.
+The light canvas is paper gray. Cards and the sidebar are white. The dark theme is the same roles on layered grays: the page is near black, cards lift one step, and the sidebar sits between them. Green does not paint the canvas.
 
 | Token | Light | Dark | Use |
 | --- | --- | --- | --- |
-| `--bg` | `#e8ebf0` | `#12161b` | Page canvas |
-| `--surface` | `#ffffff` | `#1b2128` | Cards, top bar, dialogs |
-| `--surface-sunken` | `#f4f6f8` | `#151a20` | Wells, table heads, badges |
-| `--border` | `#d5dbe3` | `#2e3741` | Hairlines |
-| `--border-strong` | `#b4bdca` | `#42505c` | Inputs, quiet buttons |
-| `--text` | `#1b2128` | `#e8eef3` | Body |
-| `--muted` | `#4e5966` | `#b0bac4` | Secondary text |
-| `--primary` | `#0e6b70` | `#3ec4bc` | The one accent, and primary buttons |
-| `--primary-ink` | `#ffffff` | `#062421` | Text on a primary button |
-| `--primary-soft` | `#e5f3f3` | `#163431` | Selected chips, soft fills in the workspace |
-| `--mark` | `#0e6b70` | `#3ec4bc` | The mark on a light or dark surface |
-| `--success` / `--success-soft` | `#0e7a42` / `#e6f4ec` | `#3dbe86` / `#143028` | Running |
+| `--bg` | `#f9fafb` | `#0a0a0a` | Page canvas |
+| `--surface` | `#ffffff` | `#171717` | Cards, top bar, dialogs |
+| `--surface-sunken` | `#f3f4f6` | `#111111` | Wells, table heads |
+| `--border` | `#e5e5e5` | `#2a2a2a` | Hairlines |
+| `--border-strong` | `#d4d4d4` | `#3a3a3a` | Inputs, quiet buttons |
+| `--text` | `#0a0a0a` | `#fafafa` | Body |
+| `--muted` | `#6b7280` | `#a3a3a3` | Secondary text |
+| `--primary` | `#171717` | `#fafafa` | Primary buttons. Not green |
+| `--primary-ink` | `#ffffff` | `#171717` | Text on a primary button |
+| `--primary-soft` | `#ecfdf5` | `rgba(32, 255, 169, 0.12)` | Selected chips and the selected nav wash |
+| `--mark` / `--brand` | `#20ffa9` | `#20ffa9` | Logo, selected bar, favicon stroke |
+| `--brand-icon` / `--brand-ink` | `#059669` / `#047857` | `#20ffa9` | Icons and badge text on a pale wash |
+| `--success` / `--success-soft` | `#047857` / `#ecfdf5` | `#20ffa9` / the pale wash | Running |
 | `--warning` / `--warning-soft` | `#8a5a00` / `#fff4d6` | `#f5c16c` / `#3a2c12` | Stopping, unreachable |
-| `--danger` / `--danger-soft` | `#b42318` / `#fdeceb` | `#ffb4ab` / `#3a1c1a` | Needs attention |
+| `--danger` / `--danger-soft` | `#b42318` / `#fdecec` | `#ffb4ab` / `#3a1c1a` | Needs attention |
 | `--info` / `--info-soft` | `#0f5c86` / `#e7f2f8` | `#9fd4f5` / `#122833` | Starting |
-| `--neutral` / `--neutral-soft` | `#4e5966` / `#e8ecf1` | `#c5ced6` / `#2a323a` | Stopped |
-| `--focus` | `#0e6b70` | `#3ec4bc` | Focus ring on the workspace |
-| `--sidebar` | `#1a2129` | `#0e1216` | Rail and the narrow-screen drawer |
-| `--sidebar-text` | `#e8edf2` | `#e8edf2` | Rail labels |
-| `--sidebar-muted` | `#b4bec8` | `#b4bec8` | Rail secondary text |
-| `--sidebar-hover` | `#262f39` | `#1c242c` | Rail hover |
-| `--sidebar-active` | `#1d3336` | `#163033` | Selected section |
-| `--sidebar-active-text` | `#e8fffc` | `#e8fffc` | Selected section label |
-| `--sidebar-accent` | `#3ec4bc` | `#3ec4bc` | Rail mark, selected bar, favicon stroke |
-| `--sidebar-focus` | `#8ee8e0` | `#8ee8e0` | Focus ring on the rail |
+| `--neutral` / `--neutral-soft` | `#6b7280` / `#f3f4f6` | `#d4d4d4` / `#1f1f1f` | Stopped |
+| `--sidebar` | `#ffffff` | `#111111` | Rail and the narrow-screen drawer |
+| `--sidebar-text` | `#0a0a0a` | `#fafafa` | Rail labels |
+| `--sidebar-muted` | `#6b7280` | `#a3a3a3` | Rail secondary text |
+| `--sidebar-active` | `#ecfdf5` | the pale wash | Selected section |
+| `--sidebar-accent` | `#20ffa9` | `#20ffa9` | The 3px bar on the selected section |
+
+Text and muted text are at least 4.5:1 on `--bg` and `--surface`. Primary button ink is at least 4.5:1 on `--primary`. Badge text is at least 4.5:1 on its wash. `#20FFA9` is not used as text on white.
 
 Text and muted text are at least 4.5:1 on `--bg`, `--surface`, `--surface-sunken`, and the soft fills they sit on. Primary button ink is at least 4.5:1 on `--primary`. The status badge uses the same rule against its soft fill. Rail text and rail muted text are at least 4.5:1 on `--sidebar`, `--sidebar-hover`, and `--sidebar-active`.
 
@@ -99,7 +94,7 @@ Node state colors, always with a word, never color alone:
 | `failed` | danger |
 | manager unreachable | warning |
 
-Stopped is not an error. Stopping is not a failure. The primary button stays the accent. It is not red. Red means the node needs attention.
+Stopped is not an error. Stopping is not a failure. The primary button stays black in the light theme and near-white in the dark theme. It is not green, and it is not red. Red means the node needs attention.
 
 ## Type, space, radius, shadow, motion
 
@@ -111,20 +106,24 @@ Body text is 14px. That is the size a Chinese ops panel is read at, and Inter at
 | `--text-sm` | 0.8125rem (13px) |
 | `--text-md` | 0.875rem (14px) |
 | `--text-lg` | 1rem (16px) |
-| `--text-xl` | 1.125rem (18px) |
-| `--text-2xl` | 1.25rem (20px) |
-| `--leading-body` | 1.5 |
+| `--text-xl` | 1rem (16px), a section |
+| `--text-2xl` | 1.375rem (22px), the page title, semibold |
+| `--leading-body` | 1.571 (22px on 14px) |
 | `--space-1` … `--space-12` | 4, 8, 12, 16, 20, 24, 32, 40, 48 |
-| `--radius-sm` / `md` / `lg` | 4 / 6 / 8 |
-| `--radius-full` | 999px |
-| `--shadow-sm` | a 1px hairline lift on a card |
-| `--shadow-md` | a dialog or menu, enough to separate it from the page |
-| `--duration-fast` / `--duration` | 120ms / 180ms |
+| `--radius-sm` | 6px, tags |
+| `--radius-md` | 8px, buttons and nav items |
+| `--radius-field` | 10px, inputs |
+| `--radius-lg` | 12px, cards and table containers |
+| `--radius-overlay` | 16px, dialogs |
+| `--radius-full` | 999px, the switch, the status dot, and the password meter only |
+| `--shadow-sm` | a 1px lift on a card |
+| `--shadow-md` | a dialog or menu |
+| `--duration-fast` / `--duration` | 150ms / 200ms |
 | `--ease` | `cubic-bezier(0.2, 0, 0, 1)` |
 
-The page title uses `--text-2xl` (20px). The node sentence uses `--text-xl` (18px). Neither uses negative tracking. Negative tracking on a short title is a marketing habit. Under `:lang(zh)` tracking stays 0. Do not tighten Chinese.
+The page title is 22px semibold. A section title is 16px semibold. Body and table text are 14px with a 22px line height. Captions are 12px. Identifiers (content IDs, peer ids, paths) are 13px monospace. Neither heading uses negative tracking. Under `:lang(zh)` tracking stays 0. Do not tighten Chinese. Do not use Montserrat or IBM Plex Sans as the UI face.
 
-`--radius-full` is only the switch, the status dot, and the password meter. Buttons, inputs, cards, badges, toasts, menus, and the language segment use `--radius-sm` or `--radius-md`. A pill is a marketing control.
+Radii are concentric: the outer control is rounder than the control inside it. One radius for the whole page is wrong. A capsule is wrong. The switch track stays fully rounded because that is the control, not the chrome.
 
 Cards separate from the canvas with a hairline and `--shadow-sm`. They do not float on a large soft shadow. Dialogs and menus use `--shadow-md`.
 
@@ -136,9 +135,10 @@ Tighter than a marketing page, looser than a 2005 control panel.
 
 - Hit targets for actions and icon buttons stay at least 40px. Primary actions on the node card stay 44px tall. Density comes from type, radius, padding, and how much of the workspace the column uses. It does not come from shrinking a button until it is hard to hit.
 - Cards pad 16px, 14px on a narrow screen.
-- Table cells pad 8px by 10px. The header row uses `--surface-sunken` and 13px type. It is not uppercase and it is not letter-spaced.
-- Toolbars are one row of rectangular controls. Sort and filter chips use `--radius-sm`. The selected chip uses `--primary-soft` and `--primary`.
-- The page header sits 12px above the work, with 4px between the title and the one-sentence description.
+- Table rows are 44px. The header row uses `--surface-sunken` and 13px type. It is not uppercase and it is not letter-spaced.
+- Toolbars are one row. Sort and filter chips use `--radius-md`. The selected chip uses `--primary-soft`.
+- Page inset is 20px. Card padding is 16px. The grid is 8px.
+- Settings is a grouped list: paper canvas, white cards, hairline separators, a quiet title. Files, node, and peers are a toolbar plus a dense table.
 - A form page is `min(920px, 100%)`, left-aligned. A list page (files, pins, peers, explore) and the scenes page are `min(1080px, 100%)`. From 1200px the node page is two columns inside `min(1080px, 100%)`. Prose stays inside about 40rem. The old 760px column left a wide empty field that read as a landing page.
 
 ## Components
@@ -147,7 +147,7 @@ All of them are in `apps/web/src/components`. Prefer these over a new one-off bu
 
 | Component | Use |
 | --- | --- |
-| `Button` | `primary` is the one obvious action. `quiet` is the second action (Restart). `danger` is rare and means something hard to undo. `ghost` is for low-emphasis actions in a bar. Radius is `--radius-sm`. |
+| `Button` | `primary` is the one obvious action, black in the light theme. `quiet` is the second action (Restart), white with a hairline. `danger` is rare. `ghost` is a bar action. Radius is 8px. Press scales to 0.98. |
 | `IconButton` | Needs a `label`. The label is the accessible name. Pair it with `Tooltip` when the name also helps sighted people. |
 | `Card` | One subject on a bordered surface. Status is a `StatusPill`, not a stripe painted on the card. |
 | `StatusPill` | A word plus a dot, drawn as a small badge (`--radius-sm`), not a capsule. Tones match the color table. `pulse` only for starting and stopping. |
@@ -155,7 +155,7 @@ All of them are in `apps/web/src/components`. Prefer these over a new one-off bu
 | `Select` | Native select. Two or more options that should use the platform picker. Language on the Settings page. The top bar keeps a two-way segment for English / 中文, because two choices do not need a menu. The segment is rectangular. |
 | `Switch` | A boolean the person can flip immediately. Theme "match this device" is the example. The track stays fully rounded. That is the control, not chrome. |
 | `Tabs` | Real panels, not a radio by another name. Arrow keys move the tab. Settings uses General, Account, and About. The selected tab is an underline, not a pill. |
-| `Dialog` | `dialog` for a short decision. `drawer` for the narrow-screen nav. Escape closes. Focus returns to the opener. The title is required even when it is visually hidden. The drawer uses the rail colors, same as the sidebar. |
+| `Dialog` | `dialog` for a short decision, 16px radius. `drawer` for the narrow-screen nav, same surface as the sidebar. Escape closes. Focus returns to the opener. The title is required even when it is visually hidden. Open and close run 200ms. |
 | `Toast` | Short confirmation, `aria-live="polite"`. "Copied" is the one we show. Rectangular, not a pill. |
 | `Tooltip` | Extra name on hover and focus. Do not hide the only copy of a required sentence in a tooltip. |
 | `Skeleton` | The shape of the card while the first overview is in flight. Not a spinner on a blank page. |
@@ -184,10 +184,9 @@ Rules:
 
 ## Accessibility
 
-- Body text, muted text, and button ink meet WCAG AA (4.5:1). The focus ring is 2px, offset 2px, and uses `:focus-visible` so a mouse click does not leave a ring.
-- On the workspace the ring is `--focus`. On the rail and the drawer it is `--sidebar-focus`, because the workspace teal disappears on charcoal.
+- Body text, muted text, and button ink meet WCAG AA (4.5:1). Focus uses `:focus-visible` so a mouse click does not leave a ring. The ring is a soft `#20FFA9` glow, not a thick outline.
 - The first control is "Skip to content".
-- The narrow-screen nav is a dialog: labelled, modal, Escape to close, focus trapped, focus restored. It is the same dark rail as the sidebar.
+- The narrow-screen nav is a dialog: labelled, modal, Escape to close, focus trapped, focus restored. It uses the same sidebar surface as the wide rail.
 - Tabs use `tab`, `tablist`, and `tabpanel`. The switch uses `role="switch"` and `aria-checked`.
 - Status is a sentence in a `role="status"` element, plus the badge. The badge is not the only carrier.
 - `html lang` is `en` or `zh-Hans`, from the locale store.
@@ -203,8 +202,8 @@ Rules:
 
 ## Shell
 
-- Sidebar from 880px up, 220px wide, charcoal in both themes. Below that, a menu button opens the drawer, and the drawer is the same rail.
-- The selected section has a teal bar on the inline-start edge and `--sidebar-active` behind the label. Hover is a lighter charcoal, not a white pill.
+- Sidebar from 880px up, 220px wide. In the light theme it is white, with a hairline on the inline-end edge. It is not charcoal. Below 880px, a menu button opens the drawer.
+- The selected section has a `#20FFA9` bar on the inline-start edge and `#ECFDF5` behind the label. Hover is a gray wash, not a capsule.
 - The rail does not scroll away on a long page. It stays `100vh`.
 - Top bar: a white (or dark-surface) strip with a hairline under it, 48px at rest. It holds "This machine", the English / 中文 segment, and a theme button. The button cycles light, dark, and match-device. Its icon and, from 720px up, its label show the current mode. The accessible name and the tooltip say the same mode. Both choices persist in `localStorage` (`ipfs-panel.lang`, `ipfs-panel.theme`). The theme is applied from a small script in `index.html` before paint, so the first frame is not the wrong theme. The segment and the theme button are rectangular. They do not float as pills.
 - From 1200px the node page is two columns. The status card is on the left. On the right, while the node is up, a Connection card shows the version and a shortened peer id. The copy button copies the full peer id. The overview does not include a gateway address or an API address, so the card does not invent them. Otherwise the right card explains what a node is and links to the IPFS docs.

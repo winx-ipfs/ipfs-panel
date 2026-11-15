@@ -4,6 +4,7 @@ import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 import Button from '@/components/Button.vue'
+import MotionIn from '@/components/MotionIn.vue'
 import Card from '@/components/Card.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import IconButton from '@/components/IconButton.vue'
@@ -251,56 +252,58 @@ onUnmounted(() => {
         <p v-if="shown.length === 0" class="peers-note">{{ t('peersNoMatch') }}</p>
 
         <template v-else>
-          <table class="peers-table">
-            <caption class="sr-only">{{ t('peersTitle') }}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{{ t('peersColPeer') }}</th>
-                <th scope="col">{{ t('peersColDirection') }}</th>
-                <th scope="col">{{ t('peersColLatency') }}</th>
-                <th scope="col">{{ t('peersColSoftware') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="peer in shown" :key="peer.peerId">
-                <td>
-                  <div class="peers-id">
-                    <code>{{ peer.peerId }}</code>
-                    <IconButton :label="t('peersCopyId')" @click="copyText(peer.peerId)">
-                      <Copy :size="16" :stroke-width="1.75" aria-hidden="true" />
-                    </IconButton>
+          <MotionIn>
+            <table class="peers-table">
+              <caption class="sr-only">{{ t('peersTitle') }}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{{ t('peersColPeer') }}</th>
+                  <th scope="col">{{ t('peersColDirection') }}</th>
+                  <th scope="col">{{ t('peersColLatency') }}</th>
+                  <th scope="col">{{ t('peersColSoftware') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="peer in shown" :key="peer.peerId">
+                  <td>
+                    <div class="peers-id">
+                      <code>{{ peer.peerId }}</code>
+                      <IconButton :label="t('peersCopyId')" @click="copyText(peer.peerId)">
+                        <Copy :size="16" :stroke-width="1.75" aria-hidden="true" />
+                      </IconButton>
+                    </div>
+                  </td>
+                  <td>{{ directionText(peer) }}</td>
+                  <td>{{ latencyText(peer) }}</td>
+                  <td>{{ softwareText(peer) }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <ul class="peers-cards">
+              <li v-for="peer in shown" :key="`card-${peer.peerId}`">
+                <div class="peers-id">
+                  <code>{{ peer.peerId }}</code>
+                  <IconButton :label="t('peersCopyId')" @click="copyText(peer.peerId)">
+                    <Copy :size="16" :stroke-width="1.75" aria-hidden="true" />
+                  </IconButton>
+                </div>
+                <dl>
+                  <div>
+                    <dt>{{ t('peersColDirection') }}</dt>
+                    <dd>{{ directionText(peer) }}</dd>
                   </div>
-                </td>
-                <td>{{ directionText(peer) }}</td>
-                <td>{{ latencyText(peer) }}</td>
-                <td>{{ softwareText(peer) }}</td>
-              </tr>
-            </tbody>
-          </table>
-          <ul class="peers-cards">
-            <li v-for="peer in shown" :key="`card-${peer.peerId}`">
-              <div class="peers-id">
-                <code>{{ peer.peerId }}</code>
-                <IconButton :label="t('peersCopyId')" @click="copyText(peer.peerId)">
-                  <Copy :size="16" :stroke-width="1.75" aria-hidden="true" />
-                </IconButton>
-              </div>
-              <dl>
-                <div>
-                  <dt>{{ t('peersColDirection') }}</dt>
-                  <dd>{{ directionText(peer) }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t('peersColLatency') }}</dt>
-                  <dd>{{ latencyText(peer) }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t('peersColSoftware') }}</dt>
-                  <dd>{{ softwareText(peer) }}</dd>
-                </div>
-              </dl>
-            </li>
-          </ul>
+                  <div>
+                    <dt>{{ t('peersColLatency') }}</dt>
+                    <dd>{{ latencyText(peer) }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ t('peersColSoftware') }}</dt>
+                    <dd>{{ softwareText(peer) }}</dd>
+                  </div>
+                </dl>
+              </li>
+            </ul>
+          </MotionIn>
         </template>
       </Card>
     </template>

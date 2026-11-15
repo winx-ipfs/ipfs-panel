@@ -4,6 +4,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 import Button from '@/components/Button.vue'
+import MotionIn from '@/components/MotionIn.vue'
 import Card from '@/components/Card.vue'
 import Dialog from '@/components/Dialog.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -547,92 +548,94 @@ onUnmounted(() => document.removeEventListener('pointerdown', onPointer))
           :title="t('filesEmptyTitle')"
           :description="t('filesEmptyBody')"
         />
-        <table v-else class="files-table">
-          <caption class="sr-only">{{ t('filesTitle') }}</caption>
-          <thead>
-            <tr>
-              <th scope="col">{{ t('filesName') }}</th>
-              <th scope="col">{{ t('filesSize') }}</th>
-              <th scope="col">{{ t('filesCid') }}</th>
-              <th scope="col">{{ t('filesModified') }}</th>
-              <th scope="col"><span class="sr-only">{{ t('filesMenuLabel') }}</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="entry in sorted" :key="entry.name">
-              <th scope="row" class="files-name-cell">
-                <span class="files-name">
-                  <Folder v-if="entry.type === 'directory'" :size="18" :stroke-width="1.75" aria-hidden="true" />
-                  <FileText v-else :size="18" :stroke-width="1.75" aria-hidden="true" />
-                  <RouterLink
-                    v-if="entry.type === 'directory'"
-                    :to="hrefFor(entryPath(store.path, entry) || '/')"
-                    :aria-label="t('filesOpenFolder', { name: entry.name })"
-                  >
-                    {{ entry.name }}
-                  </RouterLink>
-                  <span v-else>{{ entry.name }}</span>
-                  <span class="sr-only">{{ entry.type === 'directory' ? t('filesFolder') : t('filesFile') }}</span>
-                </span>
-              </th>
-              <td class="files-size">
-                <span class="files-kicker" aria-hidden="true">{{ t('filesSize') }}</span>
-                {{ sizeText(entry) }}
-              </td>
-              <td class="files-cid">
-                <span class="files-kicker" aria-hidden="true">{{ t('filesCid') }}</span>
-                <code v-if="entry.cid">{{ shortenMiddle(entry.cid, 8, 6) }}</code>
-                <span v-else>{{ t('filesModifiedUnknown') }}</span>
-                <button v-if="entry.cid" type="button" class="files-text-btn" :aria-label="t('filesCopyCid')" @click="copyCid(entry)">
-                  {{ t('filesCopy') }}
-                </button>
-              </td>
-              <td class="files-time">
-                <span class="files-kicker" aria-hidden="true">{{ t('filesModified') }}</span>
-                {{ formatWhen(entry.modified) }}
-              </td>
-              <td class="files-meta">
-                <span class="sr-only">{{ t('filesSize') }} {{ sizeText(entry) }}, {{ t('filesModified') }} {{ formatWhen(entry.modified) }}</span>
-                <span aria-hidden="true">{{ sizeText(entry) }} · {{ formatWhen(entry.modified) }}</span>
-              </td>
-              <td class="files-actions">
-                <div class="files-menu-wrap">
-                  <IconButton :label="t('filesActions', { name: entry.name })" @click="toggleMenu(entry.name, $event)">
-                    <MoreHorizontal :size="18" :stroke-width="1.75" aria-hidden="true" />
-                  </IconButton>
-                  <div
-                    v-if="menuFor === entry.name"
-                    class="files-menu"
-                    role="menu"
-                    :aria-label="t('filesMenuLabel')"
-                    @keydown="onMenuKey"
-                  >
-                    <a
-                      v-if="entry.type === 'file'"
-                      role="menuitem"
-                      :href="downloadHref(entry)"
-                      :download="entry.name"
+        <MotionIn v-else>
+          <table class="files-table">
+            <caption class="sr-only">{{ t('filesTitle') }}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{{ t('filesName') }}</th>
+                <th scope="col">{{ t('filesSize') }}</th>
+                <th scope="col">{{ t('filesCid') }}</th>
+                <th scope="col">{{ t('filesModified') }}</th>
+                <th scope="col"><span class="sr-only">{{ t('filesMenuLabel') }}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="entry in sorted" :key="entry.name">
+                <th scope="row" class="files-name-cell">
+                  <span class="files-name">
+                    <Folder v-if="entry.type === 'directory'" :size="18" :stroke-width="1.75" aria-hidden="true" />
+                    <FileText v-else :size="18" :stroke-width="1.75" aria-hidden="true" />
+                    <RouterLink
+                      v-if="entry.type === 'directory'"
+                      :to="hrefFor(entryPath(store.path, entry) || '/')"
+                      :aria-label="t('filesOpenFolder', { name: entry.name })"
                     >
-                      {{ t('filesDownload') }}
-                    </a>
-                    <button v-if="entry.cid && localShareURL(store.localGateway, entry.cid)" type="button" role="menuitem" @click="copyLink(entry)">
-                      {{ t('filesLocalLink') }}
-                    </button>
-                    <button v-if="entry.cid" type="button" class="files-menu-cid" role="menuitem" :aria-label="t('filesCopyCid')" @click="copyCid(entry)">
-                      <span aria-hidden="true">{{ t('filesCopyCid') }}</span>
-                      <span class="files-menu-cid-value" aria-hidden="true">{{ entry.cid }}</span>
-                    </button>
-                    <button v-if="entry.cid" type="button" role="menuitem" @click="pinEntry(entry)">{{ t('filesPin') }}</button>
-                    <button type="button" role="menuitem" @click="openDialog('rename', entry)">{{ t('filesRename') }}</button>
-                    <button type="button" role="menuitem" @click="openDialog('move', entry)">{{ t('filesMove') }}</button>
-                    <button type="button" role="menuitem" @click="openDialog('copy', entry)">{{ t('filesDuplicate') }}</button>
-                    <button type="button" role="menuitem" class="is-danger" @click="openDialog('delete', entry)">{{ t('filesDelete') }}</button>
+                      {{ entry.name }}
+                    </RouterLink>
+                    <span v-else>{{ entry.name }}</span>
+                    <span class="sr-only">{{ entry.type === 'directory' ? t('filesFolder') : t('filesFile') }}</span>
+                  </span>
+                </th>
+                <td class="files-size">
+                  <span class="files-kicker" aria-hidden="true">{{ t('filesSize') }}</span>
+                  {{ sizeText(entry) }}
+                </td>
+                <td class="files-cid">
+                  <span class="files-kicker" aria-hidden="true">{{ t('filesCid') }}</span>
+                  <code v-if="entry.cid">{{ shortenMiddle(entry.cid, 8, 6) }}</code>
+                  <span v-else>{{ t('filesModifiedUnknown') }}</span>
+                  <button v-if="entry.cid" type="button" class="files-text-btn" :aria-label="t('filesCopyCid')" @click="copyCid(entry)">
+                    {{ t('filesCopy') }}
+                  </button>
+                </td>
+                <td class="files-time">
+                  <span class="files-kicker" aria-hidden="true">{{ t('filesModified') }}</span>
+                  {{ formatWhen(entry.modified) }}
+                </td>
+                <td class="files-meta">
+                  <span class="sr-only">{{ t('filesSize') }} {{ sizeText(entry) }}, {{ t('filesModified') }} {{ formatWhen(entry.modified) }}</span>
+                  <span aria-hidden="true">{{ sizeText(entry) }} · {{ formatWhen(entry.modified) }}</span>
+                </td>
+                <td class="files-actions">
+                  <div class="files-menu-wrap">
+                    <IconButton :label="t('filesActions', { name: entry.name })" @click="toggleMenu(entry.name, $event)">
+                      <MoreHorizontal :size="18" :stroke-width="1.75" aria-hidden="true" />
+                    </IconButton>
+                    <div
+                      v-if="menuFor === entry.name"
+                      class="files-menu"
+                      role="menu"
+                      :aria-label="t('filesMenuLabel')"
+                      @keydown="onMenuKey"
+                    >
+                      <a
+                        v-if="entry.type === 'file'"
+                        role="menuitem"
+                        :href="downloadHref(entry)"
+                        :download="entry.name"
+                      >
+                        {{ t('filesDownload') }}
+                      </a>
+                      <button v-if="entry.cid && localShareURL(store.localGateway, entry.cid)" type="button" role="menuitem" @click="copyLink(entry)">
+                        {{ t('filesLocalLink') }}
+                      </button>
+                      <button v-if="entry.cid" type="button" class="files-menu-cid" role="menuitem" :aria-label="t('filesCopyCid')" @click="copyCid(entry)">
+                        <span aria-hidden="true">{{ t('filesCopyCid') }}</span>
+                        <span class="files-menu-cid-value" aria-hidden="true">{{ entry.cid }}</span>
+                      </button>
+                      <button v-if="entry.cid" type="button" role="menuitem" @click="pinEntry(entry)">{{ t('filesPin') }}</button>
+                      <button type="button" role="menuitem" @click="openDialog('rename', entry)">{{ t('filesRename') }}</button>
+                      <button type="button" role="menuitem" @click="openDialog('move', entry)">{{ t('filesMove') }}</button>
+                      <button type="button" role="menuitem" @click="openDialog('copy', entry)">{{ t('filesDuplicate') }}</button>
+                      <button type="button" role="menuitem" class="is-danger" @click="openDialog('delete', entry)">{{ t('filesDelete') }}</button>
+                    </div>
                   </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </MotionIn>
       </div>
     </Card>
 

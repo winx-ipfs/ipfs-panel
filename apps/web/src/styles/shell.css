@@ -108,7 +108,7 @@
   gap: 10px;
   min-height: 40px;
   padding: 6px 10px 6px 8px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   border-inline-start: 3px solid transparent;
   color: var(--sidebar-text);
   text-decoration: none;
@@ -130,7 +130,7 @@
 }
 
 .nav-link.active svg {
-  color: var(--sidebar-accent);
+  color: var(--brand-icon);
 }
 
 .nav-link:hover {
@@ -314,7 +314,11 @@
 
 .main {
   flex: 1;
-  padding: 16px 20px 28px;
+  padding: 20px;
+}
+
+.route-frame {
+  width: 100%;
 }
 
 .page {
