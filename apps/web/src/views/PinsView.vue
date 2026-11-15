@@ -435,7 +435,7 @@ onUnmounted(() => {
         :title="t('pinsNoMatchTitle')"
         :description="t('pinsNoMatchBody')"
       />
-      <MotionIn v-else>
+      <MotionIn v-else class="work-scroll">
         <table class="pins-table">
           <caption class="sr-only">{{ t('pinsTitle') }}</caption>
           <thead>

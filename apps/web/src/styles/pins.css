@@ -12,6 +12,9 @@
   gap: 8px;
   align-items: center;
   justify-content: space-between;
+  margin: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .pins-toolbar-main,

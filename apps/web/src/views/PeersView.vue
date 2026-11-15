@@ -224,6 +224,17 @@ onUnmounted(() => {
             :hint="t('peersAddressHint')"
             :error="fieldError"
           />
+          <Input
+            v-if="store.peers.length > 0"
+            v-model="query"
+            class="peers-filter"
+            name="peer-filter"
+            autocomplete="off"
+            :spellcheck="false"
+            :label="t('peersFilterLabel')"
+            :hint="t('peersFilterHint')"
+            @keydown.escape="query = ''"
+          />
           <Button class="peers-connect" type="submit" variant="primary" :disabled="!canConnect">
             {{ connecting ? t('peersConnecting') : t('peersConnect') }}
           </Button>
@@ -235,22 +246,8 @@ onUnmounted(() => {
           <p v-else-if="!filtering" class="peers-summary">{{ t('peersSummary', { count: store.total }) }}</p>
           <p v-if="store.truncated && !filtering" class="peers-note">{{ t('peersTruncated', { shown: store.peers.length, total: store.total }) }}</p>
           <p v-if="listError" class="peers-problem">{{ listError }}</p>
-
-          <div class="peers-filter">
-            <Input
-              v-model="query"
-              name="peer-filter"
-              autocomplete="off"
-              :spellcheck="false"
-              :label="t('peersFilterLabel')"
-              :hint="t('peersFilterHint')"
-              @keydown.escape="query = ''"
-            />
-          </div>
-
           <p v-if="shown.length === 0" class="peers-note">{{ t('peersNoMatch') }}</p>
-
-          <template v-else>
+          <div v-else class="work-scroll">
             <MotionIn>
               <table class="peers-table">
                 <caption class="sr-only">{{ t('peersTitle') }}</caption>
@@ -303,7 +300,7 @@ onUnmounted(() => {
                 </li>
               </ul>
             </MotionIn>
-          </template>
+          </div>
         </template>
       </Card>
     </template>

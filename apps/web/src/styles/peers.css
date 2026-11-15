@@ -10,9 +10,16 @@
 
 .peers-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1.3fr) minmax(160px, 0.8fr) auto;
   gap: 8px;
   align-items: start;
+  margin: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.peers-toolbar:not(:has(.peers-filter)) {
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .peers-address,
@@ -65,9 +72,16 @@
   gap: 12px;
 }
 
+.peers-summary,
+.peers-note,
+.peers-empty,
+.peers-problem {
+  padding-inline: 12px;
+}
+
 .peers-table {
   width: 100%;
-  margin-top: 8px;
+  margin-top: 0;
   border-collapse: collapse;
 }
 

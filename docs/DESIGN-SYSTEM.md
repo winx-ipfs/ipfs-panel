@@ -138,7 +138,8 @@ Tighter than a marketing page, looser than a 2005 control panel.
 - Table rows are 44px. The header row uses `--surface-sunken` and 13px type. It is not uppercase and it is not letter-spaced.
 - Toolbars are one row. Sort and filter chips use `--radius-md`. The selected chip uses `--primary-soft`.
 - Page inset is 20px. Card padding is 16px. The grid is 8px.
-- Settings is a grouped list: paper canvas, white cards, hairline separators, a quiet title. Files, pins, and peers are a toolbar plus a dense table that uses the full width of the work column. The node page is a dashboard that fills that column: status and actions on one side, connection facts on the other, not two small cards in an empty field.
+- The main column fills the window. Each ops page is a compact title, then one work surface (toolbar, then rows) that runs to the bottom of the content area. The list scrolls inside that surface. A tall window is not a short card on an empty canvas.
+- The node page is one operations surface: a status and action band, then property rows for the folder, version, peer id, peer count, and traffic. Files, pins, and peers are a toolbar on that same kind of surface, then the list.
 - Connecting a peer is a compact toolbar on the list, not its own tall card.
 - In the dark theme the selected nav row is a neutral lift plus the `#20FFA9` bar. It is not a green block. A disabled primary button keeps its fill (black in light, near-white in dark) so it does not fade into gray.
 - A form page is `min(920px, 100%)`, left-aligned. A list page (files, pins, peers, explore) and the scenes page are `min(1080px, 100%)`. From 1200px the node page is two columns inside `min(1080px, 100%)`. Prose stays inside about 40rem. The old 760px column left a wide empty field that read as a landing page.

@@ -6,12 +6,21 @@
   text-decoration: none;
 }
 
+.files-toolbar,
+.pins-toolbar,
+.peers-toolbar {
+  flex: none;
+}
+
 .files-toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   justify-content: space-between;
+  margin: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .files-toolbar-main {
@@ -126,8 +135,11 @@
 }
 
 .files-drop {
-  margin-top: 8px;
-  border-radius: var(--radius-md);
+  flex: 1;
+  min-height: 0;
+  margin-top: 0;
+  overflow: auto;
+  border-radius: 0;
 }
 
 .files-drop.is-over {
