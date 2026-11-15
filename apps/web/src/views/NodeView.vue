@@ -92,7 +92,7 @@ async function copy(kind: string, value: string | null | undefined) {
   <div class="page page-node">
     <PageHeader :title="t('nodePageTitle')" :description="t('nodePageDescription')" />
     <div class="node-layout">
-      <Card :aria-busy="busy">
+      <Card class="node-status" :aria-busy="busy">
         <div v-if="loading" class="node-loading">
           <p class="sr-only" role="status">{{ sentence }}</p>
           <Skeleton width="7rem" height="28px" />

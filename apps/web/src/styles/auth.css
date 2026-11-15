@@ -179,23 +179,20 @@
 }
 
 .nav-logout {
-  display: flex;
-  align-items: center;
   width: 100%;
-  min-height: 40px;
-  margin: 0 0 4px;
-  padding: 6px 10px;
+  margin: 0;
   border: 0;
-  border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--sidebar-muted);
-  font-weight: 600;
+  color: var(--sidebar-text);
+  font: inherit;
+  font-weight: 500;
   text-align: start;
+  cursor: pointer;
 }
 
-.nav-logout:hover {
-  background: var(--sidebar-hover);
-  color: var(--sidebar-text);
+.sidebar-foot .portal {
+  color: var(--sidebar-muted);
+  font-weight: 500;
 }
 
 .gate-loading {

@@ -1,5 +1,5 @@
 .pins-page {
-  width: min(1080px, 100%);
+  width: 100%;
 }
 
 .pins-page a.ui-btn {
@@ -9,7 +9,7 @@
 .pins-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 16px;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
 }
@@ -52,6 +52,7 @@
 .pins-filter-btn.is-active {
   background: var(--primary-soft);
   color: var(--primary);
+  box-shadow: inset 0 -2px 0 var(--brand);
 }
 
 .pins-filter-btn:hover {
@@ -101,6 +102,11 @@
 .pins-table tbody tr:last-child th,
 .pins-table tbody tr:last-child td {
   border-bottom: 0;
+}
+
+.pins-table tbody tr:hover th,
+.pins-table tbody tr:hover td {
+  background: var(--surface-sunken);
 }
 
 .pins-name {

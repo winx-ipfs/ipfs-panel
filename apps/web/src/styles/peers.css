@@ -1,26 +1,35 @@
 .peers-page {
-  width: min(1080px, 100%);
+  width: 100%;
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .peers-page a.ui-btn {
   text-decoration: none;
 }
 
-.peers-form {
+.peers-toolbar {
   display: grid;
-  gap: 12px;
-  justify-items: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
 }
 
-.peers-form .ui-field,
+.peers-address,
 .peers-filter .ui-field {
   width: 100%;
 }
 
-.peers-form .ui-btn {
-  min-height: 40px;
+.peers-connect {
+  margin-top: 22px;
+}
+
+.peers-list-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .peers-summary {
@@ -47,7 +56,8 @@
 }
 
 .peers-filter {
-  margin-top: 12px;
+  flex: 1 1 220px;
+  margin-top: 8px;
 }
 
 .peers-loading {
@@ -57,7 +67,7 @@
 
 .peers-table {
   width: 100%;
-  margin-top: 16px;
+  margin-top: 8px;
   border-collapse: collapse;
 }
 
@@ -68,6 +78,10 @@
   font-size: var(--text-sm);
   font-weight: 600;
   text-align: start;
+}
+
+.peers-table tbody tr:hover td {
+  background: var(--surface-sunken);
 }
 
 .peers-table td {
@@ -143,6 +157,15 @@
 }
 
 @media (max-width: 719px) {
+  .peers-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .peers-connect {
+    margin-top: 0;
+    width: 100%;
+  }
+
   .peers-table {
     display: none;
   }

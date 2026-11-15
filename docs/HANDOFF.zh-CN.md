@@ -34,7 +34,7 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 - **场景是四种有名字的用法。** `quiet`、`share`、`pinset`、`gateway`。键、重启规则，以及只读公共网关的例外，在 `docs/design/scenes.zh-CN.md`。控制 API 保持 loopback。
 - **探索看的是一个内容标识的里面。** manager 在回环上调用 `dag/resolve` 和 `dag/get`。浏览器不去请求网关，也拿不到 RPC 地址。规格是 `docs/design/explore.zh-CN.md`。
 - **对等节点是一张表和一次拨号。** manager 在回环上调用 `swarm/peers` 和 `swarm/connect`。已经连上的节点地址不进浏览器。没有地图，这一页也不写 `Peering.Peers`。规格是 `docs/design/peers.zh-CN.md`。
-- **面板用 winx.run 的视觉语言。** `docs/DESIGN-SYSTEM.zh-CN.md`。纸灰底、白卡片、黑色主按钮。萤光绿（`#20FFA9`）只给标志、选中条和小标签。浅色主题的侧栏是浅的。shadcn-vue（Nova，再套主题）加 Motion。不是炭灰的 1Panel 仿品，不是 IPFS webui 的青，也不是薄荷绿的铺底。同一套界面，现在是本机座位，以后是远程座位。不要改回去。
+- **面板用 winx.run 的视觉语言，密度是运维面板。** `docs/DESIGN-SYSTEM.zh-CN.md`。纸灰底、白卡片、黑色主按钮（深色主题里是近白，禁用时也保持填充色）。萤光绿（`#20FFA9`）只给标志、选中条和小标签。浅色侧栏是白的；深色里选中行是中性的一层抬起加上那条，不是一块绿。节点页铺满工作区。对等节点的连接是列表上的工具条。shadcn-vue（Nova，再套主题）加 Motion。不是炭灰的 1Panel 仿品，不是 IPFS webui 的青，也不是薄荷绿的铺底。不要改回去。
 
 ## 还开着的事
 
