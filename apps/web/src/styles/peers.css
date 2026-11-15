@@ -1,7 +1,5 @@
 .peers-page {
   width: 100%;
-  display: grid;
-  gap: 8px;
 }
 
 .peers-page a.ui-btn {

@@ -1,6 +1,5 @@
 .page-scenes {
-  display: grid;
-  gap: var(--space-3);
+  gap: 8px;
 }
 
 .scene-list {

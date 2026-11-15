@@ -138,11 +138,11 @@ Tighter than a marketing page, looser than a 2005 control panel.
 - Table rows are 44px. The header row uses `--surface-sunken` and 13px type. It is not uppercase and it is not letter-spaced.
 - Toolbars are one row. Sort and filter chips use `--radius-md`. The selected chip uses `--primary-soft`.
 - Page inset is 20px. Card padding is 16px. The grid is 8px.
-- The main column fills the window. Each ops page is a compact title, then one work surface (toolbar, then rows) that runs to the bottom of the content area. The list scrolls inside that surface. A tall window is not a short card on an empty canvas.
-- The node page is one operations surface: a status and action band, then property rows for the folder, version, peer id, peer count, and traffic. Files, pins, and peers are a toolbar on that same kind of surface, then the list.
-- Connecting a peer is a compact toolbar on the list, not its own tall card.
+- The main column fills the window. Each ops page is a compact title, then one work surface that starts immediately under that title and runs to the bottom of the content area. The list scrolls inside that surface. These pages are a flex column. A grid on the page itself stretches a closed disclosure and shoves the surface down the window. A tall window is not a short card on an empty canvas.
+- The node page is one operations surface. A status and action band, then property rows for the folder, version, peer id, peer count, and traffic. When the pins API returns `localGateway`, that address is a row too. The overview still has no API address, and the page does not invent one. Under the rows, a pins section and a connected-peers section use the existing pins and peers APIs, each with a view-all link. From 1100px they sit side by side and fill the rest of the surface. Narrower than that, they stack and the surface scrolls. When the node is not running, the surface sizes to its content.
+- Files, pins, and peers are a toolbar on that same kind of surface, then the list. Connecting a peer is a compact toolbar on the list, not its own tall card.
 - In the dark theme the selected nav row is a neutral lift plus the `#20FFA9` bar. It is not a green block. A disabled primary button keeps its fill (black in light, near-white in dark) so it does not fade into gray.
-- A form page is `min(920px, 100%)`, left-aligned. A list page (files, pins, peers, explore) and the scenes page are `min(1080px, 100%)`. From 1200px the node page is two columns inside `min(1080px, 100%)`. Prose stays inside about 40rem. The old 760px column left a wide empty field that read as a landing page.
+- A form page is `min(920px, 100%)`, left-aligned. A list page (files, pins, peers, explore) and the scenes page are `min(1080px, 100%)`. The node page is one column inside that same width. Prose stays inside about 40rem. The old 760px column left a wide empty field that read as a landing page.
 
 ## Components
 
@@ -209,7 +209,7 @@ Rules:
 - The selected section has a `#20FFA9` bar on the inline-start edge and `#ECFDF5` behind the label. Hover is a gray wash, not a capsule.
 - The rail does not scroll away on a long page. It stays `100vh`.
 - Top bar: a white (or dark-surface) strip with a hairline under it, 48px at rest. It holds "This machine", the English / 中文 segment, and a theme button. The button cycles light, dark, and match-device. Its icon and, from 720px up, its label show the current mode. The accessible name and the tooltip say the same mode. Both choices persist in `localStorage` (`ipfs-panel.lang`, `ipfs-panel.theme`). The theme is applied from a small script in `index.html` before paint, so the first frame is not the wrong theme. The segment and the theme button are rectangular. They do not float as pills.
-- From 1200px the node page is two columns. The status card is on the left. On the right, while the node is up, a Connection card shows the version and a shortened peer id. The copy button copies the full peer id. The overview does not include a gateway address or an API address, so the card does not invent them. Otherwise the right card explains what a node is and links to the IPFS docs.
+- The node page is one column. While the node is up, the surface shows the version, a shortened peer id (the copy button copies the full id), the peer count, traffic, and the local gateway when `GET /api/pins` returns `localGateway`. Below that, from 1100px, the current pins and a few connected peers sit side by side and fill the rest of the surface. Narrower than that, they stack and the surface scrolls. Both come from those same APIs, with links to the Pins and Peers pages. The overview has no API address, and the page does not invent one. While the node is stopped, the surface explains what a node is and links to the IPFS docs, and it sizes to that content.
 - Nav: Node, Files, Explore, Peers, Pins, Scenes, then Settings. Those are real pages. Expert mode is not a nav item.
 - `winx.run` sits in the sidebar footer, under Sign out. It opens in a new tab. It is the portal, labeled as such.
 - Login and first-run setup use the same canvas and the same card. There is no glow behind the mark. The mark tile is 48px.
@@ -224,9 +224,11 @@ From `apps/web`, after `npx playwright install chromium`:
 npm run shots
 ```
 
-That writes the node page in all five states, the files page (list, empty, uploading, delete dialog, node stopped), the explore page (start, and a block with links), the peers page (list, empty, node stopped), the pins page (list, add dialog with a validation error, a job in progress, empty), the scenes page (list, preview, applied), the setup screen, the login screen with an error, and the settings password form, light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture. The files page uses `?files=`. The explore page uses `?explore=`. The peers page uses `?peers=`. The pins page uses `?pins=`. The scenes page uses `?scenes=`.
+That writes the node page in all five states, the files page (list, empty, uploading, delete dialog, node stopped), the explore page (start, and a block with links), the peers page (list, empty, node stopped), the pins page (list, add dialog with a validation error, a job in progress, empty), the scenes page (list, preview, applied), the setup screen, the login screen with an error, and the settings password form, light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture. The files page uses `?files=`. The explore page uses `?explore=`. The peers page uses `?peers=`. The pins page uses `?pins=`. The scenes page uses `?scenes=`. The running node shot also passes `peers=list` and `pins=list`, so the workbench shows those fixtures.
 
 This is not a CI job. A Chromium install and the machine's CJK fonts make a pixel run slow and easy to flake, and `ci-ok` should stay the fast check. The unit tests still cover the sentences, the manager actions, and the form controls. Re-run `npm run shots` when the shell or the node card changes, and look at the pictures.
+
+![Node running, light theme, English](screenshots/node-running-light-en.png)
 
 ![Needs attention, dark theme, English](screenshots/node-failed-dark-en.png)
 

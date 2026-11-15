@@ -26,6 +26,7 @@ function plugins(locale: 'en' | 'zh' = 'en') {
     routes: [
       { path: '/', name: 'node', component: NodeView },
       { path: '/peers', name: 'peers', component: { template: '<div />' } },
+      { path: '/pins', name: 'pins', component: { template: '<div />' } },
     ],
   })
   return [

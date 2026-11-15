@@ -1,7 +1,5 @@
 .explore-page {
   width: 100%;
-  display: grid;
-  gap: 8px;
 }
 
 .explore-page a.ui-btn {

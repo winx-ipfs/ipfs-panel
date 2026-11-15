@@ -100,8 +100,10 @@ try {
           )
           const page = await context.newPage()
           for (const state of states) {
-            await page.goto(`${origin}/?mock=${state}`, { waitUntil: 'domcontentloaded' })
+            const query = state === 'up' ? 'mock=up&peers=list&pins=list' : `mock=${state}`
+            await page.goto(`${origin}/?${query}`, { waitUntil: 'domcontentloaded' })
             await page.waitForSelector('[role="status"]')
+            if (state === 'up') await page.waitForSelector('.node-peers .node-table')
             const file = path.join(outDir, `node-${state}-${theme}-${locale}-${size.name}.png`)
             await shoot(page, file)
             index.push(file)

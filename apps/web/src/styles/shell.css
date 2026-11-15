@@ -360,6 +360,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  overflow: auto;
 }
 
 .work,
@@ -392,6 +393,154 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
+}
+
+.page-node .work.is-fit {
+  flex: none;
+}
+
+.page-node .work.is-fit .node-facts {
+  padding-bottom: 12px;
+}
+
+.page-node .node-facts {
+  flex: none;
+  overflow: visible;
+}
+
+.node-split {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.node-split > .node-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.node-section {
+  flex: none;
+  border-top: 1px solid var(--border);
+}
+
+.node-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 12px;
+}
+
+.node-section-head h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.node-section-head a {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.node-section-head a:hover {
+  text-decoration: underline;
+}
+
+.node-section-note {
+  margin: 0;
+  padding: 0 12px 10px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 22px;
+}
+
+@media (min-width: 1100px) {
+  .node-split {
+    flex-direction: row;
+  }
+
+  .node-split > .node-section {
+    flex: 1;
+  }
+
+  .node-split > .node-section + .node-section {
+    border-left: 1px solid var(--border);
+  }
+}
+
+@media (max-width: 1099px) {
+  .page-node .work:not(.is-fit) {
+    overflow: auto;
+  }
+
+  .node-split,
+  .node-split > .node-section,
+  .node-scroll {
+    flex: none;
+    overflow: visible;
+  }
+}
+
+.node-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.node-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.node-table th {
+  height: 36px;
+  padding: 0 12px;
+  background: var(--surface-sunken);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: start;
+  position: sticky;
+  top: 0;
+}
+
+.node-table td {
+  height: 44px;
+  padding: 6px 12px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  line-height: 22px;
+  vertical-align: middle;
+}
+
+.node-table tbody tr:hover td {
+  background: var(--surface-sunken);
+}
+
+.node-table code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.node-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.node-sub {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .node-band {
