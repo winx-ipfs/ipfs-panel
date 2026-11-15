@@ -57,3 +57,7 @@ jobs:
             echo "TestRealKuboOptional did not pass"
             exit 1
           fi
+          if ! grep -q -- '--- PASS: TestRealKuboConfig' "$log"; then
+            echo "TestRealKuboConfig did not pass"
+            exit 1
+          fi

@@ -26,6 +26,7 @@ What is here:
 - pick one of four scenes, see what it will change, apply it, and revert it, without opening Kubo's JSON
 - look inside a content ID: what the block is, and what it points at
 - see who the node is connected to, and dial one peer by an address
+- read and replace the Kubo config as JSON, from Settings, marked Expert
 
 What is not here:
 
@@ -75,11 +76,11 @@ Done when a beginner can paste a content ID or an `/ipfs/` path, see the block, 
 
 See who this node is connected to, and dial one address once. The spec is [Peers](design/peers.md). It is webui parity, not a new numbered slice.
 
-Done when a beginner can open the list, in English and in 中文, and connect by an address the page allows, without a map and without seeing another node's address. That is the current tree. The raw config editor is still not here. It waits. Permanent peering waits with it.
+Done when a beginner can open the list, in English and in 中文, and connect by an address the page allows, without a map and without seeing another node's address. That is the current tree. Permanent peering still waits.
 
 ## 6. Expert mode, then more than one node
 
-Raw config, logs, and permanent peering. The peers page above is the beginner list and one dial, not this. After that, more than one Kubo behind the same panel.
+The raw config editor is in. It is Settings, Advanced, marked Expert. The spec is [Config editor](design/config-editor.md). Logs and permanent peering are not. The peers page above is the beginner list and one dial, not permanent peering. After the rest of expert mode, more than one Kubo behind the same panel.
 
 This waits until slices 1–5 feel dull. Dull is the goal.
 

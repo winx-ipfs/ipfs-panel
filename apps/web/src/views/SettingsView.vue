@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { passwordAcceptable } from '@/auth/strength'
 import Card from '@/components/Card.vue'
@@ -12,6 +12,8 @@ import Select from '@/components/Select.vue'
 import Switch from '@/components/Switch.vue'
 import Table from '@/components/Table.vue'
 import Tabs from '@/components/Tabs.vue'
+
+const ConfigPanel = defineAsyncComponent(() => import('@/components/ConfigPanel.vue'))
 import type { AppLocale } from '@/i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useLocaleStore } from '@/stores/locale'
@@ -23,7 +25,11 @@ const localeStore = useLocaleStore()
 const theme = useThemeStore()
 const auth = useAuthStore()
 const toast = useToastStore()
-const tab = ref('general')
+const tab = ref(import.meta.env.DEV && new URLSearchParams(window.location.search).has('config') ? 'advanced' : 'general')
+const advancedMounted = ref(tab.value === 'advanced')
+watch(tab, (value) => {
+  if (value === 'advanced') advancedMounted.value = true
+})
 const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
@@ -34,6 +40,7 @@ const tabs = computed(() => [
   { id: 'general', label: t('settingsGeneral') },
   { id: 'account', label: t('accountTab') },
   { id: 'about', label: t('settingsAbout') },
+  { id: 'advanced', label: t('settingsAdvanced') },
 ])
 
 const confirmError = computed(() => {
@@ -93,7 +100,7 @@ function choose(next: ThemePreference) {
 </script>
 
 <template>
-  <div class="page">
+  <div class="page page-settings">
     <PageHeader :title="t('settingsTitle')" :description="t('settingsDescription')" />
     <Tabs v-model="tab" :tabs="tabs" :label="t('settingsTabs')">
       <template #general>
@@ -195,6 +202,9 @@ function choose(next: ThemePreference) {
             </tbody>
           </Table>
         </Card>
+      </template>
+      <template #advanced>
+        <ConfigPanel v-if="advancedMounted" v-show="tab === 'advanced'" :active="tab === 'advanced'" />
       </template>
     </Tabs>
   </div>

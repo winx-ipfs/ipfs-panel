@@ -1,0 +1,164 @@
+.config-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.config-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+}
+
+.config-head p,
+.config-note,
+.config-footnote,
+.config-status,
+.config-error {
+  margin: 0;
+  line-height: var(--leading-body);
+}
+
+.config-head p,
+.config-footnote,
+.config-status {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.config-expert {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--brand-ink);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.config-note {
+  color: var(--text);
+  font-size: var(--text-md);
+}
+
+.config-error {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.config-detail {
+  display: block;
+  margin-top: 4px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.config-toolbar,
+.config-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.config-toolbar .ui-btn,
+.config-actions .ui-btn {
+  min-height: 44px;
+}
+
+.config-keys {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.config-work {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.config-editor {
+  height: min(480px, calc(100vh - 340px));
+  min-height: 280px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunken);
+}
+
+.config-code {
+  --config-select: rgba(10, 10, 10, 0.12);
+  height: 100%;
+}
+
+:root[data-theme='dark'] .config-code {
+  --config-select: rgba(250, 250, 250, 0.16);
+}
+
+.config-code .cm-editor {
+  height: 100%;
+}
+
+.config-skeleton {
+  display: grid;
+  gap: 8px;
+}
+
+.config-diff {
+  max-height: min(420px, 48vh);
+  overflow: auto;
+  margin: 8px 0 0;
+  padding: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.config-diff-line {
+  display: grid;
+  grid-template-columns: 16px max-content;
+  gap: 8px;
+  padding: 0 10px;
+  white-space: pre;
+}
+
+.config-diff-line.is-add {
+  background: var(--success-soft);
+}
+
+.config-diff-line.is-del {
+  background: var(--danger-soft);
+}
+
+.config-diff-line.is-skip {
+  display: block;
+  color: var(--muted);
+  padding: 4px 10px;
+}
+
+@media (max-width: 719px) {
+  .config-editor {
+    height: min(420px, 58vh);
+    min-height: 240px;
+  }
+
+  .config-toolbar .ui-btn,
+  .config-actions .ui-btn {
+    flex: 1 1 calc(50% - 8px);
+  }
+}

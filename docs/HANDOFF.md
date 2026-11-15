@@ -35,13 +35,14 @@ These are settled. Do not reopen them without a reason and a pull request that s
 - **Explore looks inside one content ID.** The manager calls `dag/resolve` and `dag/get` on loopback. The browser does not fetch the gateway and does not receive the RPC address. The spec is `docs/design/explore.md`.
 - **Peers is a table and a one-time dial.** The manager calls `swarm/peers` and `swarm/connect` on loopback. Connected peer addresses stay off the browser. There is no map, and the page does not write `Peering.Peers`. The spec is `docs/design/peers.md`.
 - **The panel uses the winx.run visual language, at ops-panel density.** `docs/DESIGN-SYSTEM.md`. Paper gray, white cards, black primary buttons (near-white in the dark theme, including when disabled), firefly green (`#20FFA9`) only for the mark, the selected bar, and small tags. The light sidebar is white; the dark selected row is a neutral lift plus that bar, not a green block. The main column fills the window: a toolbar and a list or property surface that starts under the title and runs to the bottom. Ops pages are a flex column so a closed disclosure cannot shove the surface down. The node surface adds the current pins and a few connected peers from the existing APIs, and the card ends after the last row. Table cells, including the first column, use the toolbar's 12px inset. Peers connect sits on that list, on the same baseline as the address input, with search on the other side. shadcn-vue (Nova, themed) plus Motion. Not a charcoal 1Panel clone, not IPFS webui teal, and not a mint wash. Do not restyle it back.
+- **The raw config editor is expert mode.** It is the Advanced tab on Settings, not a nav item. The manager reads with Kubo `config/show` and writes with `config/replace`. `Identity.PrivKey` never reaches the browser. `Addresses.API` cannot be changed. A backup can be restored. A restart is offered. Scenes still apply and undo. The spec is `docs/design/config-editor.md`.
 
 ## What is open
 
 Each of these needs a decision, not code.
 
 1. **Whether Dependabot actually retargets.** v0.1.1 put `target-branch: develop` on `main`, which is the copy GitHub reads. Dependabot's own runs now show `head_branch: develop`, so it took effect. The remaining check is the next pull request it opens: if that one still targets `main`, the setting is being ignored and the alternative is to make `develop` the default branch (`docs/ORG-SETUP.md` step 3).
-2. **Webui parity still open.** The remaining gap is the raw config editor. The checklist is `docs/design/webui-parity.md`. The raw editor is expert mode and still waits. Do not start it in the same change as something else.
+2. **Webui parity.** The raw config editor is in, on Settings, marked Expert. The spec is `docs/design/config-editor.md`. IPNS keys, remote pinning, analytics, and diagnostics stay deferred. Do not fold those into a config-editor fix.
 
 ## Known gaps worth naming
 
@@ -55,9 +56,9 @@ Each of these needs a decision, not code.
 If you have one session and no other instruction:
 
 1. Read `AGENTS.md`, then `docs/design/harness.md`, so you do not reopen the harness, Peers, Explore, the four scenes, or the winx visual language in `docs/DESIGN-SYSTEM.md`.
-2. The raw config editor is the remaining webui gap and still waits. Do not start it unless that is the task. Do not start it in the same change as something else.
+2. The raw config editor is in. Logs, permanent peering, and a second node are still not. Do not start those in the same change as a config-editor fix.
 
-Scenes are in. Explore is in. Peers are in. The released-Kubo harness is in. The bitswap question is answered. Do not start plugin work.
+Scenes are in. Explore is in. Peers are in. The raw config editor is in. The released-Kubo harness is in. The bitswap question is answered. Do not start plugin work.
 
 ## How this file stays true
 

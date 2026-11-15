@@ -61,7 +61,7 @@ The RPC clients need no change. They already refuse a non-loopback base URL. The
 
 ## What the integration test must cover
 
-`TestRealKuboOptional` keeps the MFS round trip and adds the checks below. Each one is a guess that only a real binary can settle:
+`TestRealKuboOptional` keeps the MFS round trip and adds the checks below. `TestRealKuboConfig` is `package node_test` in the same directory, so the same `-run TestRealKubo` starts it. It cannot live in `package node`: the editor package already imports `node`. The workflow also requires `--- PASS: TestRealKuboConfig`. Each row is a guess that only a real binary can settle:
 
 | Check | Why it cannot be a stub |
 | --- | --- |
@@ -75,6 +75,10 @@ The RPC clients need no change. They already refuse a non-loopback base URL. The
 | `files/stat` on a directory versus a file | `Type` differs |
 | `pin/rm` on an indirect pin | Error text and status |
 | stopped node | Connection refused, not a timeout |
+| `config/show` omits `Identity.PrivKey` | Kubo scrubs the key; a stub can forget |
+| `config/replace` keeps that key and the API address | Kubo preserves the key and merges the struct |
+| `config/replace` of `Discovery.MDNS.Enabled`, then restore | The round trip is Kubo's, including a bool Kubo does not omit |
+| a stopped node `config/show` | Connection refused, same as the other clients |
 
 The last one is already covered for Windows by `internal/kuborpc`. The integration test also runs it against the real daemon after the supervisor stops it, because that is cheap once the binary is present. The assertion is `node_not_running`, which is connection refused, not a timeout.
 
@@ -90,6 +94,9 @@ Checked by running the released `v0.43.1` binary, not by reading the reference c
 - `files/ls` with `long=true` returns `Name`, `Type` (an integer: 0 file, 1 directory), `Size`, and `Hash`. It does not return `Mtime`. `files/stat` returns `Type` as the string `file` or `directory`. After `ipfs files touch --mtime`, `files/stat` returns that `Mtime`, and the list entry's modified time comes from that stat.
 - `pin/rm` of a CID that is only pinned indirectly returns HTTP 500 `{"Message":"not pinned or pinned indirectly","Code":0,"Type":"error"}`. The client maps that to `indirect`.
 - After the supervisor stops the daemon, a files stat returns `node_not_running`.
+- `config/show` does not contain `Identity.PrivKey` or the private-key value. The file on disk still has that value after show, after replace, and after a refused save.
+- Flipping `Discovery.MDNS.Enabled` through `config/replace` comes back on the next show, and restoring the backup puts the previous value back. `Addresses.API` is unchanged. A document that changes it is refused with `api_locked` before Kubo is asked to write. A document that includes `Identity.PrivKey` is refused with `privkey_locked`.
+- After the supervisor has reached `down`, `config/show` returns `node_not_running`.
 
 `IPFS_PANEL_KUBO_VERSION=0.43.1` locks those results. Any other non-empty value fails the test until the pin pull request writes the new expectations. An empty value, which is a local run, still requires the calls to succeed and the two name outcomes to be coherent (`kubo` with the name, or `panel` after the fallback).
 
