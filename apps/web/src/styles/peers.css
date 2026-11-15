@@ -1,7 +1,7 @@
 .peers-page {
-  width: min(960px, 100%);
+  width: min(1080px, 100%);
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 
 .peers-page a.ui-btn {
@@ -10,7 +10,7 @@
 
 .peers-form {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   justify-items: start;
 }
 
@@ -20,7 +20,7 @@
 }
 
 .peers-form .ui-btn {
-  min-height: 44px;
+  min-height: 40px;
 }
 
 .peers-summary {
@@ -47,7 +47,7 @@
 }
 
 .peers-filter {
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .peers-loading {
@@ -62,7 +62,8 @@
 }
 
 .peers-table th {
-  padding: 8px 12px 8px 0;
+  padding: 6px 10px 6px 0;
+  background: var(--surface-sunken);
   color: var(--muted);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -70,7 +71,7 @@
 }
 
 .peers-table td {
-  padding: 12px 12px 12px 0;
+  padding: 8px 10px 8px 0;
   border-top: 1px solid var(--border);
   vertical-align: top;
   line-height: 1.45;

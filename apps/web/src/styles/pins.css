@@ -1,5 +1,5 @@
 .pins-page {
-  width: min(960px, 100%);
+  width: min(1080px, 100%);
 }
 
 .pins-page a.ui-btn {
@@ -43,7 +43,7 @@
   min-height: 40px;
   padding: 0 12px;
   border: 1px solid transparent;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--muted);
   font-weight: 600;
@@ -84,7 +84,7 @@
 
 .pins-table th,
 .pins-table td {
-  padding: 12px 10px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--border);
   text-align: start;
   vertical-align: middle;
@@ -92,6 +92,7 @@
 }
 
 .pins-table thead th {
+  background: var(--surface-sunken);
   color: var(--muted);
   font-size: var(--text-sm);
   font-weight: 600;

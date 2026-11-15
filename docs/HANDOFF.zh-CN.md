@@ -34,6 +34,7 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 - **场景是四种有名字的用法。** `quiet`、`share`、`pinset`、`gateway`。键、重启规则，以及只读公共网关的例外，在 `docs/design/scenes.zh-CN.md`。控制 API 保持 loopback。
 - **探索看的是一个内容标识的里面。** manager 在回环上调用 `dag/resolve` 和 `dag/get`。浏览器不去请求网关，也拿不到 RPC 地址。规格是 `docs/design/explore.zh-CN.md`。
 - **对等节点是一张表和一次拨号。** manager 在回环上调用 `swarm/peers` 和 `swarm/connect`。已经连上的节点地址不进浏览器。没有地图，这一页也不写 `Peering.Peers`。规格是 `docs/design/peers.zh-CN.md`。
+- **面板看起来像自托管的运维工具。** `docs/DESIGN-SYSTEM.zh-CN.md`。中性的工作面，克制的青色强调，两种主题都是实心深色侧栏，小圆角，密一些的表格和工具条。不是薄荷绿的 SaaS 控制台。同一套界面，现在是本机座位，以后是远程座位。文案保持工具口气：栏目名，加一句要做的事。不要把它改回营销仪表盘。
 
 ## 还开着的事
 
@@ -53,7 +54,7 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 
 如果你只有一个会话且没有别的指示：
 
-1. 读 `AGENTS.zh-CN.md`，再读 `docs/design/harness.zh-CN.md`，不要把测试基线、对等节点、探索或四个场景重开一遍。
+1. 读 `AGENTS.zh-CN.md`，再读 `docs/design/harness.zh-CN.md`，不要把测试基线、对等节点、探索、四个场景，或 `docs/DESIGN-SYSTEM.zh-CN.md` 里的视觉语言重开一遍。
 2. 原始配置编辑器是剩下的 webui 缺口，仍然要等。除非任务就是它，否则不要开始。不要在做别的事的同一个改动里开始它。
 
 场景已经在。探索已经在。对等节点已经在。发行版 Kubo 的测试基线已经在。bitswap 的问题已经回答。不要开始插件工作。

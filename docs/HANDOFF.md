@@ -34,6 +34,7 @@ These are settled. Do not reopen them without a reason and a pull request that s
 - **Scenes are four named setups.** `quiet`, `share`, `pinset`, and `gateway`. The keys, the restart rule, and the read-only public gateway exception are in `docs/design/scenes.md`. The control API stays loopback.
 - **Explore looks inside one content ID.** The manager calls `dag/resolve` and `dag/get` on loopback. The browser does not fetch the gateway and does not receive the RPC address. The spec is `docs/design/explore.md`.
 - **Peers is a table and a one-time dial.** The manager calls `swarm/peers` and `swarm/connect` on loopback. Connected peer addresses stay off the browser. There is no map, and the page does not write `Peering.Peers`. The spec is `docs/design/peers.md`.
+- **The panel looks like a self-hosted ops tool.** `docs/DESIGN-SYSTEM.md`. Neutral work surfaces, a restrained teal accent, a solid dark sidebar in both themes, small radii, dense tables and toolbars. Not a mint SaaS console. The same chrome is the local seat now and the remote seat later. Copy stays a tool: a section name and one sentence about the job. Do not restyle it back toward a marketing dashboard.
 
 ## What is open
 
@@ -53,7 +54,7 @@ Each of these needs a decision, not code.
 
 If you have one session and no other instruction:
 
-1. Read `AGENTS.md`, then `docs/design/harness.md`, so you do not reopen the harness, Peers, Explore, or the four scenes.
+1. Read `AGENTS.md`, then `docs/design/harness.md`, so you do not reopen the harness, Peers, Explore, the four scenes, or the visual language in `docs/DESIGN-SYSTEM.md`.
 2. The raw config editor is the remaining webui gap and still waits. Do not start it unless that is the task. Do not start it in the same change as something else.
 
 Scenes are in. Explore is in. Peers are in. The released-Kubo harness is in. The bitswap question is answered. Do not start plugin work.

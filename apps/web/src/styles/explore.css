@@ -1,7 +1,7 @@
 .explore-page {
-  width: min(960px, 100%);
+  width: min(1080px, 100%);
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 
 .explore-page a.ui-btn {
@@ -19,7 +19,7 @@
 }
 
 .explore-form .ui-btn {
-  min-height: 44px;
+  min-height: 40px;
 }
 
 .explore-idle,
@@ -91,15 +91,9 @@ button.explore-crumb {
 
 .explore-kind {
   margin: 0;
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-}
-
-:lang(zh) .explore-kind,
-:lang(zh-Hans) .explore-kind {
-  letter-spacing: 0;
+  line-height: 1.3;
 }
 
 .explore-meta {
@@ -174,7 +168,8 @@ button.explore-crumb {
 }
 
 .explore-table th {
-  padding: 8px 10px 8px 0;
+  padding: 6px 10px 6px 0;
+  background: var(--surface-sunken);
   color: var(--muted);
   font-size: var(--text-sm);
   font-weight: 600;
