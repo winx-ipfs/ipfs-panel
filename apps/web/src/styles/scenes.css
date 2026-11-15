@@ -1,5 +1,6 @@
 .page-scenes {
   gap: 8px;
+  padding-bottom: 24px;
 }
 
 .scene-list {

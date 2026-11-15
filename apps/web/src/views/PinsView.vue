@@ -436,6 +436,7 @@ onUnmounted(() => {
         :description="t('pinsNoMatchBody')"
       />
       <MotionIn v-else class="work-scroll">
+        <p class="list-count">{{ t('pinsSummary', { count: shown.length }) }}</p>
         <table class="pins-table">
           <caption class="sr-only">{{ t('pinsTitle') }}</caption>
           <thead>

@@ -165,20 +165,24 @@ button.explore-crumb {
   border-collapse: collapse;
 }
 
+.explore-table th,
+.explore-table td {
+  height: 44px;
+  padding: 0 12px;
+  text-align: start;
+  vertical-align: middle;
+}
+
 .explore-table th {
-  padding: 6px 10px 6px 0;
+  height: 36px;
   background: var(--surface-sunken);
   color: var(--muted);
   font-size: var(--text-sm);
   font-weight: 600;
-  text-align: left;
 }
 
 .explore-table td {
-  padding: 8px 12px 8px 0;
   border-top: 1px solid var(--border);
-  vertical-align: top;
-  line-height: 1.45;
 }
 
 .explore-name {

@@ -264,7 +264,7 @@ async function copy(kind: string, value: string | null | undefined) {
                 </dd>
               </div>
               <div v-if="showPeer">
-                <dt>{{ t('nodePeerId') }}</dt>
+                <dt :title="t('peerHint')">{{ t('nodePeerId') }}<span class="sr-only">. {{ t('peerHint') }}</span></dt>
                 <dd>
                   <div class="fact">
                     <span v-if="peerShort === peerId" class="peer mono">{{ peerId }}</span>
@@ -283,17 +283,15 @@ async function copy(kind: string, value: string | null | undefined) {
                       </IconButton>
                     </Tooltip>
                   </div>
-                  <p class="peer-hint">{{ t('peerHint') }}</p>
                 </dd>
               </div>
               <div v-if="peers !== null">
-                <dt>{{ t('nodePeers') }}</dt>
+                <dt :title="t('nodePeersHint')">{{ t('nodePeers') }}<span class="sr-only">. {{ t('nodePeersHint') }}</span></dt>
                 <dd>
                   <RouterLink class="peers-count-link" to="/peers">
                     <span class="mono">{{ peers }}</span>
                     <span class="sr-only">{{ t('nodePeersOpen') }}</span>
                   </RouterLink>
-                  <p class="peer-hint">{{ t('nodePeersHint') }}</p>
                 </dd>
               </div>
               <div v-if="showTraffic">

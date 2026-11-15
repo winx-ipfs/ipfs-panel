@@ -549,6 +549,7 @@ onUnmounted(() => document.removeEventListener('pointerdown', onPointer))
           :description="t('filesEmptyBody')"
         />
         <MotionIn v-else>
+          <p class="list-count">{{ t('filesSummary', { count: sorted.length }) }}</p>
           <table class="files-table">
             <caption class="sr-only">{{ t('filesTitle') }}</caption>
             <thead>

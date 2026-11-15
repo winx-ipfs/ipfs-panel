@@ -70,7 +70,7 @@
 
 .pins-table {
   width: 100%;
-  margin-top: 8px;
+  margin-top: 0;
   border-collapse: collapse;
 }
 
@@ -88,14 +88,21 @@
 
 .pins-table th,
 .pins-table td {
-  padding: 11px 12px;
+  height: 44px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--border);
   text-align: start;
   vertical-align: middle;
-  overflow-wrap: anywhere;
+}
+
+.pins-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pins-table thead th {
+  height: 36px;
   background: var(--surface-sunken);
   color: var(--muted);
   font-size: var(--text-sm);
@@ -130,10 +137,7 @@
 }
 
 .pins-type-code {
-  display: block;
-  margin-top: 2px;
-  color: var(--muted);
-  font-weight: 400;
+  display: none;
 }
 
 .pins-text-btn {

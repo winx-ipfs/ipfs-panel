@@ -263,7 +263,7 @@ onUnmounted(() => {
                   <tr v-for="peer in shown" :key="peer.peerId">
                     <td>
                       <div class="peers-id">
-                        <code>{{ peer.peerId }}</code>
+                        <code :title="peer.peerId">{{ peer.peerId }}</code>
                         <IconButton :label="t('peersCopyId')" @click="copyText(peer.peerId)">
                           <Copy :size="16" :stroke-width="1.75" aria-hidden="true" />
                         </IconButton>
