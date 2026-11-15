@@ -224,6 +224,9 @@ onUnmounted(() => {
             :hint="t('peersAddressHint')"
             :error="fieldError"
           />
+          <Button class="peers-connect" type="submit" variant="primary" :disabled="!canConnect">
+            {{ connecting ? t('peersConnecting') : t('peersConnect') }}
+          </Button>
           <Input
             v-if="store.peers.length > 0"
             v-model="query"
@@ -235,9 +238,6 @@ onUnmounted(() => {
             :hint="t('peersFilterHint')"
             @keydown.escape="query = ''"
           />
-          <Button class="peers-connect" type="submit" variant="primary" :disabled="!canConnect">
-            {{ connecting ? t('peersConnecting') : t('peersConnect') }}
-          </Button>
         </form>
         <p v-if="connectError" class="peers-problem" role="alert">{{ connectError }}</p>
         <p v-else-if="store.status === 'ready' && store.peers.length === 0" class="peers-empty">{{ t('peersEmpty') }}</p>
