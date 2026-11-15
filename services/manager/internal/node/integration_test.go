@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/files"
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/logs"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/pins"
 )
 
@@ -29,12 +30,18 @@ func TestRealKuboOptional(t *testing.T) {
 		t.Skip("PATH is the test double, not Kubo")
 	}
 	repo := t.TempDir()
+	logStore, err := logs.Open(logs.Options{Dir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = logStore.Close() })
 	sup, err := New(Config{
 		ManagerAddr: "127.0.0.1:8080",
 		RepoPath:    repo,
 		KuboBin:     bin,
 		ReadyBudget: 90 * time.Second,
 		InitTimeout: 90 * time.Second,
+		KuboLog:     logStore.KuboWriter(),
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -78,6 +85,7 @@ func TestRealKuboOptional(t *testing.T) {
 		t.Fatal(err)
 	}
 	roundTripMFS(t, client, bin, repo, apiBase, release)
+	assertLiveLogs(t, logStore, apiBase)
 	if _, err := sup.Stop(context.Background()); err != nil {
 		t.Fatal(err)
 	}
@@ -86,6 +94,7 @@ func TestRealKuboOptional(t *testing.T) {
 		t.Fatalf("%#v", down)
 	}
 	assertStoppedNode(t, apiBase)
+	assertStoppedLogs(t, apiBase)
 }
 
 func roundTripMFS(t *testing.T, client *files.Client, bin, repo, apiBase, release string) {
@@ -337,4 +346,65 @@ func assertStoppedNode(t *testing.T, apiBase string) {
 		t.Fatalf("stopped node: %v", err)
 	}
 	t.Log("stopped node returned node_not_running")
+}
+
+func assertLiveLogs(t *testing.T, store *logs.Store, apiBase string) {
+	t.Helper()
+	deadline := time.Now().Add(20 * time.Second)
+	var saw logs.Line
+	for {
+		page, err := store.Query(logs.Query{Source: logs.SourceKubo, Level: "debug", Limit: 100})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(page.Lines) > 0 {
+			saw = page.Lines[0]
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("daemon produced no stdout or stderr")
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+	if strings.TrimSpace(saw.Text) == "" {
+		t.Fatalf("empty kubo line %#v", saw)
+	}
+	t.Logf("kubo log line %s %s", saw.Level, saw.Text)
+	client, err := logs.New(logs.ClientOptions{BaseURL: apiBase, Timeout: 15 * time.Second})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	names, err := client.Subsystems(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(names) == 0 {
+		t.Fatal("log/ls returned no subsystems")
+	}
+	msg, err := client.SetLevel(ctx, "core", "error")
+	if err != nil {
+		t.Fatal(err)
+	}
+	const changed = "Changed log level of 'core' to 'error'"
+	if !strings.Contains(msg, changed) {
+		t.Fatalf("log/level message %q", msg)
+	}
+	t.Logf("log/ls %d subsystems; log/level %s", len(names), msg)
+}
+
+func assertStoppedLogs(t *testing.T, apiBase string) {
+	t.Helper()
+	client, err := logs.New(logs.ClientOptions{BaseURL: apiBase, Timeout: 5 * time.Second})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+	_, err = client.SetLevel(ctx, "core", "error")
+	if logs.CodeOf(err) != "node_not_running" {
+		t.Fatalf("stopped log/level: %v", err)
+	}
+	t.Log("stopped log/level returned node_not_running")
 }

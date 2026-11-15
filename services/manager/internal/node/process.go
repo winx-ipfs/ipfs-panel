@@ -11,6 +11,7 @@ type running struct {
 	pid     int
 	cmd     *exec.Cmd
 	stderr  *tailBuf
+	logs    io.Writer
 	done    chan struct{}
 	waitErr error
 }
@@ -27,6 +28,15 @@ func (r *running) exited() bool {
 	}
 }
 
+func (r *running) flushLogs() {
+	if r == nil || r.logs == nil {
+		return
+	}
+	if f, ok := r.logs.(interface{ Flush() }); ok {
+		f.Flush()
+	}
+}
+
 func (r *running) stderrString() string {
 	if r == nil || r.stderr == nil {
 		return ""
@@ -34,13 +44,19 @@ func (r *running) stderrString() string {
 	return r.stderr.String()
 }
 
-func spawnDaemon(bin, repo string) (*running, error) {
+func spawnDaemon(bin, repo string, kubo io.Writer) (*running, error) {
 	// Argument vector only: the binary, then "daemon". No shell, no extra flags.
 	cmd := exec.Command(bin, "daemon")
 	cmd.Env = withIPFSPath(nilEnv(), repo)
-	cmd.Stdout = io.Discard
 	stderr := newTail(detailLimit)
-	cmd.Stderr = stderr
+	stdout := io.Writer(io.Discard)
+	errOut := io.Writer(stderr)
+	if kubo != nil {
+		stdout = kubo
+		errOut = io.MultiWriter(stderr, kubo)
+	}
+	cmd.Stdout = stdout
+	cmd.Stderr = errOut
 	cmd.SysProcAttr = daemonSysProcAttr()
 	if err := cmd.Start(); err != nil {
 		return nil, err
@@ -49,6 +65,7 @@ func spawnDaemon(bin, repo string) (*running, error) {
 		pid:    cmd.Process.Pid,
 		cmd:    cmd,
 		stderr: stderr,
+		logs:   kubo,
 		done:   make(chan struct{}),
 	}
 	go func() {

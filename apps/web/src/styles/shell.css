@@ -354,7 +354,8 @@
 .files-page,
 .pins-page,
 .peers-page,
-.explore-page {
+.explore-page,
+.logs-page {
   flex: 1;
   min-height: 0;
   display: flex;
@@ -367,7 +368,8 @@
 .files-page > .ui-card,
 .pins-page > .ui-card,
 .peers-page > .ui-card,
-.explore-page > .ui-card {
+.explore-page > .ui-card,
+.logs-page > .ui-card {
   flex: 1;
   min-height: 0;
   display: flex;
@@ -378,7 +380,8 @@
 .files-page > .ui-card,
 .pins-page > .ui-card,
 .peers-page > .ui-card,
-.explore-page > .ui-card {
+.explore-page > .ui-card,
+.logs-page > .ui-card {
   padding: 0;
 }
 

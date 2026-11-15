@@ -41,6 +41,8 @@ docs = [
     "docs/design/peers.zh-CN.md",
     "docs/design/config-editor.md",
     "docs/design/config-editor.zh-CN.md",
+    "docs/design/logs.md",
+    "docs/design/logs.zh-CN.md",
     "docs/DESIGN-node-lifecycle.md",
     "docs/DESIGN-node-lifecycle.zh-CN.md",
 ]

@@ -21,6 +21,9 @@ type Config struct {
 	KuboBin     string
 	TrustProxy  bool
 	Logger      *slog.Logger
+	// KuboLog receives stdout and stderr of a daemon this manager starts.
+	// Nil discards stdout and keeps only the stderr tail used for error detail.
+	KuboLog io.Writer
 
 	// Time limits. Zero means the spec default. Tests set shorter values.
 	InitTimeout     time.Duration

@@ -4,6 +4,7 @@ import type { MessageSchema } from '@/locales/en'
 import { onUnauthorized } from '@/lib/session'
 import { useAuthStore } from '@/stores/auth'
 import ExploreView from '@/views/ExploreView.vue'
+import LogsView from '@/views/LogsView.vue'
 import FilesView from '@/views/FilesView.vue'
 import PeersView from '@/views/PeersView.vue'
 import PinsView from '@/views/PinsView.vue'
@@ -29,6 +30,7 @@ const router = createRouter({
     { path: '/peers', name: 'peers', component: PeersView, meta: { titleKey: 'peersTitle' } },
     { path: '/pins', name: 'pins', component: PinsView, meta: { titleKey: 'pinsTitle' } },
     { path: '/scenes', name: 'scenes', component: ScenesView, meta: { titleKey: 'scenesTitle' } },
+    { path: '/logs', name: 'logs', component: LogsView, meta: { titleKey: 'logsTitle' } },
     { path: '/settings', name: 'settings', component: SettingsView, meta: { titleKey: 'settingsTitle' } },
     { path: '/login', name: 'login', component: LoginView, meta: { titleKey: 'signInTitle' } },
     { path: '/setup', name: 'setup', component: SetupView, meta: { titleKey: 'setupTitle' } },

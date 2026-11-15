@@ -201,7 +201,7 @@ Rules:
 - Do not ellipsize a sentence, a button label, a peer id, a path, or an error. Wrapping is the layout. A long detail block may scroll inside its well. The text is still in the page.
 - Folder paths get a break opportunity after each `/`. Peer ids have no breaks in them, so they wrap anywhere.
 - Buttons may grow and wrap onto a second line. Do not fix their width in `ch` of the English word. Chinese labels are often shorter. English hints are often longer.
-- The sidebar labels wrap instead of clipping. Node, Files, Explore, Peers, Pins, and Scenes are normal items. Settings sits at the bottom of that list, then the footer.
+- The sidebar labels wrap instead of clipping. Node, Files, Explore, Peers, Pins, Scenes, and Logs are normal items. Settings sits at the bottom of that list, then the footer.
 
 ## Shell
 
@@ -210,7 +210,7 @@ Rules:
 - The rail does not scroll away on a long page. It stays `100vh`.
 - Top bar: a white (or dark-surface) strip with a hairline under it, 48px at rest. It holds "This machine", the English / 中文 segment, and a theme button. The button cycles light, dark, and match-device. Its icon and, from 720px up, its label show the current mode. The accessible name and the tooltip say the same mode. Both choices persist in `localStorage` (`ipfs-panel.lang`, `ipfs-panel.theme`). The theme is applied from a small script in `index.html` before paint, so the first frame is not the wrong theme. The segment and the theme button are rectangular. They do not float as pills.
 - The node page is one column. While the node is up, the surface shows the version, a shortened peer id (the copy button copies the full id), the peer count, traffic, and the local gateway when `GET /api/pins` returns `localGateway`. Below that, from 1100px, the current pins and a few connected peers sit side by side and fill the rest of the surface. Narrower than that, they stack and the surface scrolls. Both come from those same APIs, with links to the Pins and Peers pages. The overview has no API address, and the page does not invent one. While the node is stopped, the surface explains what a node is and links to the IPFS docs, and it sizes to that content.
-- Nav: Node, Files, Explore, Peers, Pins, Scenes, then Settings. Those are real pages. Expert mode is not a nav item. The raw config editor is the Advanced tab on Settings, marked Expert. The editor is a monospace surface with line numbers. Firefly green is not its background and not its selection.
+- Nav: Node, Files, Explore, Peers, Pins, Scenes, Logs, then Settings. Those are real pages. The raw config editor is the Advanced tab on Settings, marked Expert. The editor is a monospace surface with line numbers. Firefly green is not its background and not its selection. Logs is a compact title, one toolbar, and a monospace list that fills the window. Level tags use the status washes. The Following tag uses the same small-tag treatment as Expert. It is not a level color.
 - `winx.run` sits in the sidebar footer, under Sign out. It opens in a new tab. It is the portal, labeled as such.
 - Login and first-run setup use the same canvas and the same card. There is no glow behind the mark. The mark tile is 48px.
 
@@ -224,7 +224,7 @@ From `apps/web`, after `npx playwright install chromium`:
 npm run shots
 ```
 
-That writes the node page in all five states, the files page (list, empty, uploading, delete dialog, node stopped), the explore page (start, and a block with links), the peers page (list, empty, node stopped), the pins page (list, add dialog with a validation error, a job in progress, empty), the scenes page (list, preview, applied), the setup screen, the login screen with an error, the settings password form, and the expert config editor (loading, ready, dirty, invalid JSON, diff, saved, node stopped, error), light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture. The files page uses `?files=`. The explore page uses `?explore=`. The peers page uses `?peers=`. The pins page uses `?pins=`. The scenes page uses `?scenes=`. The config editor uses `?config=`. The running node shot also passes `peers=list` and `pins=list`, so the workbench shows those fixtures.
+That writes the node page in all five states, the files page (list, empty, uploading, delete dialog, node stopped), the explore page (start, and a block with links), the peers page (list, empty, node stopped), the pins page (list, add dialog with a validation error, a job in progress, empty), the scenes page (list, preview, applied), the logs page (loading, streaming, paused, filtered, empty, node stopped, error), the setup screen, the login screen with an error, the settings password form, and the expert config editor (loading, ready, dirty, invalid JSON, diff, saved, node stopped, error), light and dark, English and 中文, at 1440 and 390, plus the 404 page, to `SHOTS_DIR` or `/opt/cursor/artifacts`. The script starts Vite itself. It does not need a running manager. Auth screens use a dev-only `?auth=` fixture. The files page uses `?files=`. The explore page uses `?explore=`. The peers page uses `?peers=`. The pins page uses `?pins=`. The scenes page uses `?scenes=`. The logs page uses `?logs=`. The config editor uses `?config=`. The running node shot also passes `peers=list` and `pins=list`, so the workbench shows those fixtures.
 
 This is not a CI job. A Chromium install and the machine's CJK fonts make a pixel run slow and easy to flake, and `ci-ok` should stay the fast check. The unit tests still cover the sentences, the manager actions, and the form controls. Re-run `npm run shots` when the shell or the node card changes, and look at the pictures.
 
@@ -233,6 +233,8 @@ This is not a CI job. A Chromium install and the machine's CJK fonts make a pixe
 ![Needs attention, dark theme, English](screenshots/node-failed-dark-en.png)
 
 ![Peers, light theme, 中文](screenshots/peers-list-light-zh-1440.png)
+
+![Logs, light theme, English](screenshots/logs-streaming-light-en-1440.png)
 
 ![Expert config, light theme, English](screenshots/config-ready-light-en-1440.png)
 

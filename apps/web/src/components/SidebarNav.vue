@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Compass, ExternalLink, FolderOpen, LayoutGrid, LogOut, Pin, Server, Settings, Users } from '@lucide/vue'
+import { Compass, ExternalLink, FolderOpen, LayoutGrid, LogOut, Pin, ScrollText, Server, Settings, Users } from '@lucide/vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import BrandMark from '@/components/BrandMark.vue'
@@ -103,6 +103,18 @@ function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
       >
         <LayoutGrid :size="18" :stroke-width="1.75" aria-hidden="true" />
         <span class="nav-text">{{ t('navScenes') }}</span>
+      </a>
+    </RouterLink>
+    <RouterLink v-slot="{ href, navigate, isActive }" to="/logs" custom>
+      <a
+        :href="href"
+        class="nav-link"
+        :class="{ active: isActive }"
+        :aria-current="isActive ? 'page' : undefined"
+        @click="go(navigate, $event)"
+      >
+        <ScrollText :size="18" :stroke-width="1.75" aria-hidden="true" />
+        <span class="nav-text">{{ t('navLogs') }}</span>
       </a>
     </RouterLink>
   </nav>

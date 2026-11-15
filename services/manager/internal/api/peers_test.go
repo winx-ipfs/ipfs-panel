@@ -147,7 +147,7 @@ func peersMux(t *testing.T, h *peersHTTP) http.Handler {
 		t.Fatal(err)
 	}
 	useSession(res.Session, res.CSRF)
-	return newMux(sup, svc, nil, nil, nil, h, nil)
+	return newMux(sup, svc, nil, nil, nil, h, nil, nil)
 }
 
 func upPeers(t *testing.T, apiBase string) *peersHTTP {

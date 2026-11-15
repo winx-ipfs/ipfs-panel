@@ -6,6 +6,7 @@ import (
 
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/auth"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/explore"
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/logs"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/node"
 )
 
@@ -20,10 +21,19 @@ type healthBody struct {
 // Kubo on loopback and never return that address.
 // Every /api route except setup-status, setup, and login requires a session.
 func NewMux(sup *node.Supervisor, svc *auth.Service) http.Handler {
-	return newMux(sup, svc, nil, nil, nil, nil, nil)
+	return NewMuxWithLogs(sup, svc, nil)
 }
 
-func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pinsHandler *pinsHTTP, exploreHandler *exploreHTTP, peersHandler *peersHTTP, configHandler *configHTTP) http.Handler {
+// NewMuxWithLogs is NewMux with the log ring the Logs page reads.
+func NewMuxWithLogs(sup *node.Supervisor, svc *auth.Service, store *logs.Store) http.Handler {
+	return newMux(sup, svc, nil, nil, nil, nil, nil, &logsHTTP{
+		sup:   sup,
+		store: store,
+		trust: svc.TrustProxy(),
+	})
+}
+
+func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pinsHandler *pinsHTTP, exploreHandler *exploreHTTP, peersHandler *peersHTTP, configHandler *configHTTP, logsHandler *logsHTTP) http.Handler {
 	maxBytes, op, transfer := sup.FileLimits()
 	if filesHandler == nil {
 		filesHandler = &filesHTTP{
@@ -64,6 +74,11 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 		if !configHandler.trustProxy {
 			configHandler.trustProxy = svc.TrustProxy()
 		}
+	}
+	if logsHandler == nil {
+		logsHandler = &logsHTTP{sup: sup, trust: svc.TrustProxy()}
+	} else if logsHandler.sup == nil {
+		logsHandler.sup = sup
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", health)
@@ -112,6 +127,11 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 	mux.HandleFunc("GET /api/config", configHandler.get)
 	mux.HandleFunc("POST /api/config", configHandler.replace)
 	mux.HandleFunc("POST /api/config/restore", configHandler.restore)
+	mux.HandleFunc("GET /api/logs", logsHandler.list)
+	mux.HandleFunc("GET /api/logs/stream", logsHandler.stream)
+	mux.HandleFunc("GET /api/logs/download", logsHandler.download)
+	mux.HandleFunc("GET /api/logs/levels", logsHandler.levels)
+	mux.HandleFunc("POST /api/logs/level", logsHandler.setLevel)
 	return protect(svc, mux)
 }
 

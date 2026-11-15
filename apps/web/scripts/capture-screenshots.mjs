@@ -409,6 +409,44 @@ try {
       }
     }
 
+    const logShots = [
+      { name: 'loading', query: 'logs=loading', wait: '[data-logs="loading"]' },
+      { name: 'streaming', query: 'logs=streaming', wait: '[data-logs="streaming"]' },
+      { name: 'paused', query: 'logs=paused', wait: '[data-logs="paused"]' },
+      { name: 'filtered', query: 'logs=filtered', wait: '[data-logs="filtered"]' },
+      { name: 'empty', query: 'logs=empty', wait: '[data-logs="empty"]' },
+      { name: 'stopped', query: 'logs=stopped', wait: '[data-logs="stopped"]' },
+      { name: 'error', query: 'logs=error', wait: '[data-logs="error"]' },
+    ]
+    for (const theme of themes) {
+      for (const locale of locales) {
+        for (const size of widths) {
+          const context = await browser.newContext({
+            viewport: { width: size.width, height: size.height },
+            deviceScaleFactor: 1,
+            colorScheme: theme,
+            reducedMotion: 'reduce',
+          })
+          await context.addInitScript(
+            ({ themePreference, localePreference }) => {
+              localStorage.setItem('ipfs-panel.theme', themePreference)
+              localStorage.setItem('ipfs-panel.lang', localePreference)
+            },
+            { themePreference: theme, localePreference: locale },
+          )
+          const page = await context.newPage()
+          for (const shot of logShots) {
+            await page.goto(`${origin}/logs?${shot.query}`, { waitUntil: 'domcontentloaded' })
+            await page.waitForSelector(shot.wait)
+            const file = path.join(outDir, `logs-${shot.name}-${theme}-${locale}-${size.name}.png`)
+            await shoot(page, file)
+            index.push(file)
+          }
+          await context.close()
+        }
+      }
+    }
+
     const configShots = [
       { name: 'loading', state: 'loading' },
       { name: 'ready', state: 'ready' },

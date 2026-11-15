@@ -19,7 +19,7 @@ The panel keeps its own beginner tone ([Vision](../VISION.md)) and its own desig
 | Pins `/pins*` | In-progress pin jobs. Not in the nav | **Shipped**, and broader than this route. [Pins](pins.md) lists what the node keeps, adds a pin, and cancels a job. |
 | Settings `/settings*` | Kubo RPC address, local gateway URL, share-link shape, IPNS keys, remote pinning services, retrieval check URL, language, analytics, CLI tutor, raw JSON editor | **Partly shipped.** Language and theme are in Settings. Scenes cover the four setups in the vision. The raw JSON editor is in Settings, on an Advanced tab marked Expert ([Config editor](config-editor.md)). IPNS keys, remote pinning services, and an analytics toggle stay deferred. The panel does not add a form for the Kubo RPC address. |
 | Settings analytics `/settings/analytics` | Analytics opt-in | **Deferred.** |
-| Diagnostics `/diagnostics*` | Logs, retrieval check, DHT provide | **Deferred.** Expert mode, slice 6. |
+| Diagnostics `/diagnostics*` | Logs, retrieval check, DHT provide | **Partly shipped.** The logs page is in ([Logs](logs.md)): the manager log, the daemon output, follow and pause, copy, download, clear view, and an expert subsystem level. The retrieval check and DHT provide stay deferred. |
 | Welcome `/welcome` | What IPFS and the webui are | **Shipped** in a smaller form. The Node page explains what a node is. There is no second product tour. |
 | Blank `/blank` | Empty route used by the shell | **Not applicable.** |
 

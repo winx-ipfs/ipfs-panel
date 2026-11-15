@@ -19,7 +19,7 @@
 | 固定 `/pins*` | 进行中的 pin 任务。不在导航里 | **已有**，而且比这条路由宽。[固定](pins.zh-CN.md)列出节点留着什么、添加 pin、取消任务。 |
 | 设置 `/settings*` | Kubo RPC 地址、本地网关 URL、分享链接形状、IPNS 密钥、远程 pin 服务、检索检查 URL、语言、分析、命令行教学、原始 JSON 编辑器 | **部分已有。** 语言和主题在设置里。场景覆盖愿景里的四种用法。原始 JSON 编辑器在设置的高级页，标成专家（[配置编辑器](config-editor.zh-CN.md)）。IPNS 密钥、远程 pin 服务、分析开关仍延后。面板不加 Kubo RPC 地址的表单。 |
 | 设置里的分析 `/settings/analytics` | 分析开关 | **延后。** |
-| 诊断 `/diagnostics*` | 日志、检索检查、DHT provide | **延后。** 专家模式，切片 6。 |
+| 诊断 `/diagnostics*` | 日志、检索检查、DHT provide | **部分已交付。** 日志页已经在（[日志](logs.zh-CN.md)）：manager 的日志、守护进程的输出、跟随和暂停、复制、下载、清空视图，以及专家用的子系统级别。检索检查和 DHT provide 仍延后。 |
 | 欢迎 `/welcome` | IPFS 和 webui 是什么 | **已有**，更短。节点页说明节点是什么。没有第二套产品导览。 |
 | 空白 `/blank` | 外壳用的空路由 | **不适用。** |
 
