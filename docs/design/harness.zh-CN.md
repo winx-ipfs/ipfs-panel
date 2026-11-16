@@ -79,6 +79,9 @@ RPC 客户端不用改。它们已经拒绝非 loopback 的 base URL。测试用
 | `config/replace` 留下这把钥匙和 API 地址 | Kubo 保留钥匙，并把结构合并进去 |
 | 改 `Discovery.MDNS.Enabled` 再恢复 | 往返是 Kubo 的，包括一个它不会省略的布尔值 |
 | 停机后的 `config/show` | 连接被拒，和其他客户端一样 |
+| 守护进程的 stdout 和 stderr 进入日志存储 | 进程管道是 Kubo 的，不是桩 |
+| `log/ls` 的 `Strings`，以及把 `core` 的 `log/level` 设成 `error` | JSON 字段和“级别已改”那句话是 Kubo 的 |
+| 停机后的 `log/level` | 连接被拒，和其他客户端一样 |
 
 最后一条在 Windows 上已由 `internal/kuborpc` 覆盖。集成测试在 supervisor 停掉守护进程之后，也对真实进程再跑一次，因为二进制在手时这一下很便宜。断言是 `node_not_running`，也就是连接被拒，不是超时。
 
@@ -97,6 +100,10 @@ RPC 客户端不用改。它们已经拒绝非 loopback 的 base URL。测试用
 - `config/show` 不含 `Identity.PrivKey`，也不含私钥的值。磁盘上的文件在 show 之后、replace 之后、以及一次被拒绝的保存之后，仍有那个值。
 - 经 `config/replace` 翻转 `Discovery.MDNS.Enabled`，下一次 show 能读回来；恢复备份会把原来的值放回去。`Addresses.API` 不变。改了它的文档在 Kubo 被要求写入之前就以 `api_locked` 拒绝。带 `Identity.PrivKey` 的文档以 `privkey_locked` 拒绝。
 - supervisor 到达 `down` 之后，`config/show` 返回 `node_not_running`。
+- 守护进程至少往 stdout 或 stderr 写一行，manager 的日志存储留得住。
+- `POST /api/v0/log/ls` 返回 JSON `{"Strings":[...]}`，至少有一个子系统名字。
+- `POST /api/v0/log/level?arg=core&arg=error` 返回 HTTP 200，`Message` 里包含 `Changed log level of 'core' to 'error'`。
+- supervisor 到达 `down` 之后，同一次 `log/level` 调用返回 `node_not_running`。
 
 `IPFS_PANEL_KUBO_VERSION=0.43.1` 把这些结果钉死。任何别的非空值都会让测试失败，直到那个升级 PR 写上新的预期。空值是本地运行：调用仍然必须成功，两种名称结果必须自洽（`kubo` 且带名称，或者回退之后是 `panel`）。
 

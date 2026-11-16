@@ -27,10 +27,12 @@ What is here:
 - look inside a content ID: what the block is, and what it points at
 - see who the node is connected to, and dial one peer by an address
 - read and replace the Kubo config as JSON, from Settings, marked Expert
+- read what the panel and the node are writing, follow it, and set one log level
 
 What is not here:
 
 - more than one node
+- permanent peering
 
 ## 1. Shell, auth, and languages
 
@@ -80,7 +82,7 @@ Done when a beginner can open the list, in English and in 中文, and connect by
 
 ## 6. Expert mode, then more than one node
 
-The raw config editor is in. It is Settings, Advanced, marked Expert. The spec is [Config editor](design/config-editor.md). Logs and permanent peering are not. The peers page above is the beginner list and one dial, not permanent peering. After the rest of expert mode, more than one Kubo behind the same panel.
+The raw config editor is in. It is Settings, Advanced, marked Expert. The spec is [Config editor](design/config-editor.md). Logs are in. The spec is [Logs](design/logs.md). Permanent peering is not. The peers page above is the beginner list and one dial, not permanent peering. After the rest of expert mode, more than one Kubo behind the same panel.
 
 This waits until slices 1–5 feel dull. Dull is the goal.
 

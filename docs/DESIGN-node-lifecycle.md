@@ -312,7 +312,7 @@ A website open in the same browser can try to call `127.0.0.1:8080` while the ma
 
 The subprocess is an argument vector. The repo path and the binary come from the manager's environment, not from the request.
 
-Stderr kept for `detail` stays in memory, capped. This slice does not write a world-readable log file and does not add a log page.
+Stderr kept for `detail` stays in memory, capped. This slice does not write a world-readable log file. A later page reads the manager log and the daemon output. The spec is [Logs](design/logs.md). Those files are owner-only, under the manager data directory.
 
 ## Out of scope
 

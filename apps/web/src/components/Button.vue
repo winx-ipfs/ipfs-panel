@@ -11,6 +11,7 @@ const props = withDefaults(
     size?: 'md' | 'sm'
     type?: 'button' | 'submit' | 'reset'
     disabled?: boolean
+    pressed?: boolean
   }>(),
   {
     variant: 'quiet',
@@ -33,6 +34,7 @@ const shadVariant = computed(() => {
   <motion.button
     :type="type"
     :disabled="disabled"
+    :aria-pressed="typeof pressed === 'boolean' ? pressed : undefined"
     :while-press="press"
     :transition="transition"
     :class="

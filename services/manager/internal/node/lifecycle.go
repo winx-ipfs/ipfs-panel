@@ -26,6 +26,7 @@ func (s *Supervisor) watchExit(gen uint64, child *running) {
 		return
 	}
 	<-child.done
+	child.flushLogs()
 	s.emit(event{kind: evExited, gen: gen, detail: child.stderrString()})
 }
 
@@ -72,7 +73,7 @@ func (s *Supervisor) runStart(ctx context.Context, gen uint64) {
 		s.fail(ctx, gen, cerr)
 		return
 	}
-	child, err := spawnDaemon(bin, s.cfg.RepoPath)
+	child, err := spawnDaemon(bin, s.cfg.RepoPath, s.cfg.KuboLog)
 	if err != nil {
 		s.fail(ctx, gen, spawnDetail(err))
 		return

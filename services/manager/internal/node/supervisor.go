@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -62,6 +63,7 @@ type Supervisor struct {
 	closeOnce sync.Once
 	closed    chan struct{}
 	closeErr  error
+	capture   atomic.Bool
 }
 
 type loopState struct {
@@ -347,7 +349,7 @@ func (s *Supervisor) beginStart(st *loopState) {
 	st.peerID = ""
 	st.version = ""
 	st.restartAfter = false
-	st.child = nil
+	s.setChild(st, nil)
 	st.probing = false
 	s.flush(st)
 	s.logState(st)
@@ -391,7 +393,7 @@ func (s *Supervisor) onReady(st *loopState, ev event) bool {
 		}
 		return false
 	}
-	st.child = ev.child
+	s.setChild(st, ev.child)
 	st.state = StateUp
 	st.peerID = ev.peerID
 	st.version = ev.version
@@ -425,7 +427,7 @@ func (s *Supervisor) onAborted(st *loopState, ev event) bool {
 	if ev.gen != st.gen {
 		return false
 	}
-	st.child = nil
+	s.setChild(st, nil)
 	removePid(st.repo)
 	st.probing = false
 	if st.shuttingDown {
@@ -443,7 +445,7 @@ func (s *Supervisor) onStopped(st *loopState, ev event) bool {
 	if ev.gen != st.gen {
 		return false
 	}
-	st.child = nil
+	s.setChild(st, nil)
 	removePid(st.repo)
 	st.probing = false
 	st.state = StateDown
@@ -512,7 +514,7 @@ func (s *Supervisor) onProbe(st *loopState, ev event) bool {
 }
 
 func (s *Supervisor) markFailed(st *loopState, code, detail string) {
-	st.child = nil
+	s.setChild(st, nil)
 	removePid(st.repo)
 	st.state = StateFailed
 	st.errCode = code
@@ -558,6 +560,17 @@ func (s *Supervisor) logState(st *loopState) {
 	s.cfg.Logger.Info("node", "state", st.state, "code", st.errCode)
 }
 
+// Capturing reports whether the current daemon was spawned here and its
+// stdout and stderr are still the pipes this manager opened.
+func (s *Supervisor) Capturing() bool {
+	return s.capture.Load()
+}
+
+func (s *Supervisor) setChild(st *loopState, child *running) {
+	st.child = child
+	s.capture.Store(child != nil && child.cmd != nil)
+}
+
 func (s *Supervisor) emit(ev event) {
 	select {
 	case s.events <- ev:
@@ -574,7 +587,7 @@ func (s *Supervisor) boot(st *loopState) {
 	if hasPID && pidAlive(pid) {
 		bin, cerr := resolveBin(s.cfg.KuboBin)
 		if cerr == nil && sameDaemon(pid, bin, st.repo) {
-			st.child = adoptProcess(pid)
+			s.setChild(st, adoptProcess(pid))
 			ctx, cancel := context.WithCancel(context.Background())
 			st.startCancel = cancel
 			st.gen++

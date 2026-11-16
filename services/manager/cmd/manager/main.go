@@ -12,8 +12,11 @@ import (
 	"syscall"
 	"time"
 
+	"path/filepath"
+
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/api"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/auth"
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/logs"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/node"
 )
 
@@ -40,7 +43,19 @@ func main() {
 		logger.Error("config", "err", err)
 		os.Exit(2)
 	}
+	logStore, err := logs.Open(logs.Options{Dir: filepath.Join(cfg.DataDir, "logs")})
+	if err != nil {
+		logger.Error("logs", "err", err)
+		os.Exit(1)
+	}
+	defer func() { _ = logStore.Close() }()
+	logger = slog.New(logs.Multi(
+		slog.NewTextHandler(os.Stderr, nil),
+		logs.NewHandler(logStore),
+	))
+	slog.SetDefault(logger)
 	cfg.Logger = logger
+	cfg.KuboLog = logStore.KuboWriter()
 
 	sup, err := node.New(cfg)
 	if err != nil {
@@ -69,7 +84,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:              cfg.ManagerAddr,
-		Handler:           api.NewMux(sup, accounts),
+		Handler:           api.NewMuxWithLogs(sup, accounts, logStore),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
