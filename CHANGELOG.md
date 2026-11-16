@@ -9,7 +9,9 @@ Releases are tagged from `main` only. The heading `## [X.Y.Z]` has to be in this
 
 ## [Unreleased]
 
-Nothing yet. New work lands here until the next `release/X.Y.Z` or `hotfix/X.Y.Z` moves it under a version heading.
+- **Restyle.** The panel now uses the winx.run visual language at ops-panel density (#33).
+- **Expert config editor.** A raw Kubo config editor on Settings > Advanced, with backup, restore, and `Identity.PrivKey` kept out of the browser (#34).
+- **Logs.** One page reading the manager's own log and the daemon's stdout and stderr, with secrets redacted before storage (#35).
 
 ## [0.1.1] - 2026-11-09
 

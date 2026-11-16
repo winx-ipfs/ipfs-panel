@@ -17,8 +17,8 @@ git log --oneline -1 origin/main origin/develop && git tag -l
 | `main` | the branch that ships. Every commit on it is a release; the latest is v0.1.1 |
 | `develop` | the integration branch. Feature work lands here first |
 | Latest tag | v0.1.1 |
-| Open pull requests | none |
-| Roadmap | slices 1–4 shipped in v0.1.0; slice 5 (scenes) is on `develop`; Explore, Peers, and the released-Kubo harness are on `develop`; slice 6 (expert mode, multi-node) later |
+| Open pull requests | two Dependabot updates: #37 (manager group) and #38 (web group), both into `develop` |
+| Roadmap | slices 1–4 shipped in v0.1.0; slice 5 (scenes) and the Explore and Peers pages are on `develop`; the released-Kubo harness is on `develop`; the first half of slice 6 — the Expert raw config editor and the Logs page — is on `develop`; the second node is not |
 
 Shipped in v0.1.0: the panel shell in English and 中文, first-run admin setup and session login, node start/stop/restart with a one-sentence status, files on the node's mutable file system, and pins. Binaries for linux, macOS, and Windows, plus a web bundle, published as a GitHub Release with checksums.
 

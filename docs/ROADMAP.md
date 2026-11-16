@@ -12,7 +12,7 @@ We do not build the whole backend, then the whole UI.
 
 ## Where this repo is
 
-The tree you can clone today has finished slices 1 through 5. Slice 3's files page, slice 4's pins page, and slice 5's scenes page are in.
+The tree you can clone today has finished slices 1 through 5. Slice 3's files page, slice 4's pins page, and slice 5's scenes page are in. The Explore and Peers pages are in, and so are the first two pieces of slice 6: the Expert raw config editor and the Logs page.
 
 What is here:
 
@@ -84,7 +84,7 @@ Done when a beginner can open the list, in English and in 中文, and connect by
 
 The raw config editor is in. It is Settings, Advanced, marked Expert. The spec is [Config editor](design/config-editor.md). Logs are in. The spec is [Logs](design/logs.md). Permanent peering is not. The peers page above is the beginner list and one dial, not permanent peering. After the rest of expert mode, more than one Kubo behind the same panel.
 
-This waits until slices 1–5 feel dull. Dull is the goal.
+The first half of slice 6 has landed. What waits is the second node: more than one Kubo behind the same panel.
 
 ## Not in the early slices
 
