@@ -17,8 +17,8 @@ git log --oneline -1 origin/main origin/develop && git tag -l
 | `main` | 发布分支。上面每个提交都是一次发布；最新是 v0.1.1 |
 | `develop` | 集成分支。功能先落这里 |
 | 最新 tag | v0.1.1 |
-| 打开的 PR | 无 |
-| 路线图 | 切片 1–4 已在 v0.1.0 发布；切片 5（场景）在 `develop`；探索、对等节点，以及发行版 Kubo 测试基线在 `develop`；切片 6（专家模式、多节点）更晚 |
+| 打开的 PR | 两个 Dependabot 更新：#37（manager 组）与 #38（web 组），都指向 `develop` |
+| 路线图 | 切片 1–4 已在 v0.1.0 发布；切片 5（场景）与探索、对等节点页在 `develop`；发行版 Kubo 测试基线在 `develop`；切片 6 的前一半——专家模式的原始配置编辑器和日志页——在 `develop`；第二个节点还没有 |
 
 v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与会话登录、节点启停与一句话状态、可变文件系统上的文件页、固定（pins）页。linux、macOS、Windows 三平台二进制加 web 包，作为 GitHub Release 发布并附校验和。
 
