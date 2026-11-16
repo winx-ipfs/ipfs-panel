@@ -271,3 +271,35 @@ func TestClientRefused(t *testing.T) {
 		t.Fatalf("refused %v", err)
 	}
 }
+
+func TestLogFileNameOnlyKnownSources(t *testing.T) {
+	cases := []struct {
+		source string
+		name   string
+		ok     bool
+	}{
+		{SourceManager, "manager.log", true},
+		{SourceKubo, "kubo.log", true},
+		{SourceAll, "", false},
+		{"", "", false},
+		{"../etc/passwd", "", false},
+		{"Manager", "", false},
+		{"manager.log", "", false},
+		{"manager/../kubo", "", false},
+	}
+	for _, tc := range cases {
+		name, ok := logFileName(tc.source)
+		if ok != tc.ok || name != tc.name {
+			t.Fatalf("logFileName(%q) = %q,%v; want %q,%v", tc.source, name, ok, tc.name, tc.ok)
+		}
+		if ok {
+			path, ok := logFilePath(t.TempDir(), tc.source)
+			if !ok || filepath.Base(path) != tc.name {
+				t.Fatalf("logFilePath(%q) = %q,%v", tc.source, path, ok)
+			}
+		}
+	}
+	if _, ok := logFilePath(t.TempDir(), SourceAll); ok {
+		t.Fatal("logFilePath accepted all")
+	}
+}

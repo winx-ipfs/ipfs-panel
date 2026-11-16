@@ -30,6 +30,28 @@ const (
 	maxQueryRunes = 200
 )
 
+// logFileName maps a source to its file name. The names are the only ones a
+// store may open: the switch returns literals, so no caller-supplied value
+// reaches a path expression.
+func logFileName(source string) (string, bool) {
+	switch source {
+	case SourceManager:
+		return "manager.log", true
+	case SourceKubo:
+		return "kubo.log", true
+	}
+	return "", false
+}
+
+// logFilePath is logFileName joined to the store directory.
+func logFilePath(dir, source string) (string, bool) {
+	name, ok := logFileName(source)
+	if !ok {
+		return "", false
+	}
+	return filepath.Join(dir, name), true
+}
+
 // Line is one redacted record.
 type Line struct {
 	ID     int64     `json:"id"`
@@ -329,7 +351,10 @@ func (s *Store) WriteDownload(w io.Writer, source string) error {
 		if source == SourceAll {
 			prefix = name
 		}
-		base := filepath.Join(s.dir, name+".log")
+		base, ok := logFilePath(s.dir, name)
+		if !ok {
+			return &Error{Code: "bad_request"}
+		}
 		for _, path := range []string{base + ".2", base + ".1", base} {
 			if err := writePrefixed(w, path, prefix); err != nil {
 				return err
@@ -340,7 +365,10 @@ func (s *Store) WriteDownload(w io.Writer, source string) error {
 }
 
 func (s *Store) readTail(source string) []Line {
-	path := filepath.Join(s.dir, source+".log")
+	path, ok := logFilePath(s.dir, source)
+	if !ok {
+		return nil
+	}
 	body, err := os.ReadFile(path)
 	if err != nil || len(body) == 0 {
 		return nil
@@ -504,7 +532,10 @@ type rotFile struct {
 }
 
 func openRot(dir, source string, rotate int) (*rotFile, error) {
-	path := filepath.Join(dir, source+".log")
+	path, ok := logFilePath(dir, source)
+	if !ok {
+		return nil, &Error{Code: "bad_request"}
+	}
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
 		return nil, err
