@@ -8,9 +8,7 @@
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  background:
-    radial-gradient(920px 420px at 50% -120px, color-mix(in srgb, var(--primary) 18%, transparent), transparent 68%),
-    var(--bg);
+  background: var(--bg);
 }
 
 .gate-bar {
@@ -44,25 +42,23 @@
 .gate-badge {
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 12px;
-  border-radius: 18px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-md);
   background: var(--surface);
   color: var(--mark);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
 }
 
 .gate-badge .brand-mark {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
 }
 
 .gate-name {
   font-size: var(--text-lg);
   font-weight: 600;
-  letter-spacing: -0.02em;
   line-height: 1.3;
 }
 
@@ -73,23 +69,15 @@
 
 .auth-card h1 {
   margin: 0;
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   font-weight: 600;
-  letter-spacing: -0.02em;
   line-height: 1.3;
 }
 
-:lang(zh) .auth-card h1,
-:lang(zh-Hans) .auth-card h1,
-:lang(zh) .gate-name,
-:lang(zh-Hans) .gate-name {
-  letter-spacing: 0;
-}
-
 .auth-lead {
-  margin: 8px 0 0;
+  margin: 4px 0 0;
   color: var(--muted);
-  font-size: 0.9375rem;
+  font-size: var(--text-sm);
   line-height: var(--leading-body);
 }
 
@@ -191,23 +179,20 @@
 }
 
 .nav-logout {
-  display: flex;
-  align-items: center;
   width: 100%;
-  min-height: 40px;
-  margin: 0 0 8px;
-  padding: 6px 10px;
+  margin: 0;
   border: 0;
-  border-radius: var(--radius-md);
   background: transparent;
-  color: var(--muted);
-  font-weight: 600;
+  color: var(--sidebar-text);
+  font: inherit;
+  font-weight: 500;
   text-align: start;
+  cursor: pointer;
 }
 
-.nav-logout:hover {
-  background: var(--surface-sunken);
-  color: var(--text);
+.sidebar-foot .portal {
+  color: var(--sidebar-muted);
+  font-weight: 500;
 }
 
 .gate-loading {

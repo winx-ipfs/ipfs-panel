@@ -22,7 +22,7 @@ export function applyTheme(preference: ThemePreference) {
   document.documentElement.dataset.theme = resolved
   document.documentElement.style.colorScheme = resolved
   const meta = document.querySelector('meta[name="theme-color"]')
-  if (meta) meta.setAttribute('content', resolved === 'dark' ? '#0c1210' : '#e4ece7')
+  if (meta) meta.setAttribute('content', resolved === 'dark' ? '#0a0a0a' : '#f9fafb')
   return resolved
 }
 

@@ -23,3 +23,13 @@ function define(name: string, value: unknown) {
 
 define('localStorage', storage)
 define('navigator', { language: 'en-US' })
+
+// Motion stops in-flight animations on unmount. happy-dom rejects animation.finished
+// with AbortError, and nothing is waiting on that promise in a unit test.
+if (typeof Animation !== 'undefined') {
+  const cancel = Animation.prototype.cancel
+  Animation.prototype.cancel = function cancelQuietly(this: Animation, ...args: []) {
+    void this.finished?.catch(() => undefined)
+    return cancel.apply(this, args)
+  }
+}

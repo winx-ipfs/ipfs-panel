@@ -100,8 +100,10 @@ try {
           )
           const page = await context.newPage()
           for (const state of states) {
-            await page.goto(`${origin}/?mock=${state}`, { waitUntil: 'domcontentloaded' })
+            const query = state === 'up' ? 'mock=up&peers=list&pins=list' : `mock=${state}`
+            await page.goto(`${origin}/?${query}`, { waitUntil: 'domcontentloaded' })
             await page.waitForSelector('[role="status"]')
+            if (state === 'up') await page.waitForSelector('.node-peers .node-table')
             const file = path.join(outDir, `node-${state}-${theme}-${locale}-${size.name}.png`)
             await shoot(page, file)
             index.push(file)
@@ -293,6 +295,39 @@ try {
             await page.goto(`${origin}/explore?${shot.query}`, { waitUntil: 'domcontentloaded' })
             await page.waitForSelector(shot.wait)
             const file = path.join(outDir, `explore-${shot.name}-${theme}-${locale}-${size.name}.png`)
+            await shoot(page, file)
+            index.push(file)
+          }
+          await context.close()
+        }
+      }
+    }
+    const peerShots = [
+      { name: 'list', query: 'peers=list', wait: '[data-peers="list"]' },
+      { name: 'empty', query: 'peers=empty', wait: '[data-peers="empty"]' },
+      { name: 'down', query: 'peers=down', wait: '[data-peers="down"]' },
+    ]
+    for (const theme of themes) {
+      for (const locale of locales) {
+        for (const size of widths) {
+          const context = await browser.newContext({
+            viewport: { width: size.width, height: size.height },
+            deviceScaleFactor: 1,
+            colorScheme: theme,
+            reducedMotion: 'reduce',
+          })
+          await context.addInitScript(
+            ({ themePreference, localePreference }) => {
+              localStorage.setItem('ipfs-panel.theme', themePreference)
+              localStorage.setItem('ipfs-panel.lang', localePreference)
+            },
+            { themePreference: theme, localePreference: locale },
+          )
+          const page = await context.newPage()
+          for (const shot of peerShots) {
+            await page.goto(`${origin}/peers?${shot.query}`, { waitUntil: 'domcontentloaded' })
+            await page.waitForSelector(shot.wait)
+            const file = path.join(outDir, `peers-${shot.name}-${theme}-${locale}-${size.name}.png`)
             await shoot(page, file)
             index.push(file)
           }

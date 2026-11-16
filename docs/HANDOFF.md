@@ -34,6 +34,7 @@ These are settled. Do not reopen them without a reason and a pull request that s
 - **Scenes are four named setups.** `quiet`, `share`, `pinset`, and `gateway`. The keys, the restart rule, and the read-only public gateway exception are in `docs/design/scenes.md`. The control API stays loopback.
 - **Explore looks inside one content ID.** The manager calls `dag/resolve` and `dag/get` on loopback. The browser does not fetch the gateway and does not receive the RPC address. The spec is `docs/design/explore.md`.
 - **Peers is a table and a one-time dial.** The manager calls `swarm/peers` and `swarm/connect` on loopback. Connected peer addresses stay off the browser. There is no map, and the page does not write `Peering.Peers`. The spec is `docs/design/peers.md`.
+- **The panel uses the winx.run visual language, at ops-panel density.** `docs/DESIGN-SYSTEM.md`. Paper gray, white cards, black primary buttons (near-white in the dark theme, including when disabled), firefly green (`#20FFA9`) only for the mark, the selected bar, and small tags. The light sidebar is white; the dark selected row is a neutral lift plus that bar, not a green block. The main column fills the window: a toolbar and a list or property surface that starts under the title and runs to the bottom. Ops pages are a flex column so a closed disclosure cannot shove the surface down. The node surface adds the current pins and a few connected peers from the existing APIs, and the card ends after the last row. Table cells, including the first column, use the toolbar's 12px inset. Peers connect sits on that list, on the same baseline as the address input, with search on the other side. shadcn-vue (Nova, themed) plus Motion. Not a charcoal 1Panel clone, not IPFS webui teal, and not a mint wash. Do not restyle it back.
 
 ## What is open
 
@@ -53,7 +54,7 @@ Each of these needs a decision, not code.
 
 If you have one session and no other instruction:
 
-1. Read `AGENTS.md`, then `docs/design/harness.md`, so you do not reopen the harness, Peers, Explore, or the four scenes.
+1. Read `AGENTS.md`, then `docs/design/harness.md`, so you do not reopen the harness, Peers, Explore, the four scenes, or the winx visual language in `docs/DESIGN-SYSTEM.md`.
 2. The raw config editor is the remaining webui gap and still waits. Do not start it unless that is the task. Do not start it in the same change as something else.
 
 Scenes are in. Explore is in. Peers are in. The released-Kubo harness is in. The bitswap question is answered. Do not start plugin work.

@@ -4,6 +4,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 import Button from '@/components/Button.vue'
+import MotionIn from '@/components/MotionIn.vue'
 import Card from '@/components/Card.vue'
 import Dialog from '@/components/Dialog.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -434,64 +435,67 @@ onUnmounted(() => {
         :title="t('pinsNoMatchTitle')"
         :description="t('pinsNoMatchBody')"
       />
-      <table v-else class="pins-table">
-        <caption class="sr-only">{{ t('pinsTitle') }}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{{ t('pinsName') }}</th>
-            <th scope="col">{{ t('pinsCid') }}</th>
-            <th scope="col">{{ t('pinsType') }}</th>
-            <th scope="col">{{ t('pinsSize') }}</th>
-            <th scope="col"><span class="sr-only">{{ t('pinsMenuLabel') }}</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="pin in shown" :key="rowKey(pin)">
-            <th scope="row" class="pins-name-cell">
-              <span class="pins-name" :class="{ 'is-unnamed': !pin.name }">{{ pin.name || t('pinsUnnamed') }}</span>
-            </th>
-            <td class="pins-cid">
-              <code>{{ shortenMiddle(pin.cid, 8, 6) }}</code>
-              <button type="button" class="pins-text-btn" :aria-label="t('pinsCopyCid')" @click="copyCid(pin)">
-                {{ t('pinsCopy') }}
-              </button>
-            </td>
-            <td class="pins-type">
-              <span>{{ typeLabel(pin.type) }}</span>
-              <code class="pins-type-code">{{ pin.type }}</code>
-            </td>
-            <td class="pins-size">{{ sizeText(pin) }}</td>
-            <td class="pins-meta">
-              <span class="sr-only">{{ t('pinsType') }} {{ typeLabel(pin.type) }}, {{ t('pinsSize') }} {{ sizeText(pin) }}</span>
-              <span aria-hidden="true">{{ typeLabel(pin.type) }} · {{ sizeText(pin) }}</span>
-            </td>
-            <td class="pins-actions">
-              <div class="pins-menu-wrap">
-                <IconButton :label="t('pinsActions', { name: actionName(pin) })" @click="toggleMenu(rowKey(pin), $event)">
-                  <MoreHorizontal :size="18" :stroke-width="1.75" aria-hidden="true" />
-                </IconButton>
-                <div
-                  v-if="menuFor === rowKey(pin)"
-                  class="pins-menu"
-                  role="menu"
-                  :aria-label="t('pinsMenuLabel')"
-                  @keydown="onMenuKey"
-                >
-                  <button type="button" class="pins-menu-cid" role="menuitem" :aria-label="t('pinsCopyCid')" @click="copyCid(pin)">
-                    <span aria-hidden="true">{{ t('pinsCopyCid') }}</span>
-                    <span class="pins-menu-cid-value" aria-hidden="true">{{ pin.cid }}</span>
-                  </button>
-                  <button v-if="localShareURL(store.localGateway, pin.cid)" type="button" role="menuitem" @click="copyLink(pin)">
-                    {{ t('pinsLocalLink') }}
-                  </button>
-                  <p class="pins-menu-code" aria-hidden="true">{{ pin.type }}</p>
-                  <button type="button" role="menuitem" class="is-danger" @click="openUnpin(pin)">{{ t('pinsUnpin') }}</button>
+      <MotionIn v-else class="work-scroll">
+        <p class="list-count">{{ t('pinsSummary', { count: shown.length }) }}</p>
+        <table class="pins-table">
+          <caption class="sr-only">{{ t('pinsTitle') }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ t('pinsName') }}</th>
+              <th scope="col">{{ t('pinsCid') }}</th>
+              <th scope="col">{{ t('pinsType') }}</th>
+              <th scope="col">{{ t('pinsSize') }}</th>
+              <th scope="col"><span class="sr-only">{{ t('pinsMenuLabel') }}</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="pin in shown" :key="rowKey(pin)">
+              <th scope="row" class="pins-name-cell">
+                <span class="pins-name" :class="{ 'is-unnamed': !pin.name }">{{ pin.name || t('pinsUnnamed') }}</span>
+              </th>
+              <td class="pins-cid">
+                <code>{{ shortenMiddle(pin.cid, 8, 6) }}</code>
+                <button type="button" class="pins-text-btn" :aria-label="t('pinsCopyCid')" @click="copyCid(pin)">
+                  {{ t('pinsCopy') }}
+                </button>
+              </td>
+              <td class="pins-type">
+                <span>{{ typeLabel(pin.type) }}</span>
+                <code class="pins-type-code">{{ pin.type }}</code>
+              </td>
+              <td class="pins-size">{{ sizeText(pin) }}</td>
+              <td class="pins-meta">
+                <span class="sr-only">{{ t('pinsType') }} {{ typeLabel(pin.type) }}, {{ t('pinsSize') }} {{ sizeText(pin) }}</span>
+                <span aria-hidden="true">{{ typeLabel(pin.type) }} · {{ sizeText(pin) }}</span>
+              </td>
+              <td class="pins-actions">
+                <div class="pins-menu-wrap">
+                  <IconButton :label="t('pinsActions', { name: actionName(pin) })" @click="toggleMenu(rowKey(pin), $event)">
+                    <MoreHorizontal :size="18" :stroke-width="1.75" aria-hidden="true" />
+                  </IconButton>
+                  <div
+                    v-if="menuFor === rowKey(pin)"
+                    class="pins-menu"
+                    role="menu"
+                    :aria-label="t('pinsMenuLabel')"
+                    @keydown="onMenuKey"
+                  >
+                    <button type="button" class="pins-menu-cid" role="menuitem" :aria-label="t('pinsCopyCid')" @click="copyCid(pin)">
+                      <span aria-hidden="true">{{ t('pinsCopyCid') }}</span>
+                      <span class="pins-menu-cid-value" aria-hidden="true">{{ pin.cid }}</span>
+                    </button>
+                    <button v-if="localShareURL(store.localGateway, pin.cid)" type="button" role="menuitem" @click="copyLink(pin)">
+                      {{ t('pinsLocalLink') }}
+                    </button>
+                    <p class="pins-menu-code" aria-hidden="true">{{ pin.type }}</p>
+                    <button type="button" role="menuitem" class="is-danger" @click="openUnpin(pin)">{{ t('pinsUnpin') }}</button>
+                  </div>
                 </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </MotionIn>
     </Card>
 
     <Dialog

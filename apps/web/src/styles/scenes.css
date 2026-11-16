@@ -1,11 +1,11 @@
 .page-scenes {
-  display: grid;
-  gap: var(--space-5);
+  gap: 8px;
+  padding-bottom: 24px;
 }
 
 .scene-list {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .scene-card h2 {

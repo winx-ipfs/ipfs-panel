@@ -1,5 +1,9 @@
+<script setup lang="ts">
+import { Card as ShadCard } from '@/components/ui/card'
+</script>
+
 <template>
-  <section class="ui-card">
+  <ShadCard class="ui-card">
     <slot />
-  </section>
+  </ShadCard>
 </template>

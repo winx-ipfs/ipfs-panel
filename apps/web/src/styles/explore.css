@@ -1,7 +1,5 @@
 .explore-page {
-  width: min(960px, 100%);
-  display: grid;
-  gap: 16px;
+  width: 100%;
 }
 
 .explore-page a.ui-btn {
@@ -19,7 +17,7 @@
 }
 
 .explore-form .ui-btn {
-  min-height: 44px;
+  min-height: 40px;
 }
 
 .explore-idle,
@@ -91,15 +89,9 @@ button.explore-crumb {
 
 .explore-kind {
   margin: 0;
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-}
-
-:lang(zh) .explore-kind,
-:lang(zh-Hans) .explore-kind {
-  letter-spacing: 0;
+  line-height: 1.3;
 }
 
 .explore-meta {
@@ -173,19 +165,24 @@ button.explore-crumb {
   border-collapse: collapse;
 }
 
+.explore-table th,
+.explore-table td {
+  height: 44px;
+  padding: 0 12px;
+  text-align: start;
+  vertical-align: middle;
+}
+
 .explore-table th {
-  padding: 8px 10px 8px 0;
+  height: 36px;
+  background: var(--surface-sunken);
   color: var(--muted);
   font-size: var(--text-sm);
   font-weight: 600;
-  text-align: left;
 }
 
 .explore-table td {
-  padding: 8px 12px 8px 0;
   border-top: 1px solid var(--border);
-  vertical-align: top;
-  line-height: 1.45;
 }
 
 .explore-name {

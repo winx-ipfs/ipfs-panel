@@ -4,6 +4,7 @@ import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 import Button from '@/components/Button.vue'
+import MotionIn from '@/components/MotionIn.vue'
 import Card from '@/components/Card.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import IconButton from '@/components/IconButton.vue'
@@ -198,25 +199,6 @@ onUnmounted(() => {
     </EmptyState>
 
     <template v-else>
-      <Card v-if="store.status !== 'loading'">
-        <form class="peers-form" @submit.prevent="submit">
-          <Input
-            v-model="draft"
-            name="peer-address"
-            autocomplete="off"
-            :spellcheck="false"
-            :label="t('peersAddressLabel')"
-            :hint="t('peersAddressHint')"
-            :error="fieldError"
-          />
-          <Button type="submit" variant="primary" :disabled="!canConnect">
-            {{ connecting ? t('peersConnecting') : t('peersConnect') }}
-          </Button>
-          <p v-if="connectError" class="peers-problem" role="alert">{{ connectError }}</p>
-          <p v-else-if="store.status === 'ready' && store.peers.length === 0" class="peers-empty">{{ t('peersEmpty') }}</p>
-        </form>
-      </Card>
-
       <div v-if="store.status === 'loading'" class="peers-loading" role="status">
         <span class="sr-only">{{ t('peersLoading') }}</span>
         <Skeleton height="18px" width="28%" />
@@ -230,15 +212,25 @@ onUnmounted(() => {
         <Button variant="primary" @click="retry">{{ t('peersRetry') }}</Button>
       </Card>
 
-      <Card v-else-if="store.peers.length > 0">
-        <p v-if="filtering && shown.length > 0" class="peers-summary">{{ t('peersSummaryMatch', { count: shown.length }) }}</p>
-        <p v-else-if="!filtering" class="peers-summary">{{ t('peersSummary', { count: store.total }) }}</p>
-        <p v-if="store.truncated && !filtering" class="peers-note">{{ t('peersTruncated', { shown: store.peers.length, total: store.total }) }}</p>
-        <p v-if="listError" class="peers-problem">{{ listError }}</p>
-
-        <div class="peers-filter">
+      <Card v-else class="peers-board">
+        <form class="peers-toolbar" @submit.prevent="submit">
           <Input
+            v-model="draft"
+            class="peers-address"
+            name="peer-address"
+            autocomplete="off"
+            :spellcheck="false"
+            :label="t('peersAddressLabel')"
+            :hint="t('peersAddressHint')"
+            :error="fieldError"
+          />
+          <Button class="peers-connect" type="submit" variant="primary" :disabled="!canConnect">
+            {{ connecting ? t('peersConnecting') : t('peersConnect') }}
+          </Button>
+          <Input
+            v-if="store.peers.length > 0"
             v-model="query"
+            class="peers-filter"
             name="peer-filter"
             autocomplete="off"
             :spellcheck="false"
@@ -246,61 +238,69 @@ onUnmounted(() => {
             :hint="t('peersFilterHint')"
             @keydown.escape="query = ''"
           />
-        </div>
-
-        <p v-if="shown.length === 0" class="peers-note">{{ t('peersNoMatch') }}</p>
-
-        <template v-else>
-          <table class="peers-table">
-            <caption class="sr-only">{{ t('peersTitle') }}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{{ t('peersColPeer') }}</th>
-                <th scope="col">{{ t('peersColDirection') }}</th>
-                <th scope="col">{{ t('peersColLatency') }}</th>
-                <th scope="col">{{ t('peersColSoftware') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="peer in shown" :key="peer.peerId">
-                <td>
+        </form>
+        <p v-if="connectError" class="peers-problem" role="alert">{{ connectError }}</p>
+        <p v-else-if="store.status === 'ready' && store.peers.length === 0" class="peers-empty">{{ t('peersEmpty') }}</p>
+        <template v-if="store.peers.length > 0">
+          <p v-if="filtering && shown.length > 0" class="peers-summary">{{ t('peersSummaryMatch', { count: shown.length }) }}</p>
+          <p v-else-if="!filtering" class="peers-summary">{{ t('peersSummary', { count: store.total }) }}</p>
+          <p v-if="store.truncated && !filtering" class="peers-note">{{ t('peersTruncated', { shown: store.peers.length, total: store.total }) }}</p>
+          <p v-if="listError" class="peers-problem">{{ listError }}</p>
+          <p v-if="shown.length === 0" class="peers-note">{{ t('peersNoMatch') }}</p>
+          <div v-else class="work-scroll">
+            <MotionIn>
+              <table class="peers-table">
+                <caption class="sr-only">{{ t('peersTitle') }}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{{ t('peersColPeer') }}</th>
+                    <th scope="col">{{ t('peersColDirection') }}</th>
+                    <th scope="col">{{ t('peersColLatency') }}</th>
+                    <th scope="col">{{ t('peersColSoftware') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="peer in shown" :key="peer.peerId">
+                    <td>
+                      <div class="peers-id">
+                        <code :title="peer.peerId">{{ peer.peerId }}</code>
+                        <IconButton :label="t('peersCopyId')" @click="copyText(peer.peerId)">
+                          <Copy :size="16" :stroke-width="1.75" aria-hidden="true" />
+                        </IconButton>
+                      </div>
+                    </td>
+                    <td>{{ directionText(peer) }}</td>
+                    <td>{{ latencyText(peer) }}</td>
+                    <td>{{ softwareText(peer) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <ul class="peers-cards">
+                <li v-for="peer in shown" :key="`card-${peer.peerId}`">
                   <div class="peers-id">
                     <code>{{ peer.peerId }}</code>
                     <IconButton :label="t('peersCopyId')" @click="copyText(peer.peerId)">
                       <Copy :size="16" :stroke-width="1.75" aria-hidden="true" />
                     </IconButton>
                   </div>
-                </td>
-                <td>{{ directionText(peer) }}</td>
-                <td>{{ latencyText(peer) }}</td>
-                <td>{{ softwareText(peer) }}</td>
-              </tr>
-            </tbody>
-          </table>
-          <ul class="peers-cards">
-            <li v-for="peer in shown" :key="`card-${peer.peerId}`">
-              <div class="peers-id">
-                <code>{{ peer.peerId }}</code>
-                <IconButton :label="t('peersCopyId')" @click="copyText(peer.peerId)">
-                  <Copy :size="16" :stroke-width="1.75" aria-hidden="true" />
-                </IconButton>
-              </div>
-              <dl>
-                <div>
-                  <dt>{{ t('peersColDirection') }}</dt>
-                  <dd>{{ directionText(peer) }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t('peersColLatency') }}</dt>
-                  <dd>{{ latencyText(peer) }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t('peersColSoftware') }}</dt>
-                  <dd>{{ softwareText(peer) }}</dd>
-                </div>
-              </dl>
-            </li>
-          </ul>
+                  <dl>
+                    <div>
+                      <dt>{{ t('peersColDirection') }}</dt>
+                      <dd>{{ directionText(peer) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ t('peersColLatency') }}</dt>
+                      <dd>{{ latencyText(peer) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ t('peersColSoftware') }}</dt>
+                      <dd>{{ softwareText(peer) }}</dd>
+                    </div>
+                  </dl>
+                </li>
+              </ul>
+            </MotionIn>
+          </div>
         </template>
       </Card>
     </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Compass, FolderOpen, LayoutGrid, Pin, Server, Settings, Users } from '@lucide/vue'
+import { Compass, ExternalLink, FolderOpen, LayoutGrid, LogOut, Pin, Server, Settings, Users } from '@lucide/vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import BrandMark from '@/components/BrandMark.vue'
@@ -105,10 +105,12 @@ function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
         <span class="nav-text">{{ t('navScenes') }}</span>
       </a>
     </RouterLink>
+  </nav>
+  <div class="sidebar-foot">
     <RouterLink v-slot="{ href, navigate, isActive }" to="/settings" custom>
       <a
         :href="href"
-        class="nav-link is-settings"
+        class="nav-link"
         :class="{ active: isActive }"
         :aria-current="isActive ? 'page' : undefined"
         @click="go(navigate, $event)"
@@ -117,17 +119,19 @@ function go(navigate: (event: MouseEvent) => void, event: MouseEvent) {
         <span class="nav-text">{{ t('navSettings') }}</span>
       </a>
     </RouterLink>
-  </nav>
-  <div class="sidebar-foot">
-    <button type="button" class="nav-logout" @click="logout">{{ t('logout') }}</button>
+    <button type="button" class="nav-link nav-logout" @click="logout">
+      <LogOut :size="18" :stroke-width="1.75" aria-hidden="true" />
+      <span class="nav-text">{{ t('logout') }}</span>
+    </button>
     <a
-      class="portal"
+      class="nav-link portal"
       href="https://winx.run"
       target="_blank"
       rel="noopener noreferrer"
       :aria-label="t('portalLabel')"
     >
-      winx.run
+      <ExternalLink :size="18" :stroke-width="1.75" aria-hidden="true" />
+      <span class="nav-text">winx.run</span>
     </a>
   </div>
 </template>

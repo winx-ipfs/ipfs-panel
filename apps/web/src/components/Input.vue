@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Eye, EyeOff } from '@lucide/vue'
 import { computed, ref } from 'vue'
+import { Input as ShadInput } from '@/components/ui/input'
 
 const model = defineModel<string>({ default: '' })
 const emit = defineEmits<{ blur: [] }>()
@@ -45,7 +46,7 @@ const toggleLabel = computed(() => (visible.value ? props.hidePasswordLabel : pr
   <div class="ui-field">
     <label class="ui-field-label" :for="controlId">{{ label }}</label>
     <div class="ui-input-wrap">
-      <input
+      <ShadInput
         :id="controlId"
         v-model="model"
         class="ui-input"
@@ -60,7 +61,7 @@ const toggleLabel = computed(() => (visible.value ? props.hidePasswordLabel : pr
         :aria-describedby="error || hint ? `${controlId}-note` : undefined"
         :data-autofocus="autofocus ? '' : undefined"
         @blur="emit('blur')"
-      >
+      />
       <button
         v-if="type === 'password'"
         type="button"
