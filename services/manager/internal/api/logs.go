@@ -85,10 +85,14 @@ func (h *logsHTTP) stream(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("X-Accel-Buffering", "no")
-	writeStatus(w, ov, h.isCapturing())
+	if err := writeStatus(w, ov, h.isCapturing()); err != nil {
+		return
+	}
 	last := q.After
 	for _, line := range page.Lines {
-		writeLine(w, line)
+		if err := writeLine(w, line); err != nil {
+			return
+		}
 		last = line.ID
 	}
 	flusher.Flush()
@@ -102,19 +106,29 @@ func (h *logsHTTP) stream(w http.ResponseWriter, r *http.Request) {
 			if line.ID <= last {
 				continue
 			}
-			writeLine(w, line)
+			if err := writeLine(w, line); err != nil {
+				return
+			}
 			last = line.ID
 			if h.store.TakeOverflow(id) {
-				fmt.Fprintf(w, "event: gap\ndata: {}\n\n")
+				if _, err := fmt.Fprintf(w, "event: gap\ndata: {}\n\n"); err != nil {
+					return
+				}
 			}
 			flusher.Flush()
 		case <-tick.C:
 			if snap, ok := h.snapshotQuiet(r); ok {
-				writeStatus(w, snap, h.isCapturing())
+				if err := writeStatus(w, snap, h.isCapturing()); err != nil {
+					return
+				}
 			}
-			fmt.Fprintf(w, ": ping\n\n")
+			if _, err := fmt.Fprintf(w, ": ping\n\n"); err != nil {
+				return
+			}
 			if h.store.TakeOverflow(id) {
-				fmt.Fprintf(w, "event: gap\ndata: {}\n\n")
+				if _, err := fmt.Fprintf(w, "event: gap\ndata: {}\n\n"); err != nil {
+					return
+				}
 			}
 			flusher.Flush()
 		}
@@ -363,7 +377,7 @@ func logPageJSON(page logs.Page, ov node.Overview, capture bool) map[string]any 
 	}
 }
 
-func writeLine(w http.ResponseWriter, line logs.Line) {
+func writeLine(w http.ResponseWriter, line logs.Line) error {
 	body, err := json.Marshal(logLineJSON{
 		ID:     line.ID,
 		Time:   line.Time.UTC().Format(time.RFC3339Nano),
@@ -372,21 +386,23 @@ func writeLine(w http.ResponseWriter, line logs.Line) {
 		Text:   line.Text,
 	})
 	if err != nil {
-		return
+		return err
 	}
-	fmt.Fprintf(w, "id: %d\nevent: line\ndata: %s\n\n", line.ID, body)
+	_, err = fmt.Fprintf(w, "id: %d\nevent: line\ndata: %s\n\n", line.ID, body)
+	return err
 }
 
-func writeStatus(w http.ResponseWriter, ov node.Overview, capture bool) {
+func writeStatus(w http.ResponseWriter, ov node.Overview, capture bool) error {
 	state := ov.State
 	if state == "" {
 		state = node.StateDown
 	}
 	body, err := json.Marshal(map[string]any{"node": state, "capture": capture})
 	if err != nil {
-		return
+		return err
 	}
-	fmt.Fprintf(w, "event: status\ndata: %s\n\n", body)
+	_, err = fmt.Fprintf(w, "event: status\ndata: %s\n\n", body)
+	return err
 }
 
 func writeLogsErr(w http.ResponseWriter, err error) {
