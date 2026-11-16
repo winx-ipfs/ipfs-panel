@@ -454,18 +454,20 @@ onUnmounted(() => {
                 <span class="pins-name" :class="{ 'is-unnamed': !pin.name }">{{ pin.name || t('pinsUnnamed') }}</span>
               </th>
               <td class="pins-cid">
+                <span class="pins-kicker" aria-hidden="true">{{ t('pinsCid') }}</span>
                 <code>{{ shortenMiddle(pin.cid, 8, 6) }}</code>
                 <button type="button" class="pins-text-btn" :aria-label="t('pinsCopyCid')" @click="copyCid(pin)">
                   {{ t('pinsCopy') }}
                 </button>
               </td>
               <td class="pins-type">
+                <span class="pins-kicker" aria-hidden="true">{{ t('pinsType') }}</span>
                 <span>{{ typeLabel(pin.type) }}</span>
                 <code class="pins-type-code">{{ pin.type }}</code>
               </td>
               <td class="pins-size">
-                <span class="pins-size-value">{{ sizeText(pin) }}</span>
-                <span class="pins-meta">{{ typeLabel(pin.type) }} · {{ sizeText(pin) }}</span>
+                <span class="pins-kicker" aria-hidden="true">{{ t('pinsSize') }}</span>
+                {{ sizeText(pin) }}
               </td>
               <td class="pins-actions">
                 <div class="pins-menu-wrap">
