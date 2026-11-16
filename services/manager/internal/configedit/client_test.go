@@ -50,9 +50,8 @@ func TestClientShowAndReplace(t *testing.T) {
 	if strings.Contains(view.Text, "secret-key") {
 		t.Fatal("show leaked the key")
 	}
-	edited := strings.Replace(view.Text, `"PeerID": "abc"`, `"PeerID": "abc"`, 1)
 	// Force a real edit that still passes the locks.
-	edited = strings.Replace(view.Text, "{", "{\n  \"Discovery\": {\"MDNS\": {\"Enabled\": false}},", 1)
+	edited := strings.Replace(view.Text, "{", "{\n  \"Discovery\": {\"MDNS\": {\"Enabled\": false}},", 1)
 	if _, err := svc.Replace(context.Background(), edited); err != nil {
 		t.Fatal(err)
 	}
