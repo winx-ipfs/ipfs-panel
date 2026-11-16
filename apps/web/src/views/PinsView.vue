@@ -463,10 +463,9 @@ onUnmounted(() => {
                 <span>{{ typeLabel(pin.type) }}</span>
                 <code class="pins-type-code">{{ pin.type }}</code>
               </td>
-              <td class="pins-size">{{ sizeText(pin) }}</td>
-              <td class="pins-meta">
-                <span class="sr-only">{{ t('pinsType') }} {{ typeLabel(pin.type) }}, {{ t('pinsSize') }} {{ sizeText(pin) }}</span>
-                <span aria-hidden="true">{{ typeLabel(pin.type) }} · {{ sizeText(pin) }}</span>
+              <td class="pins-size">
+                <span class="pins-size-value">{{ sizeText(pin) }}</span>
+                <span class="pins-meta">{{ typeLabel(pin.type) }} · {{ sizeText(pin) }}</span>
               </td>
               <td class="pins-actions">
                 <div class="pins-menu-wrap">

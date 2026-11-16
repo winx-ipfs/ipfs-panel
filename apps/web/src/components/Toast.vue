@@ -8,7 +8,7 @@ const { enter, shown, transition } = useMotion()
 </script>
 
 <template>
-  <div class="ui-toaster" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+  <div class="ui-toaster">
     <motion.p
       v-for="item in toast.items"
       :key="item.id"

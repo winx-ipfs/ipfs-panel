@@ -359,18 +359,16 @@
 
   .pins-name-cell { grid-area: name; }
   .pins-actions { grid-area: actions; align-self: start; }
-  .pins-table .pins-meta {
+  .pins-table .pins-size {
     display: block;
     grid-area: meta;
     color: var(--muted);
     font-size: var(--text-sm);
   }
-
+  .pins-size-value { display: none; }
+  .pins-table .pins-meta { display: block; }
   .pins-table .pins-cid,
-  .pins-table .pins-type,
-  .pins-table .pins-size {
-    display: none;
-  }
+  .pins-table .pins-type { display: none; }
 
   .pins-table th,
   .pins-table td {

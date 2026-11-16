@@ -370,6 +370,14 @@
 
   .files-name-cell { grid-area: name; }
   .files-actions { grid-area: actions; align-self: start; }
+  .files-time {
+    display: block;
+    grid-area: meta;
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+  .files-time .files-when,
+  .files-time .files-kicker { display: none; }
   .files-meta {
     display: block;
     grid-area: meta;
@@ -377,8 +385,7 @@
     font-size: var(--text-sm);
   }
   .files-table .files-size,
-  .files-table .files-cid,
-  .files-table .files-time { display: none; }
+  .files-table .files-cid { display: none; }
 
   .files-table th,
   .files-table td {

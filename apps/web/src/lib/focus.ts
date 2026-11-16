@@ -7,10 +7,12 @@ const selector = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',')
 
+export function isFocusable(element: HTMLElement): boolean {
+  if (element.getAttribute('aria-hidden') === 'true') return false
+  const style = window.getComputedStyle(element)
+  return style.display !== 'none' && style.visibility !== 'hidden'
+}
+
 export function focusable(root: HTMLElement): HTMLElement[] {
-  return [...root.querySelectorAll<HTMLElement>(selector)].filter((element) => {
-    if (element.getAttribute('aria-hidden') === 'true') return false
-    const style = window.getComputedStyle(element)
-    return style.display !== 'none' && style.visibility !== 'hidden'
-  })
+  return [...root.querySelectorAll<HTMLElement>(selector)].filter(isFocusable)
 }
