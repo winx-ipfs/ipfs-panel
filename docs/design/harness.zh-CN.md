@@ -61,7 +61,7 @@ RPC 客户端不用改。它们已经拒绝非 loopback 的 base URL。测试用
 
 ## 集成测试必须覆盖什么
 
-`TestRealKuboOptional` 保留 MFS 往返，并加上下面这些检查。每一条都只能由真实二进制裁定：
+`TestRealKuboOptional` 保留 MFS 往返，并加上下面这些检查。`TestRealKuboConfig` 是同一目录里的 `package node_test`，所以同一个 `-run TestRealKubo` 会启动它。它不能放在 `package node` 里：编辑器那个包已经导入了 `node`。工作流也要求 `--- PASS: TestRealKuboConfig`。每一条都只能由真实二进制裁定：
 
 | 检查 | 为什么桩替代不了 |
 | --- | --- |
@@ -75,6 +75,10 @@ RPC 客户端不用改。它们已经拒绝非 loopback 的 base URL。测试用
 | 目录与文件的 `files/stat` | `Type` 取值不同 |
 | 对间接 pin 的 `pin/rm` | 错误文本与状态码 |
 | 停机的节点 | 连接被拒，而非超时 |
+| `config/show` 省掉 `Identity.PrivKey` | Kubo 会涂掉这把钥匙；桩可以忘掉 |
+| `config/replace` 留下这把钥匙和 API 地址 | Kubo 保留钥匙，并把结构合并进去 |
+| 改 `Discovery.MDNS.Enabled` 再恢复 | 往返是 Kubo 的，包括一个它不会省略的布尔值 |
+| 停机后的 `config/show` | 连接被拒，和其他客户端一样 |
 
 最后一条在 Windows 上已由 `internal/kuborpc` 覆盖。集成测试在 supervisor 停掉守护进程之后，也对真实进程再跑一次，因为二进制在手时这一下很便宜。断言是 `node_not_running`，也就是连接被拒，不是超时。
 
@@ -90,6 +94,9 @@ RPC 客户端不用改。它们已经拒绝非 loopback 的 base URL。测试用
 - `files/ls` 带 `long=true` 返回 `Name`、`Type`（整数：0 是文件，1 是目录）、`Size` 和 `Hash`。它不返回 `Mtime`。`files/stat` 的 `Type` 是字符串 `file` 或 `directory`。`ipfs files touch --mtime` 之后，`files/stat` 会带回那个 `Mtime`，列表条目的修改时间来自这次 stat。
 - 对一个只被间接固定的 CID 做 `pin/rm`，返回 HTTP 500，正文是 `{"Message":"not pinned or pinned indirectly","Code":0,"Type":"error"}`。客户端把它映射成 `indirect`。
 - supervisor 停掉守护进程之后，files stat 返回 `node_not_running`。
+- `config/show` 不含 `Identity.PrivKey`，也不含私钥的值。磁盘上的文件在 show 之后、replace 之后、以及一次被拒绝的保存之后，仍有那个值。
+- 经 `config/replace` 翻转 `Discovery.MDNS.Enabled`，下一次 show 能读回来；恢复备份会把原来的值放回去。`Addresses.API` 不变。改了它的文档在 Kubo 被要求写入之前就以 `api_locked` 拒绝。带 `Identity.PrivKey` 的文档以 `privkey_locked` 拒绝。
+- supervisor 到达 `down` 之后，`config/show` 返回 `node_not_running`。
 
 `IPFS_PANEL_KUBO_VERSION=0.43.1` 把这些结果钉死。任何别的非空值都会让测试失败，直到那个升级 PR 写上新的预期。空值是本地运行：调用仍然必须成功，两种名称结果必须自洽（`kubo` 且带名称，或者回退之后是 `panel`）。
 

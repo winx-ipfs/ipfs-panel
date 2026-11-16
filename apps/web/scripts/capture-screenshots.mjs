@@ -55,11 +55,11 @@ function waitForServer(url, child) {
   })
 }
 
-async function shoot(page, file) {
+async function shoot(page, file, fullPage = true) {
   await page.waitForSelector('main')
   await page.evaluate(() => document.fonts.ready)
   await page.waitForTimeout(150)
-  await page.screenshot({ path: file, fullPage: true })
+  await page.screenshot({ path: file, fullPage })
 }
 
 const port = await freePort()
@@ -402,6 +402,46 @@ try {
             await page.waitForSelector(shot.wait)
             const file = path.join(outDir, `scenes-${shot.name}-${theme}-${locale}-${size.name}.png`)
             await shoot(page, file)
+            index.push(file)
+          }
+          await context.close()
+        }
+      }
+    }
+
+    const configShots = [
+      { name: 'loading', state: 'loading' },
+      { name: 'ready', state: 'ready' },
+      { name: 'dirty', state: 'dirty' },
+      { name: 'invalid', state: 'invalid' },
+      { name: 'diff', state: 'diff' },
+      { name: 'saved', state: 'saved' },
+      { name: 'stopped', state: 'stopped' },
+      { name: 'error', state: 'error' },
+    ]
+    for (const theme of themes) {
+      for (const locale of locales) {
+        for (const size of widths) {
+          const context = await browser.newContext({
+            viewport: { width: size.width, height: size.height },
+            deviceScaleFactor: 1,
+            colorScheme: theme,
+            reducedMotion: 'reduce',
+          })
+          await context.addInitScript(
+            ({ themePreference, localePreference }) => {
+              localStorage.setItem('ipfs-panel.theme', themePreference)
+              localStorage.setItem('ipfs-panel.lang', localePreference)
+            },
+            { themePreference: theme, localePreference: locale },
+          )
+          const page = await context.newPage()
+          for (const shot of configShots) {
+            await page.goto(`${origin}/settings?auth=session&config=${shot.state}`, { waitUntil: 'domcontentloaded' })
+            await page.waitForSelector(`[data-state="${shot.state}"]`)
+            const dialog = shot.state === 'diff' || shot.state === 'saved'
+            const file = path.join(outDir, `config-${shot.name}-${theme}-${locale}-${size.name}.png`)
+            await shoot(page, file, !dialog)
             index.push(file)
           }
           await context.close()

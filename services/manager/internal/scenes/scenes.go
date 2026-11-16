@@ -375,6 +375,14 @@ func codeFor(key, raw string) string {
 	}
 }
 
+// ManagedKeys is the config paths a scene writes. The raw editor uses the
+// list to warn when an edit leaves the scene that is in use.
+func ManagedKeys() []string {
+	out := make([]string, len(managedKeys))
+	copy(out, managedKeys)
+	return out
+}
+
 var managedKeys = []string{
 	"Routing.Type",
 	"AutoNAT.ServiceMode",

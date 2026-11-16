@@ -43,7 +43,14 @@ func gatewayMultiaddr(managerAddr string) string {
 	return fmt.Sprintf("/ip4/127.0.0.1/tcp/%d", gatewayPort(managerAddr))
 }
 
-// addressKind is "string" or "array", matching the JSON Kubo stored.
+// ParseAddresses returns the multiaddrs stored in a Kubo address field.
+// The JSON is either one string or a list of strings. addressKind on the
+// unexported parser is "string" or "array", matching the JSON Kubo stored.
+func ParseAddresses(raw json.RawMessage) ([]string, error) {
+	_, values, err := addressValues(raw)
+	return values, err
+}
+
 func addressValues(raw json.RawMessage) (kind string, values []string, err error) {
 	raw = bytes.TrimSpace(raw)
 	if len(raw) == 0 || bytes.Equal(raw, []byte("null")) {

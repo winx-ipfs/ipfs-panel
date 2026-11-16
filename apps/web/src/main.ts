@@ -21,6 +21,7 @@ import './styles/explore.css'
 import './styles/peers.css'
 import './styles/pins.css'
 import './styles/scenes.css'
+import './styles/config.css'
 
 const app = createApp(App)
 

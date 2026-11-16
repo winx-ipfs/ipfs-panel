@@ -20,10 +20,10 @@ type healthBody struct {
 // Kubo on loopback and never return that address.
 // Every /api route except setup-status, setup, and login requires a session.
 func NewMux(sup *node.Supervisor, svc *auth.Service) http.Handler {
-	return newMux(sup, svc, nil, nil, nil, nil)
+	return newMux(sup, svc, nil, nil, nil, nil, nil)
 }
 
-func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pinsHandler *pinsHTTP, exploreHandler *exploreHTTP, peersHandler *peersHTTP) http.Handler {
+func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pinsHandler *pinsHTTP, exploreHandler *exploreHTTP, peersHandler *peersHTTP, configHandler *configHTTP) http.Handler {
 	maxBytes, op, transfer := sup.FileLimits()
 	if filesHandler == nil {
 		filesHandler = &filesHTTP{
@@ -56,6 +56,14 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 		peersHandler = &peersHTTP{sup: sup}
 	} else if peersHandler.sup == nil {
 		peersHandler.sup = sup
+	}
+	if configHandler == nil {
+		configHandler = &configHTTP{sup: sup, trustProxy: svc.TrustProxy()}
+	} else if configHandler.sup == nil {
+		configHandler.sup = sup
+		if !configHandler.trustProxy {
+			configHandler.trustProxy = svc.TrustProxy()
+		}
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", health)
@@ -101,6 +109,9 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 	mux.HandleFunc("GET /api/explore", exploreHandler.get)
 	mux.HandleFunc("GET /api/peers", peersHandler.list)
 	mux.HandleFunc("POST /api/peers/connect", peersHandler.connect)
+	mux.HandleFunc("GET /api/config", configHandler.get)
+	mux.HandleFunc("POST /api/config", configHandler.replace)
+	mux.HandleFunc("POST /api/config/restore", configHandler.restore)
 	return protect(svc, mux)
 }
 
