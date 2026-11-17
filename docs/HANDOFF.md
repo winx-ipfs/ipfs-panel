@@ -51,12 +51,13 @@ Each of these needs a decision, not code.
 - **`docs/design/*.md` are the authority.** `harness.md` is implemented. `kubo-integration.md` is a decision, not a build. Read their status lines.
 - **Windows coverage depends on a developer running the tests there.** The harness runs on ubuntu only. The three Windows defects found in slice 1–4 were all found by a human running `go test` on Windows.
 - **`ci-ok` requires nine jobs.** `web` and `manager` skip when their paths do not change. `integration` runs on pull requests into `develop` and skips otherwise. That is intentional; `docs/ORG-SETUP.md` explains the ruleset. Do not add a required check without updating `.github/workflows/ci.yml` and `docs/ORG-SETUP.md` together.
+- **The browser finds what the unit tests cannot.** Three defects shipped past a green `web` job in slice 6: a row menu clipped to nothing by its cell's `overflow: hidden`, a `flex-basis` that became a 280px height once the toolbar stacked, and a test that asserted the start request was the *last* fetch when companion loads can follow it. `npm run check-menus` now drives the real page in the `web` job for the first, and the third is pinned by its own regression test. Anything that depends on computed layout or clipping still needs a browser, not a headless DOM.
 
 ## Next step, concretely
 
 If you have one session and no other instruction:
 
-1. Read `AGENTS.md`, then `docs/design/harness.md`, so you do not reopen the harness, Peers, Explore, the four scenes, or the winx visual language in `docs/DESIGN-SYSTEM.md`.
+1. Read `AGENTS.md`, then `docs/design/harness.md`, so you do not reopen the harness, Peers, Explore, the four scenes, or the winx visual language in `docs/DESIGN-SYSTEM.md`. Then open the panel in a browser: `npm run check-menus` covers the row menus, and both list pages are worth one look at 390px, where the layout changes shape.
 2. Logs are in. Permanent peering and a second node are still not. Do not start those in the same change as a logs fix.
 
 Scenes are in. Explore is in. Peers are in. The raw config editor is in. Logs are in. The released-Kubo harness is in. The bitswap question is answered. Do not start plugin work.

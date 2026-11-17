@@ -51,6 +51,7 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 - **`docs/design/*.md` 是权威。** `harness.md` 已实现。`kubo-integration.md` 是一份决定，不是待做的构建。读它们的 status 行。
 - **Windows 覆盖依赖有人在那边跑测试。** 测试基线只在 ubuntu 上跑。切片 1–4 里的三个 Windows 缺陷，全是有人在 Windows 上跑 `go test` 才发现的。
 - **`ci-ok` 要求九个任务。** `web` 和 `manager` 在路径未变时跳过。`integration` 在指向 `develop` 的 pull request 上跑，其他时候跳过。这是有意的，`docs/ORG-SETUP.zh-CN.md` 说明了规则集。加必需检查时，要同时改 `.github/workflows/ci.yml` 与 `docs/ORG-SETUP.zh-CN.md`。
+- **浏览器能发现单元测试发现不了的问题。** 切片 6 有三个缺陷穿过了全绿的 `web` job：行内菜单被单元格的 `overflow: hidden` 裁到不可见、工具栏堆叠后 `flex-basis` 变成了 280px 的高度、以及一个断言把 start 请求当成"最后一次 fetch"而同批的伴随请求还会跟在后面。第一个现在由 `web` job 里的 `npm run check-menus` 覆盖，第三个有自己的回归测试。任何依赖计算布局或裁剪的检查仍然需要真浏览器，而不是无头 DOM。
 
 ## 具体的下一步
 
