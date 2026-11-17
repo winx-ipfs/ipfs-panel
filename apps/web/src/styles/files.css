@@ -417,3 +417,10 @@
     min-width: min(240px, 78vw);
   }
 }
+
+/* The row menu is absolutely positioned inside the actions cell. The cell's
+   overflow: hidden (for ellipsis on the text cells) clipped it away entirely,
+   so no row action could be clicked. */
+.files-table td.files-actions {
+  overflow: visible;
+}
