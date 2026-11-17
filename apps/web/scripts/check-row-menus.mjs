@@ -151,8 +151,41 @@ try {
         // Every row, not just the first: a menu that opens below the fold or
         // past the scroll container is unusable for the rows a user sees last.
         for (let row = 0; row < rows; row += 1) {
+          // A portalled menu animates out, so the previous one can still be in
+          // the document. Reading the first match would measure a stale node
+          // drawn off-screen, which is what made this check flaky in CI.
+          await page.waitForFunction(
+            (selector) => document.querySelectorAll(selector).length === 0,
+            target.menu,
+            { timeout: 5000 },
+          )
           await triggers.nth(row).click()
           await page.waitForSelector(target.menu, { state: 'attached', timeout: 5000 })
+          await page.waitForFunction(
+            (selector) => document.querySelectorAll(selector).length === 1,
+            target.menu,
+            { timeout: 5000 },
+          )
+          // The popper measures and places the content after it mounts, so a
+          // rect read on the same frame can still be the pre-placement one.
+          await page.waitForFunction(
+            (selector) => {
+              const menu = document.querySelector(selector)
+              if (!menu) return false
+              const box = menu.getBoundingClientRect()
+              const previous = window.__menuBox
+              window.__menuBox = { top: box.top, left: box.left, h: box.height }
+              return (
+                previous !== undefined &&
+                previous.top === box.top &&
+                previous.left === box.left &&
+                previous.h === box.height &&
+                box.height > 0
+              )
+            },
+            target.menu,
+            { timeout: 5000, polling: 'raf' },
+          )
           const result = await page.evaluate((menuSelector) => {
             const menu = document.querySelector(menuSelector)
             if (!menu) return { items: 0, reachable: 0, clippedBy: [], offscreen: false }
@@ -201,6 +234,11 @@ try {
             console.log(`${label}: ${result.reachable}/${result.items} menu items reachable`)
           }
           await page.keyboard.press('Escape')
+          await page.waitForFunction(
+            (selector) => document.querySelectorAll(selector).length === 0,
+            target.menu,
+            { timeout: 5000 },
+          )
         }
         await context.close()
       }
