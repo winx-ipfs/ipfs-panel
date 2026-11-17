@@ -191,12 +191,21 @@ describe('NodeView', () => {
     const pendingClick = wrapper.get('[data-node-action="start"]').trigger('click')
     await flushPromises()
     expect(wrapper.get('[data-node-action="start"]').attributes('disabled')).toBeDefined()
-    expect(fetchMock).toHaveBeenLastCalledWith('/api/node/start', {
+    // Assert on the start request itself, not on it being the last call.
+    // Once the node reports up, watch(connected) loads companions
+    // (/api/peers, /api/pins) and those can land after this POST.
+    const startCall = fetchMock.mock.calls.find((call) => call[0] === '/api/node/start')
+    expect(startCall, 'the Start button must POST /api/node/start').toBeDefined()
+    expect(startCall?.[1]).toEqual({
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': '' },
       body: '{}',
     })
+    expect(
+      fetchMock.mock.calls.filter((call) => call[0] === '/api/node/start'),
+      'start must be posted exactly once',
+    ).toHaveLength(1)
     release(
       new Response(JSON.stringify(overview({ state: 'starting' })), {
         status: 200,
@@ -206,6 +215,69 @@ describe('NodeView', () => {
     await pendingClick
     await flushPromises()
     expect(wrapper.findAll('[data-node-action]')).toHaveLength(0)
+    wrapper.unmount()
+  })
+})
+
+describe('NodeView start assertion survives companion loads', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  it('still detects the start POST when a companion request lands after it', async () => {
+    const calls: string[] = []
+    let startResolve: (value: Response) => void = () => {}
+    const fetchMock = vi.fn().mockImplementation((url: string) => {
+      const target = String(url)
+      calls.push(target)
+      if (target === '/api/node') {
+        return Promise.resolve(
+          new Response(JSON.stringify(overview()), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        )
+      }
+      if (target === '/api/node/start') {
+        return new Promise<Response>((resolve) => {
+          startResolve = resolve
+        })
+      }
+      // /api/peers and /api/pins: the companions that fired the CI flake
+      if (target === '/api/peers' || target === '/api/pins') {
+        return Promise.resolve(
+          new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } }),
+        )
+      }
+      return Promise.resolve(new Response('{}', { status: 200 }))
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const wrapper = mount(NodeView, { global: { plugins: plugins() } })
+    await flushPromises()
+
+    void wrapper.get('[data-node-action="start"]').trigger('click')
+    await flushPromises()
+
+    // The daemon comes up, so watch(connected) loads companions afterwards.
+    startResolve(
+      new Response(JSON.stringify(overview({ state: 'up', peerId: 'p', version: 'kubo/1/' })), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+    await flushPromises()
+    await flushPromises()
+
+    // Deliberately assert from the flaky position: the start POST is no longer last.
+    expect(calls[calls.length - 1]).not.toBe('/api/node/start')
+    const startCall = fetchMock.mock.calls.find((call) => call[0] === '/api/node/start')
+    expect(startCall?.[1]).toEqual({
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': '' },
+      body: '{}',
+    })
     wrapper.unmount()
   })
 })
