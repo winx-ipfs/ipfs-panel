@@ -161,16 +161,7 @@
   text-align: end;
 }
 
-.pins-menu-wrap {
-  position: relative;
-  display: inline-flex;
-}
-
 .pins-menu {
-  position: absolute;
-  z-index: 5;
-  inset-inline-end: 0;
-  top: calc(100% + 4px);
   min-width: 220px;
   padding: 6px;
   border: 1px solid var(--border);
@@ -178,6 +169,7 @@
   background: var(--surface);
   box-shadow: var(--shadow-md);
   display: grid;
+  z-index: 60;
 }
 
 .pins-menu button {
@@ -397,7 +389,7 @@
     min-width: min(260px, 78vw);
   }
 
-  .pins-menu-cid {
+  .pins-menu .pins-menu-cid {
     flex-direction: column;
     align-items: flex-start;
     height: auto;
@@ -413,10 +405,4 @@
     font-weight: 400;
     overflow-wrap: anywhere;
   }
-}
-
-/* Same reason as .files-table td.files-actions: the row menu lives inside the
-   cell and was clipped by the cell's overflow: hidden. */
-.pins-table td.pins-actions {
-  overflow: visible;
 }

@@ -248,16 +248,7 @@
   text-align: end;
 }
 
-.files-menu-wrap {
-  position: relative;
-  display: inline-flex;
-}
-
 .files-menu {
-  position: absolute;
-  z-index: 5;
-  inset-inline-end: 0;
-  top: calc(100% + 4px);
   min-width: 220px;
   padding: 6px;
   border: 1px solid var(--border);
@@ -265,6 +256,7 @@
   background: var(--surface);
   box-shadow: var(--shadow-md);
   display: grid;
+  z-index: 60;
 }
 
 .files-menu a,
@@ -395,7 +387,7 @@
     padding: 0;
   }
 
-  .files-menu-cid {
+  .files-menu .files-menu-cid {
     flex-direction: column;
     align-items: flex-start;
     height: auto;
@@ -416,11 +408,4 @@
   .files-menu {
     min-width: min(240px, 78vw);
   }
-}
-
-/* The row menu is absolutely positioned inside the actions cell. The cell's
-   overflow: hidden (for ellipsis on the text cells) clipped it away entirely,
-   so no row action could be clicked. */
-.files-table td.files-actions {
-  overflow: visible;
 }

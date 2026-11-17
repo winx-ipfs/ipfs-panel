@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ChevronRight, FileText, Folder, FolderPlus, Home, MoreHorizontal, RefreshCw, Upload } from '@lucide/vue'
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { ChevronRight, FileText, Folder, FolderPlus, Home, RefreshCw, Upload } from '@lucide/vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 import Button from '@/components/Button.vue'
@@ -11,6 +11,8 @@ import EmptyState from '@/components/EmptyState.vue'
 import IconButton from '@/components/IconButton.vue'
 import Input from '@/components/Input.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import RowMenu from '@/components/RowMenu.vue'
+import { DropdownMenuItem } from 'reka-ui'
 import Skeleton from '@/components/Skeleton.vue'
 import {
   cleanPath,
@@ -47,11 +49,8 @@ const folderDraft = ref('/')
 const target = ref<FileEntry | null>(null)
 const replaceFile = ref<File | null>(null)
 const replaceRest = ref<File[]>([])
-const menuFor = ref('')
-const menuWrap = ref<HTMLElement | null>(null)
 const dragDepth = ref(0)
 const picker = ref<HTMLInputElement | null>(null)
-let menuOpener: HTMLElement | null = null
 
 const sorted = computed(() => sortEntries(store.entries, sortKey.value, sortDir.value))
 const trail = computed(() => crumbs(store.path))
@@ -190,59 +189,7 @@ async function copyText(value: string, message: string) {
   toast.show(message)
 }
 
-function closeMenu(restore: boolean) {
-  menuFor.value = ''
-  if (restore) menuOpener?.focus()
-  menuOpener = null
-}
-
-function toggleMenu(key: string, event: MouseEvent) {
-  if (menuFor.value === key) {
-    closeMenu(false)
-    return
-  }
-  const opener = event.currentTarget
-  menuOpener = opener instanceof HTMLElement ? opener : null
-  const wrap = menuOpener?.closest('.files-menu-wrap')
-  menuWrap.value = wrap instanceof HTMLElement ? wrap : null
-  menuFor.value = key
-  void nextTick(() => {
-    menuWrap.value?.querySelector<HTMLElement>('[role="menuitem"]')?.focus()
-  })
-}
-
-function onMenuKey(event: KeyboardEvent) {
-  const items = [...(menuWrap.value?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])]
-  const index = items.findIndex((item) => item === document.activeElement)
-  if (event.key === 'Escape') {
-    event.preventDefault()
-    closeMenu(true)
-    return
-  }
-  if (event.key === 'Tab') {
-    menuFor.value = ''
-    menuOpener = null
-    return
-  }
-  if (!items.length) return
-  if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Home' && event.key !== 'End') return
-  event.preventDefault()
-  let next = 0
-  if (event.key === 'End') next = items.length - 1
-  else if (event.key === 'ArrowDown') next = (Math.max(index, 0) + 1) % items.length
-  else if (event.key === 'ArrowUp') next = (index <= 0 ? items.length : index) - 1
-  items[next]?.focus()
-}
-
-function onPointer(event: Event) {
-  if (!menuFor.value || !menuWrap.value) return
-  if (event.target instanceof Node && menuWrap.value.contains(event.target)) return
-  menuFor.value = ''
-  menuOpener = null
-}
-
 function openDialog(kind: 'mkdir' | 'rename' | 'move' | 'copy' | 'delete', entry: FileEntry | null) {
-  closeMenu(false)
   target.value = entry
   if (kind === 'rename' && entry) draft.value = entry.name
   else if (kind === 'copy' && entry) draft.value = copyName(entry.name)
@@ -368,7 +315,6 @@ function onDrop(event: DragEvent) {
 async function pinEntry(entry: FileEntry) {
   const path = entryPath(store.path, entry)
   if (!path) return
-  closeMenu(false)
   const result = await pins.pinPath(path, entry.name)
   if (result.ok) toast.show(t('filesPinStarted', { name: entry.name }))
   else announce(result.error, entry.name)
@@ -382,7 +328,6 @@ function copyCid(entry: FileEntry) {
 function copyLink(entry: FileEntry) {
   const url = localShareURL(store.localGateway, entry.cid)
   if (!url) return
-  closeMenu(false)
   void copyText(url, t('filesLocalCopied'))
 }
 
@@ -411,12 +356,9 @@ async function openRoute() {
 }
 
 watch(() => route.fullPath, () => {
-  menuFor.value = ''
   void openRoute()
 }, { immediate: true })
 
-onMounted(() => document.addEventListener('pointerdown', onPointer))
-onUnmounted(() => document.removeEventListener('pointerdown', onPointer))
 </script>
 
 <template>
@@ -595,39 +537,51 @@ onUnmounted(() => document.removeEventListener('pointerdown', onPointer))
                   {{ formatWhen(entry.modified) }}
                 </td>
                 <td class="files-actions">
-                  <div class="files-menu-wrap">
-                    <IconButton :label="t('filesActions', { name: entry.name })" @click="toggleMenu(entry.name, $event)">
-                      <MoreHorizontal :size="18" :stroke-width="1.75" aria-hidden="true" />
-                    </IconButton>
-                    <div
-                      v-if="menuFor === entry.name"
-                      class="files-menu"
-                      role="menu"
-                      :aria-label="t('filesMenuLabel')"
-                      @keydown="onMenuKey"
-                    >
-                      <a
-                        v-if="entry.type === 'file'"
-                        role="menuitem"
-                        :href="downloadHref(entry)"
-                        :download="entry.name"
-                      >
+                  <RowMenu
+                    :label="t('filesActions', { name: entry.name })"
+                    :menu-label="t('filesMenuLabel')"
+                    menu-class="files-menu"
+                  >
+                    <DropdownMenuItem v-if="entry.type === 'file'" as-child>
+                      <a :href="downloadHref(entry)" :download="entry.name">
                         {{ t('filesDownload') }}
                       </a>
-                      <button v-if="entry.cid && localShareURL(store.localGateway, entry.cid)" type="button" role="menuitem" @click="copyLink(entry)">
-                        {{ t('filesLocalLink') }}
-                      </button>
-                      <button v-if="entry.cid" type="button" class="files-menu-cid" role="menuitem" :aria-label="t('filesCopyCid')" @click="copyCid(entry)">
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      v-if="entry.cid && localShareURL(store.localGateway, entry.cid)"
+                      as-child
+                    >
+                      <button type="button" @click="copyLink(entry)">{{ t('filesLocalLink') }}</button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem v-if="entry.cid" as-child>
+                      <button
+                        type="button"
+                        class="files-menu-cid"
+                        :aria-label="t('filesCopyCid')"
+                        @click="copyCid(entry)"
+                      >
                         <span aria-hidden="true">{{ t('filesCopyCid') }}</span>
                         <span class="files-menu-cid-value" aria-hidden="true">{{ entry.cid }}</span>
                       </button>
-                      <button v-if="entry.cid" type="button" role="menuitem" @click="pinEntry(entry)">{{ t('filesPin') }}</button>
-                      <button type="button" role="menuitem" @click="openDialog('rename', entry)">{{ t('filesRename') }}</button>
-                      <button type="button" role="menuitem" @click="openDialog('move', entry)">{{ t('filesMove') }}</button>
-                      <button type="button" role="menuitem" @click="openDialog('copy', entry)">{{ t('filesDuplicate') }}</button>
-                      <button type="button" role="menuitem" class="is-danger" @click="openDialog('delete', entry)">{{ t('filesDelete') }}</button>
-                    </div>
-                  </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem v-if="entry.cid" as-child>
+                      <button type="button" @click="pinEntry(entry)">{{ t('filesPin') }}</button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as-child>
+                      <button type="button" @click="openDialog('rename', entry)">{{ t('filesRename') }}</button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as-child>
+                      <button type="button" @click="openDialog('move', entry)">{{ t('filesMove') }}</button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as-child>
+                      <button type="button" @click="openDialog('copy', entry)">{{ t('filesDuplicate') }}</button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as-child>
+                      <button type="button" class="is-danger" @click="openDialog('delete', entry)">
+                        {{ t('filesDelete') }}
+                      </button>
+                    </DropdownMenuItem>
+                  </RowMenu>
                 </td>
               </tr>
             </tbody>
