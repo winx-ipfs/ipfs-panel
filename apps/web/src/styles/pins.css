@@ -150,7 +150,7 @@
   min-height: 40px;
 }
 
-.pins-meta,
+.pins-kicker,
 .pins-menu-cid-value,
 .pins-menu-code {
   display: none;
@@ -346,7 +346,9 @@
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "name actions"
-      "meta meta";
+      "cid cid"
+      "type type"
+      "size size";
     gap: 2px 8px;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
@@ -359,17 +361,24 @@
 
   .pins-name-cell { grid-area: name; }
   .pins-actions { grid-area: actions; align-self: start; }
-  .pins-table .pins-meta {
-    display: block;
-    grid-area: meta;
-    color: var(--muted);
-    font-size: var(--text-sm);
-  }
-
   .pins-table .pins-cid,
   .pins-table .pins-type,
   .pins-table .pins-size {
-    display: none;
+    display: block;
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+  .pins-table .pins-cid { grid-area: cid; }
+  .pins-table .pins-type { grid-area: type; }
+  .pins-table .pins-size { grid-area: size; }
+  .pins-kicker {
+    display: inline;
+    margin-inline-end: 6px;
+    color: var(--muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .pins-table th,

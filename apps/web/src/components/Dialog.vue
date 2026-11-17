@@ -64,7 +64,7 @@ watch(open, async (value) => {
     const root = panelEl()
     const items = root ? focusable(root) : []
     const preferred = root?.querySelector<HTMLElement>('[data-autofocus]')
-    ;(preferred ?? items[0] ?? root)?.focus()
+    ;(preferred && items.includes(preferred) ? preferred : items[0] ?? root)?.focus()
   } else {
     document.removeEventListener('keydown', onKey)
     previous?.focus()

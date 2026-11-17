@@ -594,10 +594,6 @@ onUnmounted(() => document.removeEventListener('pointerdown', onPointer))
                   <span class="files-kicker" aria-hidden="true">{{ t('filesModified') }}</span>
                   {{ formatWhen(entry.modified) }}
                 </td>
-                <td class="files-meta">
-                  <span class="sr-only">{{ t('filesSize') }} {{ sizeText(entry) }}, {{ t('filesModified') }} {{ formatWhen(entry.modified) }}</span>
-                  <span aria-hidden="true">{{ sizeText(entry) }} · {{ formatWhen(entry.modified) }}</span>
-                </td>
                 <td class="files-actions">
                   <div class="files-menu-wrap">
                     <IconButton :label="t('filesActions', { name: entry.name })" @click="toggleMenu(entry.name, $event)">

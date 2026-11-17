@@ -239,7 +239,6 @@
 }
 
 .files-kicker,
-.files-meta,
 .files-menu-cid-value {
   display: none;
 }
@@ -357,7 +356,8 @@
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "name actions"
-      "meta meta";
+      "size size"
+      "time time";
     gap: 2px 8px;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
@@ -370,15 +370,24 @@
 
   .files-name-cell { grid-area: name; }
   .files-actions { grid-area: actions; align-self: start; }
-  .files-meta {
+  .files-size,
+  .files-time {
     display: block;
-    grid-area: meta;
     color: var(--muted);
     font-size: var(--text-sm);
   }
-  .files-table .files-size,
-  .files-table .files-cid,
-  .files-table .files-time { display: none; }
+  .files-size { grid-area: size; }
+  .files-time { grid-area: time; }
+  .files-kicker {
+    display: inline;
+    margin-inline-end: 6px;
+    color: var(--muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .files-table .files-cid { display: none; }
 
   .files-table th,
   .files-table td {
