@@ -298,6 +298,12 @@
     align-items: stretch;
   }
 
+  /* flex-basis: 280px is a width basis; once the axis becomes column it
+     would reserve 280px of height above the search field. */
+  .pins-tools {
+    flex-basis: auto;
+  }
+
   .pins-tools .ui-input {
     width: 100%;
   }
@@ -407,4 +413,10 @@
     font-weight: 400;
     overflow-wrap: anywhere;
   }
+}
+
+/* Same reason as .files-table td.files-actions: the row menu lives inside the
+   cell and was clipped by the cell's overflow: hidden. */
+.pins-table td.pins-actions {
+  overflow: visible;
 }

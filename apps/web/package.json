@@ -12,7 +12,8 @@
     "typecheck": "vue-tsc --build",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
-    "shots": "node scripts/capture-screenshots.mjs"
+    "shots": "node scripts/capture-screenshots.mjs",
+    "check-menus": "node scripts/check-row-menus.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.1",
