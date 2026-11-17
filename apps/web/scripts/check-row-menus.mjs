@@ -141,46 +141,66 @@ try {
         const page = await context.newPage()
         await page.goto(`${origin}${target.path}`, { waitUntil: 'domcontentloaded' })
         await page.waitForSelector(`${target.table} tbody tr`, { timeout: 20000 })
-        await page.getByRole('button', { name: /操作|Actions/ }).first().click()
-        await page.waitForSelector(target.menu, { state: 'attached', timeout: 5000 })
-
-        const result = await page.evaluate((menuSelector) => {
-          const menu = document.querySelector(menuSelector)
-          if (!menu) return { items: 0, reachable: 0, clippedBy: [] }
-          const items = [...menu.querySelectorAll('a,button')]
-          const reachable = items.filter((item) => {
-            const box = item.getBoundingClientRect()
-            if (box.width === 0 || box.height === 0) return false
-            const hit = document.elementFromPoint(
-              box.left + box.width / 2,
-              box.top + box.height / 2,
-            )
-            return hit === item || item.contains(hit)
-          })
-          const clippedBy = []
-          let node = menu.parentElement
-          while (node && node !== document.body) {
-            const style = getComputedStyle(node)
-            if (style.overflow !== 'visible') {
-              const cls = String(node.className).split(' ')[0] || ''
-              clippedBy.push(`${node.tagName.toLowerCase()}${cls ? '.' + cls : ''}:${style.overflow}`)
+        const triggers = page.getByRole('button', { name: /操作|Actions/ })
+        const rows = await triggers.count()
+        if (rows === 0) {
+          failures.push(`${target.name} @${width}px: no row actions found`)
+          await context.close()
+          continue
+        }
+        // Every row, not just the first: a menu that opens below the fold or
+        // past the scroll container is unusable for the rows a user sees last.
+        for (let row = 0; row < rows; row += 1) {
+          await triggers.nth(row).click()
+          await page.waitForSelector(target.menu, { state: 'attached', timeout: 5000 })
+          const result = await page.evaluate((menuSelector) => {
+            const menu = document.querySelector(menuSelector)
+            if (!menu) return { items: 0, reachable: 0, clippedBy: [], offscreen: false }
+            const items = [...menu.querySelectorAll('a,button,[role="menuitem"]')]
+            const reachable = items.filter((item) => {
+              const box = item.getBoundingClientRect()
+              if (box.width === 0 || box.height === 0) return false
+              const hit = document.elementFromPoint(
+                box.left + box.width / 2,
+                box.top + box.height / 2,
+              )
+              return hit === item || item.contains(hit)
+            })
+            const clippedBy = []
+            let node = menu.parentElement
+            while (node && node !== document.body) {
+              const style = getComputedStyle(node)
+              if (style.overflow !== 'visible') {
+                const cls = String(node.className).split(' ')[0] || ''
+                clippedBy.push(`${node.tagName.toLowerCase()}${cls ? '.' + cls : ''}:${style.overflow}`)
+              }
+              node = node.parentElement
             }
-            node = node.parentElement
-          }
-          return { items: items.length, reachable: reachable.length, clippedBy }
-        }, target.menu)
+            const box = menu.getBoundingClientRect()
+            return {
+              items: items.length,
+              reachable: reachable.length,
+              clippedBy,
+              offscreen: box.top < 0 || box.bottom > window.innerHeight,
+            }
+          }, target.menu)
 
-        const label = `${target.name} @${width}px`
-        checked += 1
-        if (result.items === 0) {
-          failures.push(`${label}: the menu opened but contained no items`)
-        } else if (result.reachable !== result.items) {
-          failures.push(
-            `${label}: ${result.reachable}/${result.items} menu items reachable by pointer` +
-              (result.clippedBy.length ? ` (clipped by ${result.clippedBy.join(', ')})` : ''),
-          )
-        } else {
-          console.log(`${label}: ${result.reachable}/${result.items} menu items reachable`)
+          const label = `${target.name} @${width}px row ${row + 1}/${rows}`
+          checked += 1
+          if (result.items === 0) {
+            failures.push(`${label}: the menu opened but contained no items`)
+          } else if (result.reachable !== result.items) {
+            failures.push(
+              `${label}: ${result.reachable}/${result.items} menu items reachable by pointer` +
+                (result.clippedBy.length ? ` (clipped by ${result.clippedBy.join(', ')})` : '') +
+                (result.offscreen ? ' (menu drawn outside the viewport)' : ''),
+            )
+          } else if (result.offscreen) {
+            failures.push(`${label}: every item reachable but the menu is drawn outside the viewport`)
+          } else {
+            console.log(`${label}: ${result.reachable}/${result.items} menu items reachable`)
+          }
+          await page.keyboard.press('Escape')
         }
         await context.close()
       }

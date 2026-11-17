@@ -23,11 +23,26 @@ function mountFiles(body: unknown, status = 200) {
     ],
   })
   const wrapper = mount(FilesView, {
+    // The row menu is portalled to the body, so the document has to be real
+    // for it to mount at all.
+    attachTo: document.body,
     global: {
       plugins: [createPinia(), router, createI18n({ legacy: false, locale: 'en', messages: { en, zh } })],
     },
   })
   return wrapper
+}
+
+// The row menu mounts into document.body through a portal, so a test cannot
+// reach it from the wrapper. Open it with a real pointer event on the trigger.
+async function openRowMenu(wrapper: ReturnType<typeof mount>, name: string) {
+  const trigger = wrapper.get(`[aria-label="Actions for ${name}"]`)
+  await trigger.trigger('pointerdown', { button: 0 })
+  await trigger.trigger('click')
+  await flushPromises()
+  for (let i = 0; i < 5 && !document.querySelector('.files-menu'); i += 1) {
+    await flushPromises()
+  }
 }
 
 describe('FilesView', () => {
@@ -57,9 +72,9 @@ describe('FilesView', () => {
     expect(wrapper.text()).toContain('photos')
     expect(wrapper.text()).toContain('2.4 KB')
     expect(wrapper.text()).not.toContain('5001')
-    await wrapper.get('[aria-label="Actions for notes.txt"]').trigger('click')
-    expect(wrapper.text()).toContain('Copy local link')
-    expect(wrapper.text()).toContain('Pin on this node')
+    await openRowMenu(wrapper, 'notes.txt')
+    expect(document.body.textContent).toContain('Copy local link')
+    expect(document.body.textContent).toContain('Pin on this node')
     wrapper.unmount()
   })
 
@@ -85,8 +100,9 @@ describe('FilesView', () => {
       entries: [{ name: 'notes.txt', type: 'file', size: 4, cid: 'bafyabc', modified: null }],
     })
     await settle()
-    await wrapper.get('[aria-label="Actions for notes.txt"]').trigger('click')
-    await wrapper.get('.files-menu .is-danger').trigger('click')
+    await openRowMenu(wrapper, 'notes.txt')
+    ;(document.querySelector('.files-menu .is-danger') as HTMLElement).click()
+    await settle()
     expect(wrapper.text()).toContain('Delete notes.txt?')
     expect(wrapper.get('[data-autofocus]').text()).toBe('Cancel')
     wrapper.unmount()

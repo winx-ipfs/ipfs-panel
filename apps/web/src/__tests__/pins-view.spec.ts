@@ -31,10 +31,25 @@ function mountPins(body: unknown, status = 200) {
     ],
   })
   return mount(PinsView, {
+    // The row menu is portalled to the body, so the document has to be real
+    // for it to mount at all.
+    attachTo: document.body,
     global: {
       plugins: [createPinia(), router, createI18n({ legacy: false, locale: 'en', messages: { en, zh } })],
     },
   })
+}
+
+// The row menu mounts into document.body through a portal, so a test cannot
+// reach it from the wrapper. Open it with a real pointer event on the trigger.
+async function openRowMenu(wrapper: ReturnType<typeof mount>, name: string) {
+  const trigger = wrapper.get(`[aria-label="Actions for ${name}"]`)
+  await trigger.trigger('pointerdown', { button: 0 })
+  await trigger.trigger('click')
+  await flushPromises()
+  for (let i = 0; i < 5 && !document.querySelector('.pins-menu'); i += 1) {
+    await flushPromises()
+  }
 }
 
 describe('PinsView', () => {
@@ -66,9 +81,9 @@ describe('PinsView', () => {
     expect(wrapper.text()).toContain('With its links')
     expect(wrapper.text()).toContain('2.4 KB')
     expect(wrapper.text()).not.toContain('5001')
-    await wrapper.get('[aria-label="Actions for notes.txt"]').trigger('click')
-    expect(wrapper.text()).toContain('Copy local link')
-    expect(wrapper.text()).toContain('Stop keeping')
+    await openRowMenu(wrapper, 'notes.txt')
+    expect(document.body.textContent).toContain('Copy local link')
+    expect(document.body.textContent).toContain('Stop keeping')
     wrapper.unmount()
   })
 
@@ -99,8 +114,9 @@ describe('PinsView', () => {
     expect(wrapper.text()).toContain('That does not look like a content ID')
     expect(wrapper.get('button[type="submit"]').attributes('disabled')).toBeDefined()
     await wrapper.get('[aria-label="Close"]').trigger('click')
-    await wrapper.get('[aria-label="Actions for notes.txt"]').trigger('click')
-    await wrapper.get('.pins-menu .is-danger').trigger('click')
+    await openRowMenu(wrapper, 'notes.txt')
+    ;(document.querySelector('.pins-menu .is-danger') as HTMLElement).click()
+    await settle()
     expect(wrapper.text()).toContain('Stop keeping this?')
     expect(wrapper.get('[data-autofocus]').text()).toBe('Cancel')
     wrapper.unmount()

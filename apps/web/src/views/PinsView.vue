@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ChevronRight, MoreHorizontal, Pin, RefreshCw } from '@lucide/vue'
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { ChevronRight, Pin, RefreshCw } from '@lucide/vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 import Button from '@/components/Button.vue'
@@ -11,11 +11,13 @@ import EmptyState from '@/components/EmptyState.vue'
 import IconButton from '@/components/IconButton.vue'
 import Input from '@/components/Input.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import RowMenu from '@/components/RowMenu.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import { formatBytes, localShareURL } from '@/files/model'
 import { shortenMiddle } from '@/lib/inline'
 import { parseTarget, validPinName } from '@/pins/cid'
 import { filterPins, sortPins, type Pin as PinRow, type PinFilter, type PinJob } from '@/pins/model'
+import { DropdownMenuItem } from 'reka-ui'
 import { usePinsStore } from '@/stores/pins'
 import { useToastStore } from '@/stores/toast'
 
@@ -36,10 +38,7 @@ const chosen = ref<File | null>(null)
 const uploadPercent = ref(0)
 const uploading = ref(false)
 const target = ref<PinRow | null>(null)
-const menuFor = ref('')
-const menuWrap = ref<HTMLElement | null>(null)
 const picker = ref<HTMLInputElement | null>(null)
-let menuOpener: HTMLElement | null = null
 let poll = 0
 
 const shown = computed(() => filterPins(sortPins(store.pins, locale.value === 'zh' ? 'zh-Hans' : 'en'), query.value, filter.value))
@@ -143,57 +142,6 @@ async function copyText(value: string, message: string) {
   toast.show(message)
 }
 
-function closeMenu(restore: boolean) {
-  menuFor.value = ''
-  if (restore) menuOpener?.focus()
-  menuOpener = null
-}
-
-function toggleMenu(key: string, event: MouseEvent) {
-  if (menuFor.value === key) {
-    closeMenu(false)
-    return
-  }
-  const opener = event.currentTarget
-  menuOpener = opener instanceof HTMLElement ? opener : null
-  const wrap = menuOpener?.closest('.pins-menu-wrap')
-  menuWrap.value = wrap instanceof HTMLElement ? wrap : null
-  menuFor.value = key
-  void nextTick(() => {
-    menuWrap.value?.querySelector<HTMLElement>('[role="menuitem"]')?.focus()
-  })
-}
-
-function onMenuKey(event: KeyboardEvent) {
-  const items = [...(menuWrap.value?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])]
-  const index = items.findIndex((item) => item === document.activeElement)
-  if (event.key === 'Escape') {
-    event.preventDefault()
-    closeMenu(true)
-    return
-  }
-  if (event.key === 'Tab') {
-    menuFor.value = ''
-    menuOpener = null
-    return
-  }
-  if (!items.length) return
-  if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Home' && event.key !== 'End') return
-  event.preventDefault()
-  let next = 0
-  if (event.key === 'End') next = items.length - 1
-  else if (event.key === 'ArrowDown') next = (Math.max(index, 0) + 1) % items.length
-  else if (event.key === 'ArrowUp') next = (index <= 0 ? items.length : index) - 1
-  items[next]?.focus()
-}
-
-function onPointer(event: Event) {
-  if (!menuFor.value || !menuWrap.value) return
-  if (event.target instanceof Node && menuWrap.value.contains(event.target)) return
-  menuFor.value = ''
-  menuOpener = null
-}
-
 function closeDialog() {
   dialog.value = null
   target.value = null
@@ -201,7 +149,6 @@ function closeDialog() {
 }
 
 function openAdd() {
-  closeMenu(false)
   mode.value = 'cid'
   draft.value = ''
   nameDraft.value = ''
@@ -212,7 +159,6 @@ function openAdd() {
 }
 
 function openUnpin(pin: PinRow) {
-  closeMenu(false)
   target.value = pin
   dialog.value = 'unpin'
 }
@@ -269,14 +215,12 @@ async function cancelJob(job: PinJob) {
 }
 
 function copyCid(pin: PinRow) {
-  closeMenu(false)
   void copyText(pin.cid, t('pinsCopiedCid'))
 }
 
 function copyLink(pin: PinRow) {
   const url = localShareURL(store.localGateway, pin.cid)
   if (!url) return
-  closeMenu(false)
   void copyText(url, t('pinsLocalCopied'))
 }
 
@@ -316,16 +260,13 @@ async function openRoute() {
 
 watch(() => store.jobs.map((job) => `${job.id}:${job.state}`).join(), syncPoll)
 watch(() => route.fullPath, () => {
-  menuFor.value = ''
   void openRoute()
 }, { immediate: true })
 
 onMounted(() => {
-  document.addEventListener('pointerdown', onPointer)
   syncPoll()
 })
 onUnmounted(() => {
-  document.removeEventListener('pointerdown', onPointer)
   window.clearInterval(poll)
 })
 </script>
@@ -470,28 +411,30 @@ onUnmounted(() => {
                 {{ sizeText(pin) }}
               </td>
               <td class="pins-actions">
-                <div class="pins-menu-wrap">
-                  <IconButton :label="t('pinsActions', { name: actionName(pin) })" @click="toggleMenu(rowKey(pin), $event)">
-                    <MoreHorizontal :size="18" :stroke-width="1.75" aria-hidden="true" />
-                  </IconButton>
-                  <div
-                    v-if="menuFor === rowKey(pin)"
-                    class="pins-menu"
-                    role="menu"
-                    :aria-label="t('pinsMenuLabel')"
-                    @keydown="onMenuKey"
-                  >
-                    <button type="button" class="pins-menu-cid" role="menuitem" :aria-label="t('pinsCopyCid')" @click="copyCid(pin)">
+                <RowMenu
+                  :label="t('pinsActions', { name: actionName(pin) })"
+                  :menu-label="t('pinsMenuLabel')"
+                  menu-class="pins-menu"
+                >
+                  <DropdownMenuItem as-child>
+                    <button
+                      type="button"
+                      class="pins-menu-cid"
+                      :aria-label="t('pinsCopyCid')"
+                      @click="copyCid(pin)"
+                    >
                       <span aria-hidden="true">{{ t('pinsCopyCid') }}</span>
                       <span class="pins-menu-cid-value" aria-hidden="true">{{ pin.cid }}</span>
                     </button>
-                    <button v-if="localShareURL(store.localGateway, pin.cid)" type="button" role="menuitem" @click="copyLink(pin)">
-                      {{ t('pinsLocalLink') }}
-                    </button>
-                    <p class="pins-menu-code" aria-hidden="true">{{ pin.type }}</p>
-                    <button type="button" role="menuitem" class="is-danger" @click="openUnpin(pin)">{{ t('pinsUnpin') }}</button>
-                  </div>
-                </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem v-if="localShareURL(store.localGateway, pin.cid)" as-child>
+                    <button type="button" @click="copyLink(pin)">{{ t('pinsLocalLink') }}</button>
+                  </DropdownMenuItem>
+                  <p class="pins-menu-code" aria-hidden="true">{{ pin.type }}</p>
+                  <DropdownMenuItem as-child>
+                    <button type="button" class="is-danger" @click="openUnpin(pin)">{{ t('pinsUnpin') }}</button>
+                  </DropdownMenuItem>
+                </RowMenu>
               </td>
             </tr>
           </tbody>
