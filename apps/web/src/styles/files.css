@@ -387,7 +387,7 @@
     padding: 0;
   }
 
-  .files-menu-cid {
+  .files-menu .files-menu-cid {
     flex-direction: column;
     align-items: flex-start;
     height: auto;

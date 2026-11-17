@@ -167,20 +167,28 @@ try {
             { timeout: 5000 },
           )
           // The popper measures and places the content after it mounts, so a
-          // rect read on the same frame can still be the pre-placement one.
+          // rect read on the first frame can still be the pre-placement one.
+          // Wait until the box is stable AND inside the viewport; a menu that
+          // never gets there is a real failure, not a slow paint.
           await page.waitForFunction(
             (selector) => {
-              const menu = document.querySelector(selector)
-              if (!menu) return false
-              const box = menu.getBoundingClientRect()
+              const menus = document.querySelectorAll(selector)
+              if (menus.length !== 1) return false
+              const box = menus[0].getBoundingClientRect()
+              const inside =
+                box.height > 0 &&
+                box.top >= 0 &&
+                box.left >= 0 &&
+                box.bottom <= window.innerHeight &&
+                box.right <= window.innerWidth
               const previous = window.__menuBox
               window.__menuBox = { top: box.top, left: box.left, h: box.height }
               return (
+                inside &&
                 previous !== undefined &&
                 previous.top === box.top &&
                 previous.left === box.left &&
-                previous.h === box.height &&
-                box.height > 0
+                previous.h === box.height
               )
             },
             target.menu,

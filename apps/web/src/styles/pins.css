@@ -389,7 +389,7 @@
     min-width: min(260px, 78vw);
   }
 
-  .pins-menu-cid {
+  .pins-menu .pins-menu-cid {
     flex-direction: column;
     align-items: flex-start;
     height: auto;
