@@ -10,7 +10,7 @@
 
 Kubo（Go 版 IPFS 节点）的面板。`apps/web` 是界面（Vue 3、Vite、TypeScript）。`services/manager` 是 API 网关（Go，标准库）。浏览器从不直接跟 Kubo RPC 说话；manager 去说，走 loopback，而且先做认证。
 
-`docs/VISION.zh-CN.md` 说明这是什么、以及拒绝变成什么。`docs/ROADMAP.zh-CN.md` 给切片编号；切片 1–4 已作为 v0.1.0 发布，切片 5 是下一个。
+`docs/VISION.zh-CN.md` 说明这是什么、以及拒绝变成什么。`docs/ROADMAP.zh-CN.md` 给已经落地的切片编号。约定的顺序在 `docs/PLAN.md`（中文配对是 `docs/PLAN.zh-CN.md`）；下一刀功能是永久对等。
 
 ## 决定争议的三个文件
 
@@ -24,7 +24,7 @@ Kubo（Go 版 IPFS 节点）的面板。`apps/web` 是界面（Vue 3、Vite、Ty
 
 ## 循环
 
-1. **先读再写。** 先 `docs/HANDOFF.md`，再你动的那块的设计文档，再 `docs/ROADMAP.zh-CN.md` 看它落在哪。
+1. **先读再写。** 先 `docs/HANDOFF.md`，再 `docs/PLAN.md` 与 `docs/PLAN.zh-CN.md`，再你动的那块的设计文档，再 `docs/ROADMAP.zh-CN.md` 看它落在哪。
 2. **判断这是切片还是修 bug。** 切片改变一个人能做什么；修 bug 恢复规范已经承诺过的东西。两者都需要一行规范，不只是代码。
 3. **在分支上工作，前缀必须合法** —— `feature/`、`fix/`、`chore/`、`docs/`、`refactor/`、`test/`、`ci/`、`dependabot/`。绝不直接提交到 `develop` 或 `main`；两者都受保护，推送会被拒绝。
 4. **靠运行来验证**，不是读 diff。细则见下。

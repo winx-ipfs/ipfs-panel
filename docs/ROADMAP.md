@@ -12,7 +12,7 @@ We do not build the whole backend, then the whole UI.
 
 ## Where this repo is
 
-The tree you can clone today has finished slices 1 through 5. Slice 3's files page, slice 4's pins page, and slice 5's scenes page are in. The Explore and Peers pages are in, and so are the first two pieces of slice 6: the Expert raw config editor and the Logs page.
+The tree you can clone today has finished slices 1 through 5. Slice 3's files page, slice 4's pins page, and slice 5's scenes page are in. The Explore and Peers pages are in, and so are the first two pieces of slice 6: the Expert raw config editor and the Logs page. The agreed upcoming sequence is [the plan](PLAN.md).
 
 What is here:
 
@@ -29,10 +29,17 @@ What is here:
 - read and replace the Kubo config as JSON, from Settings, marked Expert
 - read what the panel and the node are writing, follow it, and set one log level
 
-What is not here:
+What is not here, in this order. Permanent peering is next. The rest are later. The detail is [the plan](PLAN.md).
 
-- more than one node
 - permanent peering
+- v0.2.0
+- installing and upgrading Kubo
+- remote control of the manager
+- the desktop app
+- IPNS keys
+- remote pinning
+- diagnostics
+- a second node
 
 ## 1. Shell, auth, and languages
 
@@ -80,11 +87,11 @@ See who this node is connected to, and dial one address once. The spec is [Peers
 
 Done when a beginner can open the list, in English and in 中文, and connect by an address the page allows, without a map and without seeing another node's address. That is the current tree. Permanent peering still waits.
 
-## 6. Expert mode, then more than one node
+## 6. Expert mode, then permanent peering
 
-The raw config editor is in. It is Settings, Advanced, marked Expert. The spec is [Config editor](design/config-editor.md). Logs are in. The spec is [Logs](design/logs.md). Permanent peering is not. The peers page above is the beginner list and one dial, not permanent peering. After the rest of expert mode, more than one Kubo behind the same panel.
+The raw config editor is in. It is Settings, Advanced, marked Expert. The spec is [Config editor](design/config-editor.md). Logs are in. The spec is [Logs](design/logs.md). Permanent peering is not. The peers page above is the beginner list and one dial, not permanent peering.
 
-The first half of slice 6 has landed. What waits is the second node: more than one Kubo behind the same panel.
+The first half of slice 6 has landed. The next feature slice is permanent peering. After that, the sequence lives in [the plan](PLAN.md).
 
 ## Not in the early slices
 

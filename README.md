@@ -26,6 +26,7 @@ docs                why we are building this, and in what order
 | `services/manager` | Go, standard library. The only process that should call Kubo. |
 | `docs/VISION.md` | What this is, and what we will not turn it into. |
 | `docs/ROADMAP.md` | Vertical slices. Finish one before starting the next. |
+| `docs/PLAN.md` | The agreed feature list, and the order of what comes next. |
 
 ## Run the panel
 
@@ -104,6 +105,7 @@ The shell, the tokens, and the rules for new screens are in [Design system](docs
 
 - [Vision](docs/VISION.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Plan](docs/PLAN.md)
 - [Design system](docs/DESIGN-SYSTEM.md)
 - [Auth](docs/design/auth.md)
 - [Files](docs/design/files.md)

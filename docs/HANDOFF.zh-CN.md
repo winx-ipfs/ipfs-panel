@@ -2,7 +2,7 @@
 
 **中文** · [English](HANDOFF.md)
 
-先读这份，再读 `AGENTS.zh-CN.md`。这份文件是工作状态：交付了什么、定了什么、还开着什么、下一步做什么。它不是教程也不是计划，而是"现在什么是真的"的答案。
+先读这份，再读 `AGENTS.zh-CN.md`。这份文件是工作状态：交付了什么、定了什么、还开着什么、下一步做什么。它不是教程也不是计划，而是"现在什么是真的"的答案。已经商量好的功能清单和开发计划在 [`docs/PLAN.zh-CN.md`](PLAN.zh-CN.md) 与 [`docs/PLAN.md`](PLAN.md)。
 
 这份文件不记 commit 哈希。更新它的那个 PR 一合并，哈希就过期了，写在这里等于构造上就是错的。直接读分支：
 
@@ -17,8 +17,8 @@ git log --oneline -1 origin/main origin/develop && git tag -l
 | `main` | 发布分支。上面每个提交都是一次发布；最新是 v0.1.1 |
 | `develop` | 集成分支。功能先落这里 |
 | 最新 tag | v0.1.1 |
-| 打开的 PR | 两个 Dependabot 更新：#37（manager 组）与 #38（web 组），都指向 `develop` |
-| 路线图 | 切片 1–4 已在 v0.1.0 发布；切片 5（场景）与探索、对等节点页在 `develop`；发行版 Kubo 测试基线在 `develop`；切片 6 的前一半——专家模式的原始配置编辑器和日志页——在 `develop`；第二个节点还没有 |
+| 打开的 PR | 两个 Dependabot 更新：#37（manager / golang.org/x/crypto）与 #46（web 组），都指向 `develop` |
+| 路线图 | 切片 1–4 已在 v0.1.0 发布；场景、探索、对等节点、winx 视觉语言、专家配置编辑器和日志在 `develop`；发行版 Kubo 测试基线在 `develop`；下一刀功能是永久对等；v0.2.0 等用户明确要求再发 |
 
 v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与会话登录、节点启停与一句话状态、可变文件系统上的文件页、固定（pins）页。linux、macOS、Windows 三平台二进制加 web 包，作为 GitHub Release 发布并附校验和。
 
@@ -43,7 +43,7 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 每一条都需要**决定**，不是代码。
 
 1. **Dependabot 是否真的改道。** v0.1.1 把 `target-branch: develop` 放到了 `main` 上——那才是 GitHub 读取的那一份。Dependabot 自己的运行现在显示 `head_branch: develop`，说明生效了。剩下的检查是它下一次开的 PR：如果那个仍指向 `main`，说明设置被忽略，替代方案是把 `develop` 设为默认分支（`docs/ORG-SETUP.zh-CN.md` 第 3 步）。
-2. **和 webui 的差距。** 原始配置编辑器已经在，位于设置，标成专家。规格是 `docs/design/config-editor.zh-CN.md`。日志页已经在。规格是 `docs/design/logs.zh-CN.md`。IPNS 密钥、远程 pin、分析、检索检查和 DHT provide 仍延后。不要把那些折进一次日志页的修补。
+2. **和 webui 的差距。** 原始配置编辑器已经在，位于设置，标成专家。规格是 `docs/design/config-editor.zh-CN.md`。日志页已经在。规格是 `docs/design/logs.zh-CN.md`。IPNS 密钥、远程 pin、分析、检索检查和 DHT provide 仍延后。顺序在 `docs/PLAN.zh-CN.md`。不要把那些折进一次日志页的修补。
 
 ## 值得点名的缺口
 
@@ -55,12 +55,9 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 
 ## 具体的下一步
 
-如果你只有一个会话且没有别的指示：
+如果你只有一个会话且没有别的指示，先读 [`docs/PLAN.zh-CN.md`](PLAN.zh-CN.md)，然后从当前的 `develop` 开始做永久对等，单独开分支和 pull request，先写设计。不要在同一次改动里开始第二台节点、Kubo 安装器、远控或发版。除非用户明确要求，不要合进 `main`，也不要打 tag。先前有一次永久对等的尝试没有开出 pull request；这次从头开始，不要叠在旧分支上。
 
-1. 读 `AGENTS.zh-CN.md`，再读 `docs/design/harness.zh-CN.md`，不要把测试基线、对等节点、探索、四个场景，或 `docs/DESIGN-SYSTEM.zh-CN.md` 里的 winx 视觉语言重开一遍。
-2. 日志已经在。永久对等和第二个节点还没有。不要在修补日志的同一个改动里开始那些。
-
-场景已经在。探索已经在。对等节点已经在。原始配置编辑器已经在。日志已经在。发行版 Kubo 的测试基线已经在。bitswap 的问题已经回答。不要开始插件工作。
+读 `AGENTS.zh-CN.md`，再读 `docs/design/harness.zh-CN.md`，不要把测试基线、对等节点、探索、四个场景，或 `docs/DESIGN-SYSTEM.zh-CN.md` 里的 winx 视觉语言重开一遍。不要开始插件工作。
 
 ## 这份文件怎么保持真实
 
