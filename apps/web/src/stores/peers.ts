@@ -1,27 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { csrfHeaders } from '@/lib/csrf'
-import { notifyUnauthorized } from '@/lib/session'
+import { apiJSON } from '@/lib/api'
 import { parseList, type PeerRow } from '@/peers/model'
 
 export type PeersStatus = 'loading' | 'ready' | 'blocked' | 'unreachable' | 'failed'
-
-function readError(value: unknown): { error: string; state: string } {
-  if (!value || typeof value !== 'object') return { error: '', state: '' }
-  const body = value as Record<string, unknown>
-  return {
-    error: typeof body.error === 'string' ? body.error : '',
-    state: typeof body.state === 'string' ? body.state : '',
-  }
-}
-
-async function readJSON(res: Response): Promise<unknown> {
-  try {
-    return await res.json()
-  } catch {
-    return {}
-  }
-}
 
 export const usePeersStore = defineStore('peers', () => {
   const peers = ref<PeerRow[]>([])
@@ -70,29 +52,24 @@ export const usePeersStore = defineStore('peers', () => {
       status.value = 'loading'
     }
     try {
-      const res = await fetch('/api/peers', { credentials: 'same-origin' })
+      const result = await apiJSON('/api/peers')
       if (mine !== generation) return
-      if (res.status === 401) {
-        notifyUnauthorized()
+      if (result.status === 401) return
+      if (result.status === 0) throw new Error('network')
+      if (result.status === 503 && result.error === 'node_not_running') {
+        applyBlocked(result.state)
         return
       }
-      const body = await readJSON(res)
-      if (mine !== generation) return
-      const problem = readError(body)
-      if (res.status === 503 && problem.error === 'node_not_running') {
-        applyBlocked(problem.state)
-        return
-      }
-      if (!res.ok) {
+      if (result.status !== 200) {
         if (quiet && peers.value.length > 0) {
-          error.value = problem.error || 'kubo_error'
+          error.value = result.error || 'kubo_error'
           return
         }
-        error.value = problem.error || ''
-        status.value = problem.error === 'kubo_error' || problem.error === 'timeout' || problem.error === 'too_large' ? 'failed' : 'unreachable'
+        error.value = result.error || ''
+        status.value = result.error === 'kubo_error' || result.error === 'timeout' || result.error === 'too_large' ? 'failed' : 'unreachable'
         return
       }
-      const parsed = parseList(body)
+      const parsed = parseList(result.body)
       if (!parsed) {
         status.value = quiet && peers.value.length > 0 ? status.value : 'unreachable'
         return
@@ -117,23 +94,14 @@ export const usePeersStore = defineStore('peers', () => {
   async function connect(address: string): Promise<string> {
     if (preview.value) return ''
     try {
-      const res = await fetch('/api/peers/connect', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
-        body: JSON.stringify({ address }),
-      })
-      if (res.status === 401) {
-        notifyUnauthorized()
-        return 'unauthorized'
-      }
-      const body = await readJSON(res)
-      const problem = readError(body)
-      if (res.status === 503 && problem.error === 'node_not_running') {
-        applyBlocked(problem.state)
+      const result = await apiJSON('/api/peers/connect', { method: 'POST', body: { address } })
+      if (result.status === 401) return 'unauthorized'
+      if (result.status === 0) return 'network'
+      if (result.status === 503 && result.error === 'node_not_running') {
+        applyBlocked(result.state)
         return 'node_not_running'
       }
-      if (!res.ok) return problem.error || 'connect_failed'
+      if (result.status !== 200) return result.error || 'connect_failed'
       await load(true)
       return ''
     } catch {

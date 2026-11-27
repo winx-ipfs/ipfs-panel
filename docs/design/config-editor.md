@@ -179,6 +179,6 @@ Web: the Advanced tab, the expert tag, invalid JSON disabling save, the diff bef
 - IPNS keys, remote pinning services as a form, analytics, and the diagnostics page. Those stay deferred in [ipfs-webui parity](webui-parity.md).
 - A form whose job is to set the Kubo RPC address the browser would call.
 - Changing `Identity.PrivKey`, `API.Authorizations`, or a remote pinning API key.
-- Permanent peering. The peers page still does not write `Peering.Peers`.
+- The kept-peer controls. Those are [Permanent peering](peering.md). This editor can still change `Peering.Peers`. The peers page notices when the saved list and the running list differ.
 - Editing the config while the node is stopped.
 - Restarting without asking.

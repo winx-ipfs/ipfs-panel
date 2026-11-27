@@ -230,5 +230,5 @@ func logsMux(t *testing.T, h *logsHTTP) http.Handler {
 	if h.store == nil {
 		h.store = openLogStore(t)
 	}
-	return newMux(sup, svc, nil, nil, nil, nil, nil, h)
+	return newMux(parts{sup: sup, auth: svc, logs: h})
 }

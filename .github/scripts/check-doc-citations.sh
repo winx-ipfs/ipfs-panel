@@ -39,6 +39,8 @@ docs = [
     "docs/design/explore.zh-CN.md",
     "docs/design/peers.md",
     "docs/design/peers.zh-CN.md",
+    "docs/design/peering.md",
+    "docs/design/peering.zh-CN.md",
     "docs/design/config-editor.md",
     "docs/design/config-editor.zh-CN.md",
     "docs/design/logs.md",

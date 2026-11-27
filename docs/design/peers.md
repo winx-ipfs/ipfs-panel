@@ -6,7 +6,7 @@
 
 ## What this is for
 
-A beginner can see which other nodes this one is connected to, as a list rather than a count, and can dial one more by pasting an address. The page says "peers". It does not draw a map, and it does not save the address into Kubo's config.
+A beginner can see which other nodes this one is connected to, as a list rather than a count, and can dial one more by pasting an address. The page says "peers". It does not draw a map. The one-time dial does not save the address into Kubo's config. Keeping a peer connected is [Permanent peering](peering.md), on this same page.
 
 The browser still never talks to Kubo. It talks to the manager. The manager calls Kubo on loopback, and only the calls this page needs. The page does not receive a Kubo RPC address. Addresses of peers that are already connected stay off the browser, the same decision the Node page already made for the count.
 
@@ -24,7 +24,7 @@ The map is not decorative in the webui. It looks up a public IP taken from the p
 
 Add connection checks that the text is a multiaddr matching a p2p, circuit, or WebRTC shape (`ipfs-webui/src/peers/AddConnection/AddConnection.js:15-21`). It then calls `swarm.connect`. The "permanent" box defaults to on (`ipfs-webui/src/peers/AddConnection/AddConnection.js:29`, `ipfs-webui/src/peers/AddConnection/AddConnection.js:127-130`) and writes `Peering.Peers` with `config.set` (`ipfs-webui/src/bundles/peers.js:40-61`).
 
-This page keeps the list and the one-time dial. It does not keep the map, the multiaddr, the location, the transport string, the stream names, the CLI tutor, the tour, or the permanent checkbox.
+This page keeps the list and the one-time dial. It does not keep the map, the multiaddr, the location, the transport string, the stream names, the CLI tutor, or the tour. The kept list is [Permanent peering](peering.md).
 
 ## Decisions
 
@@ -42,7 +42,7 @@ This page keeps the list and the one-time dial. It does not keep the map, the mu
 
 7. **The RPC dial is loopback only.** The call reads `<repo>/config` and uses the API address only when it is an `http` loopback origin with a port. The client refuses any other dial, ignores `HTTP_PROXY`, and does not follow redirects. The response has no API URL, no port `5001`, and no multiaddr.
 
-8. **Connect dials once.** `POST /api/peers/connect` takes one JSON object, `{"address":"<multiaddr>"}`. The manager calls `swarm/connect` with that one argument (`core/commands/swarm.go:641-686`). It does not call `config.set`, and it does not write `Peering.Peers`. That checkbox is config editing, and it waits with the raw editor. Success is **200** `{"peerId":"<id>"}` using the peer id parsed from the address, not Kubo's `Strings` line. Kubo's message stays in the manager log. A non-200 from Kubo, after the address passed the rules below, is **502** `connect_failed`. The deadline is 30 seconds. A deadline is **504** `timeout`.
+8. **Connect dials once.** `POST /api/peers/connect` takes one JSON object, `{"address":"<multiaddr>"}`. The manager calls `swarm/connect` with that one argument (`core/commands/swarm.go:641-686`). It does not call `config.set`, and it does not write `Peering.Peers`. Keeping a peer connected is not this dial. The spec is [Permanent peering](peering.md). Success is **200** `{"peerId":"<id>"}` using the peer id parsed from the address, not Kubo's `Strings` line. Kubo's message stays in the manager log. A non-200 from Kubo, after the address passed the rules below, is **502** `connect_failed`. The deadline is 30 seconds. A deadline is **504** `timeout`.
 
 9. **The address is one multiaddr that already names the peer.** Surrounding whitespace is ignored. Empty is rejected. Longer than 2048 bytes is rejected. A URL, a bare peer id, a space, a backslash, `?`, `#`, and `@` are rejected. The value must start with `/` and end with `/p2p/<peer-id>` or `/ipfs/<peer-id>`. The peer id is one of the forms `peer.Decode` accepts in go-libp2p v0.50.0: a `Qm…` sha2-256 peer id (34-byte multihash `0x12` / `0x20`), a base58 multihash that starts with `1` and is identity (`0x00`) or sha2-256, or a CIDv1 whose codec is libp2p-key (`0x72`) in base32 (`b`), base58btc (`z`), or base16 (`f`). Components before the final peer id are only:
 
@@ -103,7 +103,7 @@ This page keeps the list and the one-time dial. It does not keep the map, the mu
 
 Peers sits in the nav after Explore: Node, Files, Explore, Peers, Pins, Scenes, Settings.
 
-The page has a title, one sentence, and a closed disclosure. The disclosure says a peer is another IPFS node this one is talking to, that a pasted address is dialled once, and that the page neither shows other nodes' addresses nor saves the address.
+The page has a title, one sentence, and a closed disclosure. The disclosure says a peer is another IPFS node this one is talking to, that Connect once dials and does not save, and that the connected table does not show other nodes' addresses. Keep connected, the kept list, and whether a restart or an apply is needed are specified in [Permanent peering](peering.md).
 
 When the node is `up`, a card holds one field and Connect as the only primary button. The label is "Peer address". The hint says the address needs to end in `/p2p/` and a peer id. An empty field does not call the manager. A value the page can already reject does not either, and the field explains why. Enter submits. While the dial is in flight the button says "Connecting…" and stays disabled. Success clears the field and shows the toast "Connected." Failure stays under the field: the address was refused, the dial failed, or it took too long.
 
@@ -132,6 +132,6 @@ Web: the address helper, the page states in English (stopped, empty, list, a rej
 - A world map, a country, a flag, or any location derived from an IP.
 - Showing or copying a connected peer's multiaddr, transport string, public key, or listen addresses.
 - Open stream names, per-peer bandwidth, and the CLI tutor.
-- Permanent peering, `Peering.Peers`, `swarm peering`, and disconnect. The raw config editor still waits.
+- Disconnect of a swarm connection that is not a kept peer. Permanent peering is [Permanent peering](peering.md).
 - Resolving a `/dnsaddr/` name that does not already end in a peer id.
 - Diagnostics, and the integration harness.
