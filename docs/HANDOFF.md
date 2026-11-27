@@ -2,7 +2,7 @@
 
 **English** · [中文](HANDOFF.zh-CN.md)
 
-Read this first, then `AGENTS.md`. This file is the state of the work: what shipped, what is decided, what is open, and what to do next. It is not a tutorial and not a plan; it is the answer to "what is true right now".
+Read this first, then `AGENTS.md`. This file is the state of the work: what shipped, what is decided, what is open, and what to do next. It is not a tutorial and not a plan; it is the answer to "what is true right now". The agreed feature list and development plan is [`docs/PLAN.md`](PLAN.md) and [`docs/PLAN.zh-CN.md`](PLAN.zh-CN.md).
 
 No commit hashes in this file. They go stale the moment the pull request that updates this file is merged, so a hash here would be wrong by construction. Read the branches instead:
 
@@ -17,8 +17,8 @@ git log --oneline -1 origin/main origin/develop && git tag -l
 | `main` | the branch that ships. Every commit on it is a release; the latest is v0.1.1 |
 | `develop` | the integration branch. Feature work lands here first |
 | Latest tag | v0.1.1 |
-| Open pull requests | two Dependabot updates: #37 (manager group) and #38 (web group), both into `develop` |
-| Roadmap | slices 1–4 shipped in v0.1.0; slice 5 (scenes) and the Explore and Peers pages are on `develop`; the released-Kubo harness is on `develop`; the first half of slice 6 — the Expert raw config editor and the Logs page — is on `develop`; the second node is not |
+| Open pull requests | two Dependabot updates: #37 (manager / golang.org/x/crypto) and #46 (web group), both into `develop` |
+| Roadmap | slices 1–4 shipped in v0.1.0; scenes, Explore, Peers, the winx visual language, the expert config editor, and logs are on `develop`; the released-Kubo harness is on `develop`; the next feature is permanent peering; v0.2.0 waits for an explicit release request |
 
 Shipped in v0.1.0: the panel shell in English and 中文, first-run admin setup and session login, node start/stop/restart with a one-sentence status, files on the node's mutable file system, and pins. Binaries for linux, macOS, and Windows, plus a web bundle, published as a GitHub Release with checksums.
 
@@ -43,7 +43,7 @@ These are settled. Do not reopen them without a reason and a pull request that s
 Each of these needs a decision, not code.
 
 1. **Whether Dependabot actually retargets.** v0.1.1 put `target-branch: develop` on `main`, which is the copy GitHub reads. Dependabot's own runs now show `head_branch: develop`, so it took effect. The remaining check is the next pull request it opens: if that one still targets `main`, the setting is being ignored and the alternative is to make `develop` the default branch (`docs/ORG-SETUP.md` step 3).
-2. **Webui parity.** The raw config editor is in, on Settings, marked Expert. The spec is `docs/design/config-editor.md`. The logs page is in. The spec is `docs/design/logs.md`. IPNS keys, remote pinning, analytics, the retrieval check, and DHT provide stay deferred. Do not fold those into a logs fix.
+2. **Webui parity.** The raw config editor is in, on Settings, marked Expert. The spec is `docs/design/config-editor.md`. The logs page is in. The spec is `docs/design/logs.md`. IPNS keys, remote pinning, analytics, the retrieval check, and DHT provide stay deferred. The order is in `docs/PLAN.md`. Do not fold those into a logs fix.
 
 ## Known gaps worth naming
 
@@ -55,12 +55,9 @@ Each of these needs a decision, not code.
 
 ## Next step, concretely
 
-If you have one session and no other instruction:
+If you have one session and no other instruction, read [`docs/PLAN.md`](PLAN.md), then start permanent peering from current `develop`, in its own branch and pull request, with the design written first. Do not start a second node, a Kubo installer, remote control, or a release in the same change. Do not merge to `main` or tag a release unless the user explicitly asked. An earlier permanent-peering attempt ended without a pull request; start clean, do not stack on an old branch.
 
-1. Read `AGENTS.md`, then `docs/design/harness.md`, so you do not reopen the harness, Peers, Explore, the four scenes, or the winx visual language in `docs/DESIGN-SYSTEM.md`. Then open the panel in a browser: `npm run check-menus` covers the row menus, and both list pages are worth one look at 390px, where the layout changes shape.
-2. Logs are in. Permanent peering and a second node are still not. Do not start those in the same change as a logs fix.
-
-Scenes are in. Explore is in. Peers are in. The raw config editor is in. Logs are in. The released-Kubo harness is in. The bitswap question is answered. Do not start plugin work.
+Read `AGENTS.md`, then `docs/design/harness.md`, so you do not reopen the harness, Peers, Explore, the four scenes, or the winx visual language in `docs/DESIGN-SYSTEM.md`. Do not start plugin work.
 
 ## How this file stays true
 

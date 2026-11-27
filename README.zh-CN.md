@@ -26,6 +26,7 @@ docs                为什么做、按什么顺序做
 | `services/manager` | Go，标准库。以后只有这个进程应该去叫 Kubo。 |
 | `docs/VISION.md` | 这是什么，以及我们不会把它做成什么。 |
 | `docs/ROADMAP.md` | 垂直切片。做完一片再开始下一片。 |
+| `docs/PLAN.md` | 已经商量好的功能清单，以及接下来按什么顺序做。 |
 
 ## 把面板跑起来
 
@@ -104,6 +105,7 @@ go build -o /dev/null ./cmd/manager
 
 - [愿景](docs/VISION.zh-CN.md)
 - [路线图](docs/ROADMAP.zh-CN.md)
+- [计划](docs/PLAN.zh-CN.md)
 - [设计系统](docs/DESIGN-SYSTEM.zh-CN.md)
 - [认证](docs/design/auth.zh-CN.md)
 - [文件](docs/design/files.zh-CN.md)

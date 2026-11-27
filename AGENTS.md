@@ -10,7 +10,7 @@ The rules here are enforced where they can be. A rule that only exists as prose 
 
 A panel for Kubo, the Go IPFS node. `apps/web` is the UI (Vue 3, Vite, TypeScript). `services/manager` is the API gateway (Go, standard library). The browser never talks to Kubo RPC; the manager does, on loopback, and it authenticates first.
 
-`docs/VISION.md` says what this is and what it refuses to become. `docs/ROADMAP.md` numbers the slices; slices 1–4 are shipped as v0.1.0 and slice 5 is next.
+`docs/VISION.md` says what this is and what it refuses to become. `docs/ROADMAP.md` numbers the slices that have landed. `docs/PLAN.md` is the agreed sequence; the next feature slice is permanent peering.
 
 ## The three files that decide arguments
 
@@ -24,7 +24,7 @@ If you cannot point at a file and a line for a claim about Kubo, boxo, or IPFS, 
 
 ## The loop
 
-1. **Read before writing.** `docs/HANDOFF.md` first, then the design doc for the area you touch, then `docs/ROADMAP.md` for where it sits.
+1. **Read before writing.** `docs/HANDOFF.md` first, then `docs/PLAN.md`, then the design doc for the area you touch, then `docs/ROADMAP.md` for where it sits.
 2. **Decide whether it is a slice or a fix.** A slice changes what a person can do. A fix restores something the spec already promised. Both need a spec line, not only code.
 3. **Work on a branch with a valid prefix** — `feature/`, `fix/`, `chore/`, `docs/`, `refactor/`, `test/`, `ci/`, `dependabot/`. Never commit to `develop` or `main`; both are protected and the push will be rejected.
 4. **Verify by running it**, not by reading the diff. Details below.
