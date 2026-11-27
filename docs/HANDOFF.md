@@ -18,7 +18,7 @@ git log --oneline -1 origin/main origin/develop && git tag -l
 | `develop` | the integration branch. Feature work lands here first |
 | Latest tag | v0.1.1 |
 | Open pull requests | two Dependabot updates: #37 (manager / golang.org/x/crypto) and #46 (web group), both into `develop` |
-| Roadmap | slices 1–4 shipped in v0.1.0; scenes, Explore, Peers, the winx visual language, the expert config editor, and logs are on `develop`; the released-Kubo harness is on `develop`; the next feature is permanent peering; v0.2.0 waits for an explicit release request |
+| Roadmap | slices 1–4 shipped in v0.1.0; scenes, Explore, Peers, permanent peering, the winx visual language, the expert config editor, and logs are on `develop`; the released-Kubo harness is on `develop`; v0.2.0 waits for an explicit release request; the next feature slice after that is installing Kubo |
 
 Shipped in v0.1.0: the panel shell in English and 中文, first-run admin setup and session login, node start/stop/restart with a one-sentence status, files on the node's mutable file system, and pins. Binaries for linux, macOS, and Windows, plus a web bundle, published as a GitHub Release with checksums.
 
@@ -33,7 +33,8 @@ These are settled. Do not reopen them without a reason and a pull request that s
 - **The panel does not need the node's bitswap.** A gateway read already uses it, and nothing the panel does needs the ledger or in-process code. `docs/design/kubo-integration.md`. No plugin work.
 - **Scenes are four named setups.** `quiet`, `share`, `pinset`, and `gateway`. The keys, the restart rule, and the read-only public gateway exception are in `docs/design/scenes.md`. The control API stays loopback.
 - **Explore looks inside one content ID.** The manager calls `dag/resolve` and `dag/get` on loopback. The browser does not fetch the gateway and does not receive the RPC address. The spec is `docs/design/explore.md`.
-- **Peers is a table and a one-time dial.** The manager calls `swarm/peers` and `swarm/connect` on loopback. Connected peer addresses stay off the browser. There is no map, and the page does not write `Peering.Peers`. The spec is `docs/design/peers.md`.
+- **Peers is a table, a one-time dial, and a kept list.** The manager calls `swarm/peers` and `swarm/connect` on loopback. Connected peer addresses stay off that table. There is no map. The one-time dial does not write `Peering.Peers`. The spec is `docs/design/peers.md`.
+- **Permanent peering keeps chosen peers connected.** Keep connected on a row, or paste an address. The manager calls `swarm peering` so a restart is not required, and it writes `Peering.Peers` with the same backup as the raw editor. The kept list shows the saved addresses and whether the running list matches. A stopped node returns `node_not_running`. The spec is `docs/design/peering.md`.
 - **The panel uses the winx.run visual language, at ops-panel density.** `docs/DESIGN-SYSTEM.md`. Paper gray, white cards, black primary buttons (near-white in the dark theme, including when disabled), firefly green (`#20FFA9`) only for the mark, the selected bar, and small tags. The light sidebar is white; the dark selected row is a neutral lift plus that bar, not a green block. The main column fills the window: a toolbar and a list or property surface that starts under the title and runs to the bottom. Ops pages are a flex column so a closed disclosure cannot shove the surface down. The node surface adds the current pins and a few connected peers from the existing APIs, and the card ends after the last row. Table cells, including the first column, use the toolbar's 12px inset. Peers connect sits on that list, on the same baseline as the address input, with search on the other side. shadcn-vue (Nova, themed) plus Motion. Not a charcoal 1Panel clone, not IPFS webui teal, and not a mint wash. Do not restyle it back.
 - **The raw config editor is expert mode.** It is the Advanced tab on Settings, not a nav item. The manager reads with Kubo `config/show` and writes with `config/replace`. `Identity.PrivKey` never reaches the browser. `Addresses.API` cannot be changed. A backup can be restored. A restart is offered. Scenes still apply and undo. The spec is `docs/design/config-editor.md`.
 - **Logs are one page and two sources.** The manager's own operational and audit log, and the stdout and stderr of the daemon this manager spawned. The browser reads them through the manager, with the existing session. `log/tail` is not called. An expert can set one Kubo subsystem level through the manager. Clear view does not delete the files. Secrets are redacted before a line is stored. The spec is `docs/design/logs.md`.
@@ -55,9 +56,9 @@ Each of these needs a decision, not code.
 
 ## Next step, concretely
 
-If you have one session and no other instruction, read [`docs/PLAN.md`](PLAN.md), then start permanent peering from current `develop`, in its own branch and pull request, with the design written first. Do not start a second node, a Kubo installer, remote control, or a release in the same change. Do not merge to `main` or tag a release unless the user explicitly asked. An earlier permanent-peering attempt ended without a pull request; start clean, do not stack on an old branch.
+Permanent peering is in this tree. If you have one session and no other instruction, do not start a release and do not start the Kubo installer. v0.2.0 is a release and waits for an explicit request. Installing Kubo is the next feature slice after that, in its own pull request. Do not merge to `main` or tag a release unless the user explicitly asked.
 
-Read `AGENTS.md`, then `docs/design/harness.md`, so you do not reopen the harness, Peers, Explore, the four scenes, or the winx visual language in `docs/DESIGN-SYSTEM.md`. Do not start plugin work.
+Read `AGENTS.md`, then `docs/design/peering.md` and `docs/design/harness.md`, so you do not reopen peering, the harness, Peers, Explore, the four scenes, or the winx visual language in `docs/DESIGN-SYSTEM.md`. Do not start plugin work. A small refactor that a later slice needs can land with that slice when the pull request says why.
 
 ## How this file stays true
 

@@ -4,13 +4,13 @@
 
 This file is for an AI agent or a human who has just been handed this repository. Read it before touching anything. It says what the product is, what is already decided, how to verify a claim, and how to leave the repository in a state the next person can pick up.
 
-The rules here are enforced where they can be. A rule that only exists as prose is a rule that gets skipped — this repository has already seen that happen four times in one session.
+Mechanical rules belong in CI, because a rule that is only prose gets skipped. This repository has already seen that happen. Rules that need judgment stay in prose. Use that judgment. Do not treat them as a script.
 
 ## What this is
 
 A panel for Kubo, the Go IPFS node. `apps/web` is the UI (Vue 3, Vite, TypeScript). `services/manager` is the API gateway (Go, standard library). The browser never talks to Kubo RPC; the manager does, on loopback, and it authenticates first.
 
-`docs/VISION.md` says what this is and what it refuses to become. `docs/ROADMAP.md` numbers the slices that have landed. `docs/PLAN.md` is the agreed sequence; the next feature slice is permanent peering.
+`docs/VISION.md` says what this is and what it refuses to become. `docs/ROADMAP.md` numbers the slices that have landed. `docs/PLAN.md` is the agreed sequence. Permanent peering is in. v0.2.0 waits for an explicit release request. The next feature slice after that is installing and upgrading Kubo.
 
 ## The three files that decide arguments
 
@@ -33,7 +33,7 @@ If you cannot point at a file and a line for a claim about Kubo, boxo, or IPFS, 
 
 ## Verification, in the order that catches the most
 
-All three are required, not a menu.
+Do all three. A check you cannot run is reported, with the reason. It is not a pass, and it is not a reason to skip the checks you can run.
 
 **1. The product runs.** Start the manager, exercise the changed path, paste the output. A green test suite is not this step. If the change touches the UI, open the page and look at it. If it touches a binary, run the binary.
 
@@ -89,7 +89,7 @@ Observed on the machine this repository was developed on; check rather than assu
 
 - **Do not guess at Kubo behaviour.** See `docs/REFERENCE-ipfs-stack.md`. Every entry point and response shape is checkable in `reference/`.
 - **Do not hand-write a stand-in for something you are trying to test.** `internal/node/fakeipfs` stands in for the `ipfs` CLI to test process lifecycle; it never speaks RPC, and making it do so would test our guesses rather than Kubo.
-- **Do not add a second way to do something that already exists.** If the spec says how, follow it, or change the spec first.
+- **Prefer the way the spec already describes.** A second path, or a small refactor next to the slice, is fine when the pull request says what was awkward and what a later slice can now do. Change the spec in the same pull request if the behaviour changes. Do not invent a parallel product feature.
 - **Do not write a check that cannot fail.** Every script added here was tested by injecting the failure it is supposed to catch. A check that only prints "OK" is worse than none.
 - **Do not commit `reference/`.** It is gitignored upstream source, never part of the product.
 

@@ -179,6 +179,6 @@ Web：高级这一页、专家标签、无效 JSON 禁用保存、保存前的�
 - IPNS 密钥、做成表单的远程 pin 服务、分析，以及诊断页。这些仍在[与 ipfs-webui 的对照](webui-parity.zh-CN.md)里延后。
 - 一张表单，它的工作是设置浏览器要去调用的 Kubo RPC 地址。
 - 改 `Identity.PrivKey`、`API.Authorizations` 或远程 pin 的 API 密钥。
-- 永久对等。对等节点页仍然不写 `Peering.Peers`。
+- 保持连接的控件。那是[永久对等](peering.zh-CN.md)。这个编辑器仍然可以改 `Peering.Peers`。对等节点页会发现保存的列表和正在执行的列表不一致。
 - 节点停着的时候编辑配置。
 - 不问就重启。

@@ -82,6 +82,10 @@ RPC 客户端不用改。它们已经拒绝非 loopback 的 base URL。测试用
 | 守护进程的 stdout 和 stderr 进入日志存储 | 进程管道是 Kubo 的，不是桩 |
 | `log/ls` 的 `Strings`，以及把 `core` 的 `log/level` 设成 `error` | JSON 字段和“级别已改”那句话是 Kubo 的 |
 | 停机后的 `log/level` | 连接被拒，和其他客户端一样 |
+| `swarm/peering/add` 之后立刻 `ls`，守护进程仍在运行 | 实时服务是 Kubo 的；只写配置要等重启才看得到这个节点 |
+| 监督器重启守护进程之后仍是同一个节点 | `Peering.Peers` 在构建节点时装入 |
+| `swarm/peering/rm` | 节点离开正在运行的服务，也离开保存的列表 |
+| 停机后的 peering 列表 | 连接被拒，和其他客户端一样 |
 
 最后一条在 Windows 上已由 `internal/kuborpc` 覆盖。集成测试在 supervisor 停掉守护进程之后，也对真实进程再跑一次，因为二进制在手时这一下很便宜。断言是 `node_not_running`，也就是连接被拒，不是超时。
 
@@ -104,6 +108,7 @@ RPC 客户端不用改。它们已经拒绝非 loopback 的 base URL。测试用
 - `POST /api/v0/log/ls` 返回 JSON `{"Strings":[...]}`，至少有一个子系统名字。
 - `POST /api/v0/log/level?arg=core&arg=error` 返回 HTTP 200，`Message` 里包含 `Changed log level of 'core' to 'error'`。
 - supervisor 到达 `down` 之后，同一次 `log/level` 调用返回 `node_not_running`。
+- `TestRealKuboPeering` 通过 manager 的 peering 服务添加一个节点。守护进程仍在运行时，`swarm peering ls` 里有这个节点，所以不需要重启。`config/show` 含有这个 peer id，不含 `Identity.PrivKey`。磁盘上的私钥不变。监督器重启守护进程之后，列表里仍有这个节点。移除会让它离开正在运行的服务，也离开保存的列表。监督器到达 `down` 之后，列表返回 `node_not_running`。
 
 `IPFS_PANEL_KUBO_VERSION=0.43.1` 把这些结果钉死。任何别的非空值都会让测试失败，直到那个升级 PR 写上新的预期。空值是本地运行：调用仍然必须成功，两种名称结果必须自洽（`kubo` 且带名称，或者回退之后是 `panel`）。
 

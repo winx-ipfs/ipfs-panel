@@ -57,13 +57,64 @@
   padding-block: 0;
 }
 
-.peers-connect {
+.peers-connect,
+.peers-keep,
+.peers-once {
   flex: none;
   align-self: flex-start;
   width: auto;
   height: 40px;
   min-height: 40px;
   margin: calc(var(--peers-label) + var(--peers-field-gap)) 0 0;
+}
+
+.peers-section {
+  margin: 0;
+  padding: 10px 12px 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.peers-banner {
+  display: grid;
+  gap: 4px;
+  margin: 8px 12px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+.peers-banner p {
+  margin: 0;
+}
+
+.peers-banner p + p {
+  color: var(--muted);
+}
+
+.peers-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.peers-banner-actions .ui-btn {
+  height: 40px;
+  min-height: 40px;
+}
+
+.peers-kept-mark {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.peers-row-action {
+  height: 32px;
+  min-height: 32px;
+  padding-inline: 8px;
 }
 
 .peers-list-meta {
@@ -119,10 +170,23 @@
   table-layout: fixed;
 }
 
-.peers-table th:nth-child(1) { width: 46%; }
-.peers-table th:nth-child(2) { width: 18%; }
-.peers-table th:nth-child(3) { width: 14%; }
-.peers-table th:nth-child(4) { width: 22%; }
+.peers-table th:nth-child(1) { width: 38%; }
+.peers-table th:nth-child(2) { width: 16%; }
+.peers-table th:nth-child(3) { width: 12%; }
+.peers-table th:nth-child(4) { width: 18%; }
+.peers-table th:nth-child(5) { width: 16%; }
+
+.peers-kept-table th:nth-child(1) { width: 32%; }
+.peers-kept-table th:nth-child(2) { width: 40%; }
+.peers-kept-table th:nth-child(3) { width: 14%; }
+.peers-kept-table th:nth-child(4) { width: 14%; }
+
+.peers-addrs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
 
 .peers-table th,
 .peers-table td {
@@ -149,6 +213,21 @@
   border-top: 1px solid var(--border);
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.peers-kept-table td {
+  height: auto;
+  min-height: 44px;
+}
+
+.peers-addrs code,
+.peers-kept-cards code {
+  display: block;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .peers-id {
@@ -227,8 +306,14 @@
     flex: 1 1 auto;
   }
 
+  .peers-filter,
+  .peers-keep,
+  .peers-once {
+    flex: 1 1 auto;
+  }
+
   .peers-filter {
-    flex: 1 1 100%;
+    flex-basis: 100%;
   }
 
   .peers-table {

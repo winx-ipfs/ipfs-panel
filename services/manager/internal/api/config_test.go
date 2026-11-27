@@ -154,7 +154,7 @@ func configMux(t *testing.T, h *configHTTP) http.Handler {
 		t.Fatal(err)
 	}
 	useSession(res.Session, res.CSRF)
-	return newMux(sup, svc, nil, nil, nil, nil, h, nil)
+	return newMux(parts{sup: sup, auth: svc, config: h})
 }
 
 func mustJSON(t *testing.T, text string) string {

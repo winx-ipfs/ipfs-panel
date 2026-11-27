@@ -61,3 +61,7 @@ jobs:
             echo "TestRealKuboConfig did not pass"
             exit 1
           fi
+          if ! grep -q -- '--- PASS: TestRealKuboPeering' "$log"; then
+            echo "TestRealKuboPeering did not pass"
+            exit 1
+          fi

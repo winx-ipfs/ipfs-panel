@@ -25,13 +25,12 @@ What is here:
 - see what the node is pinning, pin a content ID or a file, and unpin, without the command line
 - pick one of four scenes, see what it will change, apply it, and revert it, without opening Kubo's JSON
 - look inside a content ID: what the block is, and what it points at
-- see who the node is connected to, and dial one peer by an address
+- see who the node is connected to, dial one peer by an address, and keep chosen peers connected
 - read and replace the Kubo config as JSON, from Settings, marked Expert
 - read what the panel and the node are writing, follow it, and set one log level
 
-What is not here, in this order. Permanent peering is next. The rest are later. The detail is [the plan](PLAN.md).
+What is not here, in this order. A release is next, and only when the user asks. The rest are later. The detail is [the plan](PLAN.md).
 
-- permanent peering
 - v0.2.0
 - installing and upgrading Kubo
 - remote control of the manager
@@ -85,13 +84,19 @@ Done when a beginner can paste a content ID or an `/ipfs/` path, see the block, 
 
 See who this node is connected to, and dial one address once. The spec is [Peers](design/peers.md). It is webui parity, not a new numbered slice.
 
-Done when a beginner can open the list, in English and in 中文, and connect by an address the page allows, without a map and without seeing another node's address. That is the current tree. Permanent peering still waits.
+Done when a beginner can open the list, in English and in 中文, and connect by an address the page allows, without a map and without seeing another node's address on that table. That is the current tree.
 
-## 6. Expert mode, then permanent peering
+## Permanent peering
 
-The raw config editor is in. It is Settings, Advanced, marked Expert. The spec is [Config editor](design/config-editor.md). Logs are in. The spec is [Logs](design/logs.md). Permanent peering is not. The peers page above is the beginner list and one dial, not permanent peering.
+Keep chosen peers connected, including after the link drops and after a restart. The spec is [Permanent peering](design/peering.md). It lives on the Peers page.
 
-The first half of slice 6 has landed. The next feature slice is permanent peering. After that, the sequence lives in [the plan](PLAN.md).
+Done when a beginner can add and remove always-connect peers without editing JSON, and the page says whether a restart or an apply is needed. That is the current tree.
+
+## 6. Expert mode
+
+The raw config editor is in. It is Settings, Advanced, marked Expert. The spec is [Config editor](design/config-editor.md). Logs are in. The spec is [Logs](design/logs.md).
+
+Slice 6's expert half has landed, and permanent peering has landed. The sequence after that lives in [the plan](PLAN.md). v0.2.0 waits for an explicit release request.
 
 ## Not in the early slices
 

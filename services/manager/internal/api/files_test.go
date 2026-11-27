@@ -218,7 +218,7 @@ func filesMux(t *testing.T, h *filesHTTP) http.Handler {
 		t.Fatal(err)
 	}
 	useSession(res.Session, res.CSRF)
-	return newMux(sup, svc, h, nil, nil, nil, nil, nil)
+	return newMux(parts{sup: sup, auth: svc, files: h})
 }
 
 func upFiles(t *testing.T, apiBase string, max int64) *filesHTTP {

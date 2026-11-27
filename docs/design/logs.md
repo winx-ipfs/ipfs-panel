@@ -2,7 +2,7 @@
 
 **English** · [中文](logs.zh-CN.md)
 
-**Status: implemented.** This file is the spec for the Logs page. If the code and this file disagree, this file wins until a pull request changes it. It is expert-mode diagnostics for one node, not a new numbered roadmap slice. Permanent peering and a second node stay out of this change.
+**Status: implemented.** This file is the spec for the Logs page. If the code and this file disagree, this file wins until a pull request changes it. It is expert-mode diagnostics for one node, not a new numbered roadmap slice. A second node stays out of this change. Permanent peering is [Permanent peering](peering.md).
 
 ## What this is for
 
@@ -184,7 +184,7 @@ Web: the nav label, the streaming lines, pause, a filter with no match, the stop
 
 ## Out of scope
 
-- Permanent peering, and writing `Peering.Peers`.
+- Permanent peering. That is [Permanent peering](peering.md).
 - A second node.
 - `log/tail`, the retrieval check, and DHT provide.
 - Deleting the log files from the page.

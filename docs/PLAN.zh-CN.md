@@ -17,12 +17,12 @@ ipfs-panel 是星萤无垠的本机开源运维软件，用来管一台真实的
 
 ## 后续开发怎么用这份
 
-开工前按这个顺序读。不要凭记忆再开一轮视觉改版，也不要把多个功能堆进同一个 pull request。
+开工前按这个顺序读。不要凭记忆再开一轮视觉改版。一个 pull request 做一块产品功能。这一刀需要的小重构可以放在旁边。
 
 1. **先读仓库文档。** `AGENTS.zh-CN.md`、`docs/HANDOFF.zh-CN.md`（及英文配对）、本文件、`docs/DESIGN-SYSTEM.zh-CN.md`，以及这一刀对应的 `docs/design/*`。设计文档高于代码。
-2. **只做当前这一刀。** 就是 [接下来要做的功能](#接下来要做的功能) 里排在最前、状态仍是「下一步」的那一项。先写设计再写代码。不要重开已决定的事项。不要做 Kubo 插件。不要因为界面看起来不顺眼就改设计系统。
+2. **做当前这一刀。** 就是 [接下来要做的功能](#接下来要做的功能) 里第一项还没做完的，发版那一行除非用户明确要求否则跳过。先写设计再写代码。这一刀需要的重构，或能拿掉后面某一刀明显障碍的重构，可以进同一个 pull request，但要写明原因。不要开工下一刀功能。没有理由就不要重开已决定的事项。不要做 Kubo 插件。不要改设计系统的皮。
 3. **竖切一条，pull request 只进 `develop`。** 界面、管理器路由、Kubo 调用、中英文案、测试和截图一起落地。squash，标题用 Conventional Commit。`ci-ok` 必须绿。除非用户明确要求，不要合进 `main`、不要打 tag、不要发版。
-4. **做完再交。** 自己审完改到的每一种状态的截图（浅色/深色、中文/英文、1440 和大约 390）。修好再说完成。不要每修一个小痕迹就停下来等确认。
+4. **做完再交。** 在桌面宽度下审你改过的每一种状态，修好再说完成。布局或文案可能在另一种主题、另一种语言或窄屏上坏掉时，再检查那些。跟这次改动无关的整张矩阵不是交工门槛。不要每修一个小痕迹就停下来等确认。
 
 ## 已经落地的功能
 
@@ -37,7 +37,8 @@ ipfs-panel 是星萤无垠的本机开源运维软件，用来管一台真实的
 | 固定与取消固定 | 已发运 | 独立页面，不藏在文件浏览器里。 |
 | 四种场景设置 | 在 `develop` | 安静、分享、固定集合、只读网关；可预览、应用、撤销。 |
 | 探索一块内容 | 在 `develop` | 按内容标识或 `/ipfs/` 路径看类型与链接。 |
-| 对等节点列表与一次性连接 | 在 `develop` | 没有地图；不写入 `Peering.Peers`。 |
+| 对等节点列表与一次性连接 | 在 `develop` | 没有地图。一次性拨号不写 `Peering.Peers`。 |
+| 永久对等 | 在 `develop` | 对等节点页上保持连接。实时 `swarm peering` 加上 `Peering.Peers`，并留备份。 |
 | 真实 Kubo 集成测试 | 在 `develop` | CI 钉在 Kubo v0.43.1。进 `develop` 的 pull request 会跑。 |
 | winx 视觉语言 | 在 `develop` | shadcn-vue + Tailwind + Motion。不再改皮，只修真正的缺陷。 |
 | 专家原始配置编辑器 | 在 `develop` | 设置 → 高级。去掉 `PrivKey`。锁定 `Addresses.API`。先看差异再保存，备份可还原。 |
@@ -49,32 +50,22 @@ ipfs-panel 是星萤无垠的本机开源运维软件，用来管一台真实的
 
 | 顺序 | 功能 | 为什么现在做 | 完成标准 |
 | --- | --- | --- | --- |
-| 1 | 永久对等 | 对等节点页还不能「一直连着这些节点」。这是单机运维还没补上的一块。 | 新手能从对等节点页添加、移除常连节点，断线会重连，不用改 JSON。 |
-| 2 | 发布 v0.2.0 | `develop` 上已经有一大批能力，`main` 还是 v0.1.1，外面下不到。 | 从 `develop` 开 pull request 进 `main`，打 tag，出 linux / macOS / Windows 二进制和校验和。 |
-| 3 | 安装与升级 Kubo | 现在找不到 `ipfs` 命令只能跳官方文档，跟一站式还差一步。 | 面板能下载并校验钉住的发行版，再安装或升级，三端都能用，不把 Kubo 提交进本仓库。 |
-| 4 | 控制面远控 | 管理器默认只听本机，装到服务器后无法用浏览器远管。 | 可以绑定到局域网或公网，走现有登录与 CSRF；Kubo RPC 仍不对外。 |
-| 5 | 桌面端 | 同一套界面，包成可安装的本机软件。到这一刀再选壳，不要提前决定。 | 可以像普通软件一样打开本机面板，连的仍是本机管理器。 |
-| 6 | IPNS 密钥 | 和 webui 对齐里还缺的专家能力，放在安装和远控之后。 | 能生成、列出、发布与解析名称，私钥不出浏览器。 |
-| 7 | 远端固定 | 把内容交给远端 pinning 服务。不是新手主路径。 | 能配置服务与密钥、提交并查看远端固定状态，密钥不进前端代码。 |
-| 8 | 诊断 | 检索检查与 DHT provide，让运维能判断内容能不能被找到。 | 新手能看懂一次检查的结果，专家能看到足够细节。 |
-| 9 | 第二台节点 | 单机可安装、可远控之后再扩。不要做集群控制台。 | 同一个面板能管两台 Kubo，现有接口不被推倒重来。 |
+| 1 | 发布 v0.2.0 | `develop` 上已经有一大批能力，包括永久对等，`main` 还是 v0.1.1，外面下不到。 | 从 `develop` 开 pull request 进 `main`，打 tag，出 linux / macOS / Windows 二进制和校验和。 |
+| 2 | 安装与升级 Kubo | 现在找不到 `ipfs` 命令只能跳官方文档，跟一站式还差一步。 | 面板能下载并校验钉住的发行版，再安装或升级，三端都能用，不把 Kubo 提交进本仓库。 |
+| 3 | 控制面远控 | 管理器默认只听本机，装到服务器后无法用浏览器远管。 | 可以绑定到局域网或公网，走现有登录与 CSRF；Kubo RPC 仍不对外。 |
+| 4 | 桌面端 | 同一套界面，包成可安装的本机软件。到这一刀再选壳，不要提前决定。 | 可以像普通软件一样打开本机面板，连的仍是本机管理器。 |
+| 5 | IPNS 密钥 | 和 webui 对齐里还缺的专家能力，放在安装和远控之后。 | 能生成、列出、发布与解析名称，私钥不出浏览器。 |
+| 6 | 远端固定 | 把内容交给远端 pinning 服务。不是新手主路径。 | 能配置服务与密钥、提交并查看远端固定状态，密钥不进前端代码。 |
+| 7 | 诊断 | 检索检查与 DHT provide，让运维能判断内容能不能被找到。 | 新手能看懂一次检查的结果，专家能看到足够细节。 |
+| 8 | 第二台节点 | 单机可安装、可远控之后再扩。不要做集群控制台。 | 同一个面板能管两台 Kubo，现有接口不被推倒重来。 |
 
-### 1. 永久对等
+永久对等已经做完。规格是[永久对等](design/peering.zh-CN.md)。
 
-新手语义是：始终与这些节点保持连接，断了会重连。入口放在已有的对等节点页，比如一行上的「保持连接」，再加一个常连列表。
+### 1. 发布 v0.2.0
 
-- 先写 `docs/design/peering.md` 及中文配对文档，再写代码。
-- 管理器负责列出、添加、移除，并校验 peer ID 与多地址。
-- 对 Kubo v0.43.1 验证：能用实时 RPC（`swarm peering add` / `rm` / `ls`）就不要强制重启，同时把 `Peering.Peers` 写进配置并做备份。
-- 与场景、原始配置编辑器共存。用已有的对等数据显示已连接 / 重连中。
-- 审计记入现有的管理器日志。节点未启动时返回 `node_not_running`。
-- pull request 进 `develop`，分支从当前 `develop` 拉出，不要叠在旧分支上。先前有一次尝试没有开出 pull request，这次从头开始。
+这是发版，不是功能切片。必须用户明确说发才动手。包进已经在 `develop` 的场景、探索、对等节点、永久对等、新界面、配置编辑器和日志。按仓库现有的发版步骤走：`develop` → `main` 的 pull request，打 tag，上传二进制和校验和。发版的 pull request 不夹带新功能。
 
-### 2. 发布 v0.2.0
-
-这是发版，不是功能切片。必须用户明确说发才动手。包进已经在 `develop` 的场景、探索、对等节点、新界面、配置编辑器、日志，以及已经合入的永久对等。按仓库现有的发版步骤走：`develop` → `main` 的 pull request，打 tag，上传二进制和校验和。发版的 pull request 不夹带新功能。
-
-### 3. 安装与升级 Kubo
+### 2. 安装与升级 Kubo
 
 现状是找不到二进制就失败，并给一条官方安装文档链接。这一刀要让新手不离开面板就能拿到一个可用的 Kubo。
 
@@ -84,7 +75,7 @@ ipfs-panel 是星萤无垠的本机开源运维软件，用来管一台真实的
 - 安装后仍要满足 API 与网关的 loopback 约束，除非用户应用了已经允许的只读网关场景。
 - linux、macOS、Windows 都要能走通。
 
-### 4. 控制面远控
+### 3. 控制面远控
 
 远控的是管理器，不是 Kubo 的 5001 端口。现有登录体系要足够硬，才能从只听本机改成可听局域网或公网。
 
@@ -92,7 +83,7 @@ ipfs-panel 是星萤无垠的本机开源运维软件，用来管一台真实的
 - Kubo RPC 仍只允许 loopback；程序里要再次把关，不只写在文档里。
 - 同一套 Web UI，不另起一套远程皮。
 
-### 5 到 9. 桌面端、IPNS、远端固定、诊断、第二台节点
+### 4 到 8. 桌面端、IPNS、远端固定、诊断、第二台节点
 
 这五刀都要单独设计、单独 pull request。桌面端开始时再比较壳（例如 Tauri 与 Electron），不要提前选。IPNS 与远端固定的密钥不出浏览器。诊断是给运维看的检查，不是分析产品。第二台节点是在「这台节点」上扩，不要推倒现有 API 去做集群控制台。
 
@@ -116,7 +107,7 @@ ipfs-panel 是星萤无垠的本机开源运维软件，用来管一台真实的
 2. 先在 `docs/design/` 写清：用户能做什么、管理器路由、Kubo 调用、怎么验证、错误怎么告诉人、与已有切片如何共存、中英文案。
 3. 再写管理器与测试，并在集成测试里对真实的 Kubo v0.43.1 补覆盖。
 4. 再写界面：工作面铺满、工具条贴列表、行高 44、内边距与其他页一致；只用真实数据。
-5. lint、类型检查、Go 与 Web 测试（含 `-race`）、文档检查、截图自审。更新交接文档、路线图，以及这一刀碰到的对齐文档。
+5. lint、类型检查、Go 与 Web 测试（机器能跑 `-race` 时含它）、文档检查，以及你改过的状态的截图自审。更新交接文档、路线图，以及这一刀碰到的对齐文档。
 6. 打开进 `develop` 的 pull request，等 `ci-ok` 全绿，不自动合并。
 
 可以把下面这段贴进云端开发的任务说明里，再补上当前这一刀的范围。
@@ -125,24 +116,23 @@ ipfs-panel 是星萤无垠的本机开源运维软件，用来管一台真实的
 You are continuing winx-ipfs/ipfs-panel.
 Read AGENTS.md, docs/HANDOFF.md (+ zh-CN), docs/PLAN.md (+ zh-CN), docs/DESIGN-SYSTEM.md, and the design doc for this slice first. Design docs outrank code.
 
-Do only the named slice. Write the design in docs/design/ before code. One vertical slice: UI + manager + Kubo call + en/zh + tests + screenshots.
+Do the named slice. Write the design in docs/design/ before code. One vertical slice: UI + manager + Kubo call + en/zh + tests + screenshots. A small refactor that the slice needs, or that makes the next named slice easier to extend, can land in the same pull request when the pull request says why. Do not start the next feature.
 PR into develop only (squash, Conventional Commit). Do not merge to main, do not tag, do not release unless the user explicitly asked.
-Do not reopen settled decisions. No Kubo plugin. No Fast. No new UI libraries. Do not start a visual restyle.
+Do not reopen a settled decision without a reason in the pull request. No Kubo plugin. No new UI libraries. Do not start a visual restyle. A new dependency needs a reason; do not add one by habit.
 Browser never talks to Kubo RPC. Never send Identity.PrivKey to the browser. Addresses.API stays locked.
 Visual tokens stay locked: #F9FAFB background, white cards, #E5E5E5 lines, #0A0A0A text, #171717 primary (near-white in dark), #20FFA9 only for logo / selection bar / small tags, radii 6/8/10/12/16, Inter + system CJK, 44px rows, motion 150-250ms ease-out. shadcn-vue + Tailwind + Motion only.
-Self-review screenshots (light/dark, zh/en, 1440 and ~390) and iterate until complete. Wait for ci-ok. Do not auto-merge.
+Review the states you changed at desktop width. Check the other theme, language, and a narrow width when the layout or the copy can break there. Wait for ci-ok. Do not auto-merge.
 ```
 
 ## 已锁定的规则
 
 没有理由、没有说明原因的 pull request，不要重开这些决定。
 
-- 技术栈：Vue 3 + Vite + TypeScript；管理器用 Go 标准库 / chi，不用 GoFrame。
+- 技术栈：Vue 3 + Vite + TypeScript。管理器是 Go 标准库（`net/http`），不是 GoFrame，也不是 chi。
 - 架构：浏览器 → 管理器 → Kubo；浏览器永远见不到 Kubo RPC 地址。
 - Kubo 走进程边界，不做插件；测试基线是已发布的 Kubo 二进制（目前 v0.43.1）。
 - 组件库：shadcn-vue + Tailwind + Motion，不换栈、不混用 DaisyUI / HeroUI。
 - 配色跟 winx.run：浅灰底、白卡片、黑主按钮；萤光绿 `#20FFA9` 只用于标识、选中条和小标签。
 - 圆角同心：标签 6、按钮和导航 8、输入 10、卡片 12、对话框 16。
-- 功能合入 `develop`，再从 `develop` 开 pull request 进 `main` 发版；squash；`ci-ok` 必须绿。
-- 不要用 Fast 或其他高消耗模式。
-- 不要在用户说发之前合 `main`、打发行版。
+- 功能合入 `develop`，再从 `develop` 开 pull request 进 `main` 发版；squash；`ci-ok` 必须绿。不要自己合并那个 pull request。
+- 不要在用户说发之前合 `main`、打发行版。模型选择和费用不是产品规则。

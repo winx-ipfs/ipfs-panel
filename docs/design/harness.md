@@ -82,6 +82,10 @@ The RPC clients need no change. They already refuse a non-loopback base URL. The
 | daemon stdout and stderr reach the log store | The process pipes are Kubo's, not a stub |
 | `log/ls` `Strings` and `log/level` of `core` to `error` | The JSON field and the changed-level sentence are Kubo's |
 | a stopped node `log/level` | Connection refused, same as the other clients |
+| `swarm/peering/add` then `ls`, with the daemon still up | The live service is Kubo's; writing config alone would not show the peer until restart |
+| the same peer after the supervisor restarts the daemon | `Peering.Peers` is loaded when the node is built |
+| `swarm/peering/rm` | The peer leaves the running service and the saved list |
+| a stopped node peering list | Connection refused, same as the other clients |
 
 The last one is already covered for Windows by `internal/kuborpc`. The integration test also runs it against the real daemon after the supervisor stops it, because that is cheap once the binary is present. The assertion is `node_not_running`, which is connection refused, not a timeout.
 
@@ -104,6 +108,7 @@ Checked by running the released `v0.43.1` binary, not by reading the reference c
 - `POST /api/v0/log/ls` returns JSON `{"Strings":[...]}` with at least one subsystem name.
 - `POST /api/v0/log/level?arg=core&arg=error` returns HTTP 200 and a `Message` containing `Changed log level of 'core' to 'error'`.
 - After the supervisor has reached `down`, that same `log/level` call returns `node_not_running`.
+- `TestRealKuboPeering` adds one peer through the manager's peering service. `swarm peering ls` contains that peer while the daemon is still up, so no restart was required. `config/show` contains the peer id and does not contain `Identity.PrivKey`. The key on disk is unchanged. After the supervisor restarts the daemon, the list still contains the peer. Remove drops it from the running service and from the saved list. After the supervisor has reached `down`, the list returns `node_not_running`.
 
 `IPFS_PANEL_KUBO_VERSION=0.43.1` locks those results. Any other non-empty value fails the test until the pin pull request writes the new expectations. An empty value, which is a local run, still requires the calls to succeed and the two name outcomes to be coherent (`kubo` with the name, or `panel` after the fallback).
 

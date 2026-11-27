@@ -162,6 +162,16 @@ func validToken(value string) bool {
 	return true
 }
 
+// CanonicalPeerID reports whether raw is a peer id this package accepts at
+// the end of a multiaddr, and returns it in the form ParseAddress stores.
+func CanonicalPeerID(raw string) (string, bool) {
+	s := strings.TrimSpace(raw)
+	if s == "" || strings.ContainsAny(s, "/ \t") || !validPeerID(s) {
+		return "", false
+	}
+	return canonicalPeer(s), true
+}
+
 func canonicalPeer(s string) string {
 	if strings.HasPrefix(s, "Qm") || strings.HasPrefix(s, "1") || strings.HasPrefix(s, "z") {
 		return s

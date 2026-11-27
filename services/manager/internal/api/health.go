@@ -15,10 +15,24 @@ type healthBody struct {
 	Service string `json:"service"`
 }
 
+// parts is the set of handlers newMux mounts. A nil feature handler is
+// built from sup. Tests pass the one handler they want to replace.
+type parts struct {
+	sup     *node.Supervisor
+	auth    *auth.Service
+	files   *filesHTTP
+	pins    *pinsHTTP
+	explore *exploreHTTP
+	peers   *peersHTTP
+	peering *peeringHTTP
+	config  *configHTTP
+	logs    *logsHTTP
+}
+
 // NewMux is the manager HTTP API.
 // GET /health reports this process only.
-// Node routes do not proxy Kubo. Files, pins, explore, and peers routes call
-// Kubo on loopback and never return that address.
+// Node routes do not proxy Kubo. Feature routes call Kubo on loopback and
+// never return that address.
 // Every /api route except setup-status, setup, and login requires a session.
 func NewMux(sup *node.Supervisor, svc *auth.Service) http.Handler {
 	return NewMuxWithLogs(sup, svc, nil)
@@ -26,14 +40,18 @@ func NewMux(sup *node.Supervisor, svc *auth.Service) http.Handler {
 
 // NewMuxWithLogs is NewMux with the log ring the Logs page reads.
 func NewMuxWithLogs(sup *node.Supervisor, svc *auth.Service, store *logs.Store) http.Handler {
-	return newMux(sup, svc, nil, nil, nil, nil, nil, &logsHTTP{
-		sup:   sup,
-		store: store,
-		trust: svc.TrustProxy(),
+	return newMux(parts{
+		sup:  sup,
+		auth: svc,
+		logs: &logsHTTP{sup: sup, store: store, trust: svc.TrustProxy()},
 	})
 }
 
-func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pinsHandler *pinsHTTP, exploreHandler *exploreHTTP, peersHandler *peersHTTP, configHandler *configHTTP, logsHandler *logsHTTP) http.Handler {
+func newMux(p parts) http.Handler {
+	sup, svc := p.sup, p.auth
+	filesHandler, pinsHandler := p.files, p.pins
+	exploreHandler, peersHandler := p.explore, p.peers
+	peeringHandler, configHandler, logsHandler := p.peering, p.config, p.logs
 	maxBytes, op, transfer := sup.FileLimits()
 	if filesHandler == nil {
 		filesHandler = &filesHTTP{
@@ -66,6 +84,14 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 		peersHandler = &peersHTTP{sup: sup}
 	} else if peersHandler.sup == nil {
 		peersHandler.sup = sup
+	}
+	if peeringHandler == nil {
+		peeringHandler = &peeringHTTP{sup: sup, trust: svc.TrustProxy()}
+	} else if peeringHandler.sup == nil {
+		peeringHandler.sup = sup
+		if !peeringHandler.trust {
+			peeringHandler.trust = svc.TrustProxy()
+		}
 	}
 	if configHandler == nil {
 		configHandler = &configHTTP{sup: sup, trustProxy: svc.TrustProxy()}
@@ -104,34 +130,7 @@ func newMux(sup *node.Supervisor, svc *auth.Service, filesHandler *filesHTTP, pi
 	mux.HandleFunc("GET /api/scenes/preview", nodes.scenesPreview)
 	mux.HandleFunc("POST /api/scenes/apply", nodes.scenesApply)
 	mux.HandleFunc("POST /api/scenes/revert", nodes.scenesRevert)
-	mux.HandleFunc("GET /api/files", filesHandler.list)
-	mux.HandleFunc("GET /api/files/stat", filesHandler.stat)
-	mux.HandleFunc("GET /api/files/download", filesHandler.download)
-	mux.HandleFunc("POST /api/files/mkdir", filesHandler.mkdir)
-	mux.HandleFunc("POST /api/files/upload", filesHandler.upload)
-	mux.HandleFunc("POST /api/files/rename", filesHandler.rename)
-	mux.HandleFunc("POST /api/files/move", filesHandler.move)
-	mux.HandleFunc("POST /api/files/copy", filesHandler.copy)
-	mux.HandleFunc("POST /api/files/delete", filesHandler.delete)
-	mux.HandleFunc("GET /api/pins", pinsHandler.list)
-	mux.HandleFunc("POST /api/pins", pinsHandler.add)
-	mux.HandleFunc("POST /api/pins/remove", pinsHandler.remove)
-	mux.HandleFunc("POST /api/pins/from-files", pinsHandler.fromFiles)
-	mux.HandleFunc("POST /api/pins/upload", pinsHandler.upload)
-	mux.HandleFunc("GET /api/pins/jobs", pinsHandler.jobsList)
-	mux.HandleFunc("GET /api/pins/jobs/{id}", pinsHandler.jobGet)
-	mux.HandleFunc("POST /api/pins/jobs/{id}/cancel", pinsHandler.jobCancel)
-	mux.HandleFunc("GET /api/explore", exploreHandler.get)
-	mux.HandleFunc("GET /api/peers", peersHandler.list)
-	mux.HandleFunc("POST /api/peers/connect", peersHandler.connect)
-	mux.HandleFunc("GET /api/config", configHandler.get)
-	mux.HandleFunc("POST /api/config", configHandler.replace)
-	mux.HandleFunc("POST /api/config/restore", configHandler.restore)
-	mux.HandleFunc("GET /api/logs", logsHandler.list)
-	mux.HandleFunc("GET /api/logs/stream", logsHandler.stream)
-	mux.HandleFunc("GET /api/logs/download", logsHandler.download)
-	mux.HandleFunc("GET /api/logs/levels", logsHandler.levels)
-	mux.HandleFunc("POST /api/logs/level", logsHandler.setLevel)
+	mount(mux, filesHandler, pinsHandler, exploreHandler, peersHandler, peeringHandler, configHandler, logsHandler)
 	return protect(svc, mux)
 }
 
