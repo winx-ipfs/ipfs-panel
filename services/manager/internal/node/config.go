@@ -19,8 +19,12 @@ type Config struct {
 	RepoPath    string
 	DataDir     string
 	KuboBin     string
-	TrustProxy  bool
-	Logger      *slog.Logger
+	// ManagedBin, when set, is the panel-installed binary used when KuboBin
+	// is empty. It is called on every start so an upgrade is picked up
+	// without restarting the manager. Nil keeps the PATH lookup.
+	ManagedBin func() string
+	TrustProxy bool
+	Logger     *slog.Logger
 	// KuboLog receives stdout and stderr of a daemon this manager starts.
 	// Nil discards stdout and keeps only the stderr tail used for error detail.
 	KuboLog io.Writer

@@ -26,13 +26,13 @@ What is here:
 - pick one of four scenes, see what it will change, apply it, and revert it, without opening Kubo's JSON
 - look inside a content ID: what the block is, and what it points at
 - see who the node is connected to, dial one peer by an address, and keep chosen peers connected
+- install the pinned Kubo when the machine has none, and upgrade it inside a supported range
 - read and replace the Kubo config as JSON, from Settings, marked Expert
 - read what the panel and the node are writing, follow it, and set one log level
 
 What is not here, in this order. A release is next, and only when the user asks. The rest are later. The detail is [the plan](PLAN.md).
 
 - v0.2.0
-- installing and upgrading Kubo
 - remote control of the manager
 - the desktop app
 - IPNS keys
@@ -92,11 +92,17 @@ Keep chosen peers connected, including after the link drops and after a restart.
 
 Done when a beginner can add and remove always-connect peers without editing JSON, and the page says whether a restart or an apply is needed. That is the current tree.
 
+## Install and upgrade Kubo
+
+A machine with no Kubo can install the pinned release from the Node page. A newer release inside the supported range can be upgraded, and a failure before the repo version changes puts the previous binary back. A binary the operator pointed the manager at is left alone. The spec is [Install and upgrade Kubo](design/kubo-install.md).
+
+Done when a beginner can leave the page with a working node, and can later see that a newer Kubo exists and upgrade it, in English and in 中文. That is the current tree.
+
 ## 6. Expert mode
 
 The raw config editor is in. It is Settings, Advanced, marked Expert. The spec is [Config editor](design/config-editor.md). Logs are in. The spec is [Logs](design/logs.md).
 
-Slice 6's expert half has landed, and permanent peering has landed. The sequence after that lives in [the plan](PLAN.md). v0.2.0 waits for an explicit release request.
+Slice 6's expert half has landed, permanent peering has landed, and installing Kubo has landed. The sequence after that lives in [the plan](PLAN.md). v0.2.0 waits for an explicit release request.
 
 ## Not in the early slices
 

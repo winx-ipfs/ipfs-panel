@@ -18,7 +18,7 @@ git log --oneline -1 origin/main origin/develop && git tag -l
 | `develop` | 集成分支。功能先落这里 |
 | 最新 tag | v0.1.1 |
 | 打开的 PR | 两个 Dependabot 更新：#37（manager / golang.org/x/crypto）与 #46（web 组），都指向 `develop` |
-| 路线图 | 切片 1–4 已在 v0.1.0 发布；场景、探索、对等节点、永久对等、winx 视觉语言、专家配置编辑器和日志在 `develop`；发行版 Kubo 测试基线在 `develop`；v0.2.0 等用户明确要求再发；那之后的下一刀功能是安装 Kubo |
+| 路线图 | 切片 1–4 已在 v0.1.0 发布；场景、探索、对等节点、永久对等、安装与升级 Kubo、winx 视觉语言、专家配置编辑器和日志在 `develop`；发行版 Kubo 测试基线在 `develop`；v0.2.0 等用户明确要求再发；那之后的下一刀功能是管理器的远控 |
 
 v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与会话登录、节点启停与一句话状态、可变文件系统上的文件页、固定（pins）页。linux、macOS、Windows 三平台二进制加 web 包，作为 GitHub Release 发布并附校验和。
 
@@ -35,6 +35,7 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 - **探索看的是一个内容标识的里面。** manager 在回环上调用 `dag/resolve` 和 `dag/get`。浏览器不去请求网关，也拿不到 RPC 地址。规格是 `docs/design/explore.zh-CN.md`。
 - **对等节点是一张表、一次拨号，和一份已保存的列表。** manager 在回环上调用 `swarm/peers` 和 `swarm/connect`。已经连上的节点地址不进那张表。没有地图。一次性拨号不写 `Peering.Peers`。规格是 `docs/design/peers.zh-CN.md`。
 - **永久对等让选中的节点保持连接。** 一行上的保持连接，或粘贴一个地址。manager 调用 `swarm peering`，所以不需要为了开始重连而重启，同时把 `Peering.Peers` 写进配置，备份和原始编辑器是同一套。已保存的列表显示存下的地址，以及正在执行的列表是否一致。节点停着返回 `node_not_running`。规格是 `docs/design/peering.zh-CN.md`。
+- **面板可以安装和升级 Kubo。** 没有 `ipfs` 的机器会得到钉住的发行版，任何东西运行之前都用上游公布的 SHA-512 核对。支持范围 `>=0.43.1 <0.45.0` 里更后的发行版可以升级，用 Kubo 自己的 `ipfs repo migrate`，仓库版本没变时放回上一个二进制。显式指定的二进制，或 `PATH` 上的 `ipfs`，不会被替换。规格是 `docs/design/kubo-install.zh-CN.md`。
 - **面板用 winx.run 的视觉语言，密度是运维面板。** `docs/DESIGN-SYSTEM.zh-CN.md`。纸灰底、白卡片、黑色主按钮（深色主题里是近白，禁用时也保持填充色）。萤光绿（`#20FFA9`）只给标志、选中条和小标签。浅色侧栏是白的；深色里选中行是中性的一层抬起加上那条，不是一块绿。主列铺满窗口：工具条和列表或属性面紧贴标题，一直铺到底。运维页是 flex 列，收起的说明不能把工作面顶下去。节点面用现有接口补上当前的固定和几条已连接节点，卡片到最后一行结束。表格单元格，包括第一列，用和工具条一样的 12px 缩进。对等节点的连接是列表上的工具条，和地址输入同一条基线，查找在另一侧。shadcn-vue（Nova，再套主题）加 Motion。不是炭灰的 1Panel 仿品，不是 IPFS webui 的青，也不是薄荷绿的铺底。不要改回去。
 - **原始配置编辑器是专家模式。** 它是设置里的高级页，不是导航项。manager 用 Kubo 的 `config/show` 读，用 `config/replace` 写。`Identity.PrivKey` 不到浏览器。`Addresses.API` 不能改。备份可以恢复。重启是提供的。场景仍然可以应用和撤销。规格是 `docs/design/config-editor.zh-CN.md`。
 - **日志是一页、两个来源。** manager 自己的运行日志和审计日志，以及这个 manager 拉起的守护进程的 stdout 和 stderr。浏览器通过 manager 读它们，用现有的会话。不调用 `log/tail`。专家可以通过 manager 设置一个 Kubo 子系统的级别。清空视图不删文件。秘密在写入之前被涂掉。规格是 `docs/design/logs.zh-CN.md`。
@@ -56,9 +57,9 @@ v0.1.0 已交付：英文与中文的面板外壳、首次运行建管理员与�
 
 ## 具体的下一步
 
-永久对等已经在这棵树上。如果你只有一个会话且没有别的指示，不要发版，也不要开始 Kubo 安装器。v0.2.0 是发版，等用户明确要求。安装 Kubo 是那之后的下一刀功能，单独的 pull request。除非用户明确要求，不要合进 `main`，也不要打 tag。
+安装与升级 Kubo 已经在这棵树上。如果你只有一个会话且没有别的指示，不要发版，也不要开始管理器的远控。v0.2.0 是发版，等用户明确要求。远控是那之后的下一刀功能，单独的 pull request。除非用户明确要求，不要合进 `main`，也不要打 tag。
 
-读 `AGENTS.zh-CN.md`，再读 `docs/design/peering.zh-CN.md` 和 `docs/design/harness.zh-CN.md`，不要把永久对等、测试基线、对等节点、探索、四个场景，或 `docs/DESIGN-SYSTEM.zh-CN.md` 里的 winx 视觉语言重开一遍。不要开始插件工作。后面某一刀需要的小重构，可以跟那一刀一起落地，只要 pull request 写明原因。
+读 `AGENTS.zh-CN.md`，再读 `docs/design/kubo-install.zh-CN.md` 和 `docs/design/harness.zh-CN.md`，不要把安装器、永久对等、测试基线、对等节点、探索、四个场景，或 `docs/DESIGN-SYSTEM.zh-CN.md` 里的 winx 视觉语言重开一遍。不要开始插件工作。后面某一刀需要的小重构，可以跟那一刀一起落地，只要 pull request 写明原因。
 
 ## 这份文件怎么保持真实
 

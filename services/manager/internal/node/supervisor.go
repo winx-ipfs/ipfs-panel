@@ -60,11 +60,16 @@ type Supervisor struct {
 	ready  chan struct{}
 	quit   chan struct{}
 
-	closeOnce sync.Once
-	closed    chan struct{}
-	closeErr  error
-	capture   atomic.Bool
+	closeOnce    sync.Once
+	closed       chan struct{}
+	closeErr     error
+	capture      atomic.Bool
+	startHold    atomic.Bool
+	installStart atomic.Bool
 }
+
+// ErrBusy is returned by Start and Restart while an install job holds the node.
+var ErrBusy = errors.New("kubo_busy")
 
 type loopState struct {
 	state        string
@@ -128,12 +133,34 @@ func (s *Supervisor) DataDir() string     { return s.cfg.DataDir }
 func (s *Supervisor) RepoPath() string    { return s.cfg.RepoPath }
 func (s *Supervisor) ManagerAddr() string { return s.cfg.ManagerAddr }
 
+// ExplicitBin is -kubo-bin / IPFS_PANEL_KUBO_BIN. Empty means the panel may
+// use a binary it installed, or ipfs on PATH.
+func (s *Supervisor) ExplicitBin() string { return s.cfg.KuboBin }
+
+// SetStartHold blocks Start and Restart for the duration of a binary swap.
+func (s *Supervisor) SetStartHold(on bool) { s.startHold.Store(on) }
+
 // PinTimeout is the deadline for one pin/add job.
 func (s *Supervisor) PinTimeout() time.Duration { return s.cfg.PinsTimeout }
 
 // Start begins startup when the state table allows it.
 // The overview is returned once the state has moved, without waiting for the daemon.
 func (s *Supervisor) Start(ctx context.Context) (Overview, error) {
+	if s.startHold.Load() {
+		ov, err := s.Snapshot(ctx)
+		if err != nil {
+			return ov, err
+		}
+		return ov, ErrBusy
+	}
+	return s.call(ctx, cmdStart)
+}
+
+// StartForInstall starts the node even while SetStartHold is on. Only the
+// install job uses it, after the new binary is the one kuboBinary returns.
+func (s *Supervisor) StartForInstall(ctx context.Context) (Overview, error) {
+	s.installStart.Store(true)
+	defer s.installStart.Store(false)
 	return s.call(ctx, cmdStart)
 }
 
@@ -145,6 +172,13 @@ func (s *Supervisor) Stop(ctx context.Context) (Overview, error) {
 // Restart stops and then starts when no transition is underway.
 // From down or a finished failure it only starts.
 func (s *Supervisor) Restart(ctx context.Context) (Overview, error) {
+	if s.startHold.Load() {
+		ov, err := s.Snapshot(ctx)
+		if err != nil {
+			return ov, err
+		}
+		return ov, ErrBusy
+	}
 	return s.call(ctx, cmdRestart)
 }
 
@@ -262,7 +296,7 @@ func (s *Supervisor) handleGet(st *loopState, c command) {
 	if st.probing {
 		return
 	}
-	bin, cerr := resolveBin(s.cfg.KuboBin)
+	bin, cerr := s.kuboBinary()
 	if cerr != nil {
 		if st.child == nil || st.child.exited() {
 			s.markFailed(st, CodeDaemonExited, cerr.detail)
@@ -336,6 +370,10 @@ func (s *Supervisor) beginShutdown(st *loopState, reply chan Overview) bool {
 }
 
 func (s *Supervisor) beginStart(st *loopState) {
+	if s.startHold.Load() && !s.installStart.Load() {
+		st.restartAfter = false
+		return
+	}
 	if st.startCancel != nil {
 		st.startCancel()
 		st.startCancel = nil
@@ -363,7 +401,7 @@ func (s *Supervisor) beginStop(st *loopState, restart bool) {
 	st.probing = false
 	s.flush(st)
 	s.logState(st)
-	bin, _ := resolveBin(s.cfg.KuboBin)
+	bin, _ := s.kuboBinary()
 	go s.runStop(st.gen, st.child, bin)
 }
 
@@ -585,7 +623,7 @@ func (s *Supervisor) boot(st *loopState) {
 		hasPID = false
 	}
 	if hasPID && pidAlive(pid) {
-		bin, cerr := resolveBin(s.cfg.KuboBin)
+		bin, cerr := s.kuboBinary()
 		if cerr == nil && sameDaemon(pid, bin, st.repo) {
 			s.setChild(st, adoptProcess(pid))
 			ctx, cancel := context.WithCancel(context.Background())

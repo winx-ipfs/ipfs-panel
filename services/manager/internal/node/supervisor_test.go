@@ -309,6 +309,33 @@ func TestExplicitBinaryIgnoresPath(t *testing.T) {
 	}
 }
 
+func TestManagedBinUsedWhenPathEmpty(t *testing.T) {
+	bin := fakebin.Path(t)
+	sup, _, logPath := newTestSupervisor(t, func(cfg *Config) {
+		cfg.ManagedBin = func() string { return bin }
+	})
+	t.Setenv("PATH", t.TempDir())
+	mustStart(t, sup)
+	waitState(t, sup, StateUp)
+	if countCmd(readLog(t, logPath), "daemon") != 1 {
+		t.Fatal("managed binary did not run")
+	}
+}
+
+func TestStartHoldBlocksStart(t *testing.T) {
+	sup, _, logPath := newTestSupervisor(t, nil)
+	sup.SetStartHold(true)
+	if _, err := sup.Start(context.Background()); !errors.Is(err, ErrBusy) {
+		t.Fatalf("hold err %v", err)
+	}
+	if countCmd(readLog(t, logPath), "daemon") != 0 {
+		t.Fatal("held start spawned a daemon")
+	}
+	sup.SetStartHold(false)
+	mustStart(t, sup)
+	waitState(t, sup, StateUp)
+}
+
 func TestOverlappingStartsOneChild(t *testing.T) {
 	t.Setenv("FAKE_INIT_SLEEP", "800ms")
 	sup, _, logPath := newTestSupervisor(t, nil)

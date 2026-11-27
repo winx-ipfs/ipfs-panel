@@ -11,9 +11,11 @@ import Skeleton from '@/components/Skeleton.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import Tooltip from '@/components/Tooltip.vue'
 import { formatBytes } from '@/files/model'
+import { jobMessageKey } from '@/kubo/model'
 import { shortenMiddle } from '@/lib/inline'
 import { hintKey, sentenceKey, statusLabelKey, statusTone, visibleActions } from '@/node/present'
 import type { PeerRow } from '@/peers/model'
+import { useKuboStore } from '@/stores/kubo'
 import { useNodeStore } from '@/stores/node'
 import { usePeersStore } from '@/stores/peers'
 import { usePinsStore } from '@/stores/pins'
@@ -21,6 +23,7 @@ import { useToastStore } from '@/stores/toast'
 
 const { t } = useI18n()
 const node = useNodeStore()
+const kubo = useKuboStore()
 const peersStore = usePeersStore()
 const pinsStore = usePinsStore()
 const toast = useToastStore()
@@ -53,10 +56,12 @@ async function loadCompanions() {
 
 onMounted(() => {
   void node.startPolling()
+  void kubo.startPolling()
 })
 
 onUnmounted(() => {
   node.stopPolling()
+  kubo.stopPolling()
   clearCompanions()
 })
 
@@ -68,8 +73,33 @@ const hint = computed(() => {
 })
 const tone = computed(() => statusTone(node.overview, node.unreachable))
 const actions = computed(() => visibleActions(node.overview, node.unreachable))
-const missingKubo = computed(
-  () => !node.unreachable && node.overview?.state === 'failed' && node.overview.error?.code === 'binary_not_found',
+const kuboMissing = computed(() => !node.unreachable && kubo.status?.source === 'missing')
+const kuboRunning = computed(() => kubo.status?.job?.state === 'running')
+const kuboBusy = computed(() => kubo.acting || kuboRunning.value)
+const jobKey = computed(() => jobMessageKey(kubo.status?.job ?? null))
+const jobText = computed(() => {
+  const key = jobKey.value
+  if (!key) return ''
+  return t(key, { version: kubo.status?.job?.version ?? '' })
+})
+const kuboVersionText = computed(() => {
+  const st = kubo.status
+  if (!st || st.source === 'missing') return ''
+  if (st.source === 'path') {
+    return st.version ? t('nodeKuboPath', { version: st.version }) : t('nodeKuboPathPlain')
+  }
+  if (st.source === 'flag') {
+    return st.version ? t('nodeKuboFlag', { version: st.version }) : t('nodeKuboFlagPlain')
+  }
+  if (st.source !== 'managed') return ''
+  const parts = [t('nodeKuboManaged', { version: st.version || st.pinned })]
+  if (st.upgrade && st.latest) parts.push(t('nodeKuboUpgradeReady', { latest: st.latest }))
+  if (st.upstream && st.latest && st.upstream !== st.latest) parts.push(t('nodeKuboBeyond', { version: st.upstream }))
+  if (st.check === 'offline') parts.push(t('nodeKuboCheckOffline'))
+  return parts.join(' ')
+})
+const showDownload = computed(
+  () => kuboRunning.value && kubo.status?.job?.phase === 'downloading' && (kubo.status.job.total ?? 0) > 0,
 )
 const connected = computed(() => node.overview?.state === 'up')
 
@@ -162,11 +192,20 @@ async function copy(kind: string, value: string | null | undefined) {
           <div class="node-lead">
             <StatusPill :tone="tone" :pulse="pulsing">{{ t(statusLabelKey(node.overview, node.unreachable)) }}</StatusPill>
             <p class="node-sentence" role="status"><InlineText :text="sentence" /></p>
-            <p v-if="hint" class="node-hint">{{ hint }}</p>
+            <p v-if="hint && !kuboMissing" class="node-hint">{{ hint }}</p>
           </div>
           <div v-if="actions.length" class="node-actions">
             <Button
-              v-if="actions.includes('start')"
+              v-if="kuboMissing"
+              variant="primary"
+              data-node-action="install"
+              :disabled="kuboBusy"
+              @click="kubo.install()"
+            >
+              {{ t('nodeKuboInstall') }}
+            </Button>
+            <Button
+              v-if="actions.includes('start') && !kuboMissing"
               variant="primary"
               data-node-action="start"
               :disabled="node.acting"
@@ -193,16 +232,16 @@ async function copy(kind: string, value: string | null | undefined) {
               {{ t('nodeRestart') }}
             </Button>
             <Button
-              v-if="actions.includes('retry')"
+              v-if="actions.includes('retry') && !kuboMissing"
               variant="primary"
               data-node-action="retry"
               :disabled="node.acting"
-              @click="missingKubo ? node.start() : node.retry()"
+              @click="node.retry()"
             >
               {{ t('nodeRetry') }}
             </Button>
             <a
-              v-if="missingKubo"
+              v-if="kuboMissing"
               class="ui-btn quiet is-quiet"
               href="https://docs.ipfs.tech/install/command-line/"
               target="_blank"
@@ -213,8 +252,31 @@ async function copy(kind: string, value: string | null | undefined) {
             </a>
           </div>
         </div>
+        <div v-if="jobText || kuboMissing" class="kubo-job" data-kubo-job>
+          <p v-if="kuboMissing" class="node-hint">{{ t('nodeKuboMissing', { version: kubo.status?.pinned }) }}</p>
+          <progress v-if="showDownload" :value="kubo.status?.job?.received" :max="kubo.status?.job?.total" />
+          <p v-if="jobText" role="status">{{ jobText }}</p>
+        </div>
         <div class="work-scroll node-facts">
           <dl class="prop-list">
+            <div v-if="kuboVersionText" data-kubo-version>
+              <dt>{{ t('nodeKubo') }}</dt>
+              <dd>
+                <div class="kubo-row">
+                  <span>{{ kuboVersionText }}</span>
+                  <Button
+                    v-if="kubo.status?.upgrade"
+                    variant="primary"
+                    size="sm"
+                    data-node-action="upgrade"
+                    :disabled="kuboBusy"
+                    @click="kubo.upgrade()"
+                  >
+                    {{ t('nodeKuboUpgrade') }}
+                  </Button>
+                </div>
+              </dd>
+            </div>
             <div v-if="node.overview?.repoPath">
               <dt>{{ t('nodeFolder') }}</dt>
               <dd>

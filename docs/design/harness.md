@@ -48,7 +48,7 @@ The user's instruction for this design was that CI time is acceptable and the te
       +-- IPFS_PANEL_INTEGRATION=1
       +-- IPFS_PANEL_KUBO_VERSION from the script (0.43.1)
       +-- PATH includes the unpacked binary
-      +-- go test -count=1 -run TestRealKubo ./services/manager/internal/node/
+      +-- go test -count=1 -run TestRealKubo ./services/manager/internal/node/ ./services/manager/internal/kuboinstall/
       +-- a skip is a failure
   ci-ok needs integration
 ```
@@ -109,6 +109,7 @@ Checked by running the released `v0.43.1` binary, not by reading the reference c
 - `POST /api/v0/log/level?arg=core&arg=error` returns HTTP 200 and a `Message` containing `Changed log level of 'core' to 'error'`.
 - After the supervisor has reached `down`, that same `log/level` call returns `node_not_running`.
 - `TestRealKuboPeering` adds one peer through the manager's peering service. `swarm peering ls` contains that peer while the daemon is still up, so no restart was required. `config/show` contains the peer id and does not contain `Identity.PrivKey`. The key on disk is unchanged. After the supervisor restarts the daemon, the list still contains the peer. Remove drops it from the running service and from the saved list. After the supervisor has reached `down`, the list returns `node_not_running`.
+- `TestRealKuboInstall` downloads the pinned linux archive through the install service, checks it against the compiled SHA-512, runs `ipfs version`, and runs `ipfs init` in a temporary repo. It does not start a second daemon. The other tests already do that with the same pin. A skip is a failure, same as the tests above.
 
 `IPFS_PANEL_KUBO_VERSION=0.43.1` locks those results. Any other non-empty value fails the test until the pin pull request writes the new expectations. An empty value, which is a local run, still requires the calls to succeed and the two name outcomes to be coherent (`kubo` with the name, or `panel` after the fallback).
 

@@ -31,7 +31,7 @@ func (s *Supervisor) watchExit(gen uint64, child *running) {
 }
 
 func (s *Supervisor) runStart(ctx context.Context, gen uint64) {
-	bin, cerr := resolveBin(s.cfg.KuboBin)
+	bin, cerr := s.kuboBinary()
 	if cerr != nil {
 		s.fail(ctx, gen, cerr)
 		return

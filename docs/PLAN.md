@@ -39,6 +39,7 @@ Status as of 2026-11-25. "Shipped" means it is on `main` / v0.1.1. "On `develop`
 | Explore one block of content | On `develop` | Paste a content ID or an `/ipfs/` path; see the type and the links. |
 | Peers list and a one-time dial | On `develop` | No map. The one-time dial does not write `Peering.Peers`. |
 | Permanent peering | On `develop` | Keep connected on the peers page. Live `swarm peering` plus `Peering.Peers`, with a backup. |
+| Install and upgrade Kubo | On `develop` | Download and verify a pinned release. Upgrade inside `>=0.43.1 <0.45.0`. A binary the operator supplied is not replaced. |
 | Released-Kubo integration tests | On `develop` | CI pins Kubo v0.43.1. Pull requests into `develop` run them. |
 | winx visual language | On `develop` | shadcn-vue + Tailwind + Motion. Do not restyle; fix real defects only. |
 | Expert raw config editor | On `develop` | Settings → Advanced. Strip `PrivKey`. Lock `Addresses.API`. Diff, then save. A backup can be restored. |
@@ -50,32 +51,21 @@ The table order is the delivery order. Do not start the next slice before the pr
 
 | Order | Feature | Why now | Done when |
 | --- | --- | --- | --- |
-| 1 | Release v0.2.0 | `develop` already has a large set of capabilities that `main` (v0.1.1) does not ship, including permanent peering. | A pull request from `develop` into `main`, a tag, and linux / macOS / Windows binaries with checksums. |
-| 2 | Install and upgrade Kubo | Today a missing `ipfs` binary only links to the official install docs. That is not one-stop ops. | The panel can download and verify a pinned release, then install or upgrade it, on all three platforms, without committing Kubo into this repository. |
-| 3 | Remote control of the manager | The manager listens on loopback by default, so a browser cannot manage a node installed on a server. | The manager can bind to a LAN or public address, still using the existing login and CSRF. Kubo RPC stays off the public interface. |
-| 4 | Desktop app | The same UI, packaged as an installable local app. Choose the shell in that slice; do not pick it early. | A person can open the local panel like an ordinary app. It still talks to the local manager. |
-| 5 | IPNS keys | Expert webui parity, after install and remote control. | Generate, list, publish, and resolve names. Private keys never reach the browser. |
-| 6 | Remote pinning | Hand content to a remote pinning service. Not the beginner path. | Configure a service and a secret, submit a pin, and see its status. Secrets do not land in frontend code. |
-| 7 | Diagnostics | Retrieval check and DHT provide, so an operator can tell whether content can be found. | A beginner can understand one check. An expert can see enough detail. |
-| 8 | A second node | After one node can be installed and reached remotely. This is not a cluster console. | The same panel can manage two Kubo nodes. Existing APIs are not redesigned from scratch. |
+| 1 | Release v0.2.0 | `develop` already has a large set of capabilities that `main` (v0.1.1) does not ship, including Kubo install and permanent peering. | A pull request from `develop` into `main`, a tag, and linux / macOS / Windows binaries with checksums. |
+| 2 | Remote control of the manager | The manager listens on loopback by default, so a browser cannot manage a node installed on a server. | The manager can bind to a LAN or public address, still using the existing login and CSRF. Kubo RPC stays off the public interface. |
+| 3 | Desktop app | The same UI, packaged as an installable local app. Choose the shell in that slice; do not pick it early. | A person can open the local panel like an ordinary app. It still talks to the local manager. |
+| 4 | IPNS keys | Expert webui parity, after install and remote control. | Generate, list, publish, and resolve names. Private keys never reach the browser. |
+| 5 | Remote pinning | Hand content to a remote pinning service. Not the beginner path. | Configure a service and a secret, submit a pin, and see its status. Secrets do not land in frontend code. |
+| 6 | Diagnostics | Retrieval check and DHT provide, so an operator can tell whether content can be found. | A beginner can understand one check. An expert can see enough detail. |
+| 7 | A second node | After one node can be installed and reached remotely. This is not a cluster console. | The same panel can manage two Kubo nodes. Existing APIs are not redesigned from scratch. |
 
-Permanent peering is done. The spec is [Permanent peering](design/peering.md).
+Permanent peering is done. The spec is [Permanent peering](design/peering.md). Installing and upgrading Kubo is done. The spec is [Install and upgrade Kubo](design/kubo-install.md).
 
 ### 1. Release v0.2.0
 
-This is a release, not a feature slice. Do not start it unless the user has explicitly said to release. The release includes what is already on `develop` (scenes, explore, peers, permanent peering, the winx visual language, the config editor, logs). Follow the existing release recipe: a pull request from `develop` into `main`, a tag, binaries, and checksums. The release pull request does not carry a new feature.
+This is a release, not a feature slice. Do not start it unless the user has explicitly said to release. The release includes what is already on `develop` (scenes, explore, peers, permanent peering, Kubo install and upgrade, the winx visual language, the config editor, logs). Follow the existing release recipe: a pull request from `develop` into `main`, a tag, binaries, and checksums. The release pull request does not carry a new feature.
 
-### 2. Install and upgrade Kubo
-
-Today a missing binary fails, with a link to the official install docs. This slice lets a beginner leave the panel with a working Kubo.
-
-- Write the design first: which release is pinned, checksums, install location, upgrade and rollback, and how failure is explained.
-- The manager downloads and verifies. Do not commit Kubo source or official binaries into this repository.
-- Keep the process boundary: the manager starts a child process. No plugin.
-- After install, the API and gateway stay on loopback, unless the user has applied the already-allowed read-only gateway scene.
-- linux, macOS, and Windows must all work.
-
-### 3. Remote control of the manager
+### 2. Remote control of the manager
 
 What is exposed remotely is the manager, not Kubo's port 5001. The existing login has to be solid enough before the listen address moves off loopback.
 
@@ -83,7 +73,7 @@ What is exposed remotely is the manager, not Kubo's port 5001. The existing logi
 - Kubo RPC stays loopback-only. Enforce that in the program, not only in the docs.
 - The same web UI. Do not invent a second remote skin.
 
-### 4 through 8. Desktop, IPNS, remote pinning, diagnostics, and a second node
+### 3 through 7. Desktop, IPNS, remote pinning, diagnostics, and a second node
 
 Each of these is its own design and its own pull request. Compare desktop shells (for example Tauri and Electron) when that slice starts, not before. IPNS and remote-pinning keys never reach the browser. Diagnostics are operator checks, not an analytics product. A second node extends "this node"; do not throw away the existing API to build a cluster console.
 

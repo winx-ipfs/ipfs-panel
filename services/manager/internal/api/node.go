@@ -63,6 +63,10 @@ func (n *nodeAPI) post(fn func(r *http.Request) (node.Overview, error)) http.Han
 			return
 		}
 		ov, err := fn(r)
+		if errors.Is(err, node.ErrBusy) {
+			writeJSON(w, http.StatusConflict, map[string]string{"error": "kubo_busy"})
+			return
+		}
 		if err != nil {
 			writeProblem(w, &statusError{code: http.StatusInternalServerError, msg: "unavailable"})
 			return
