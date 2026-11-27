@@ -1,7 +1,6 @@
 package kuboinstall
 
 import (
-	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -29,17 +28,18 @@ func TestRealKuboInstall(t *testing.T) {
 		StartWait: time.Second,
 		StopWait:  time.Second,
 	})
-	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
-	defer cancel()
 	job, err := s.Install(Actor{Username: "ci", IP: "127.0.0.1"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	deadline := time.Now().Add(4 * time.Minute)
+	// Each origin is capped, so a slow dist falls through to GitHub well
+	// inside this wait. The workflow's go test timeout is 15 minutes.
+	deadline := time.Now().Add(6 * time.Minute)
 	var done Job
 	for {
-		if time.Now().After(deadline) || ctx.Err() != nil {
-			t.Fatal("install did not finish")
+		if time.Now().After(deadline) {
+			snap, snapErr := s.Job(job.ID)
+			t.Fatalf("install did not finish: %+v (%v)", snap, snapErr)
 		}
 		done, err = s.Job(job.ID)
 		if err != nil {

@@ -51,12 +51,12 @@ func extractTar(archivePath, dest, exe string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	gz, err := gzip.NewReader(f)
 	if err != nil {
 		return err
 	}
-	defer gz.Close()
+	defer func() { _ = gz.Close() }()
 	tr := tar.NewReader(gz)
 	found := false
 	for {
@@ -77,7 +77,7 @@ func extractTar(archivePath, dest, exe string) error {
 		if hdr.Typeflag == tar.TypeSymlink || hdr.Typeflag == tar.TypeLink {
 			return fmt.Errorf("archive binary is a link")
 		}
-		if hdr.Typeflag != tar.TypeReg && hdr.Typeflag != tar.TypeRegA && hdr.Typeflag != 0 {
+		if hdr.Typeflag != tar.TypeReg && hdr.Typeflag != 0 {
 			return fmt.Errorf("archive binary is not a file")
 		}
 		if hdr.Size < 0 || hdr.Size > maxBinary {
@@ -99,7 +99,7 @@ func extractZip(archivePath, dest, exe string) error {
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 	found := false
 	for _, file := range r.File {
 		ok, err := wanted(file.Name, exe)

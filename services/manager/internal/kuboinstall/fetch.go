@@ -92,7 +92,11 @@ func (s *Service) download(ctx context.Context, version string, progress func(go
 	sawNet := false
 	sawVerify := false
 	for _, rawURL := range urls {
-		path, ferr := s.saveArchive(ctx, rawURL, expect, progress)
+		// A stuck origin must not hold the attempt. The next origin still
+		// has to satisfy the same hash.
+		attempt, cancel := context.WithTimeout(ctx, 45*time.Second)
+		path, ferr := s.saveArchive(attempt, rawURL, expect, progress)
+		cancel()
 		if ferr == nil {
 			return path, expect, nil
 		}
@@ -152,7 +156,7 @@ func (s *Service) saveArchive(ctx context.Context, rawURL, expect string, progre
 		}
 		return "", errCode(CodeVerify)
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != http.StatusOK {
 		if res.StatusCode >= 500 {
 			return "", errCode(CodeOffline)
@@ -235,7 +239,7 @@ func (s *Service) getLimited(ctx context.Context, rawURL string, limit int64) ([
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != http.StatusOK {
 		return nil, errors.New("status")
 	}

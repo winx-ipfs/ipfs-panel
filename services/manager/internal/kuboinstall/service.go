@@ -427,7 +427,7 @@ func (s *Service) run(id, action, version string, actor Actor) {
 		s.fail(id, actor, event, version, "", err)
 		return
 	}
-	defer os.Remove(archive)
+	defer func() { _ = os.Remove(archive) }()
 
 	s.setPhase(id, "verifying")
 	dest := versionDir(s.dataDir, version)

@@ -47,13 +47,13 @@ For `0.43.1`:
 1. Fetch the `.sha512` sidecar from each origin that answers. A sidecar is the hash as the first field, then the file name, which is what `sha512sum` writes.
 2. A sidecar that is not the compiled hash is `verify_failed`, even if the other origin matches.
 3. At least one sidecar must be present and must equal the compiled hash. If every origin fails to connect, the result is `offline`.
-4. Download the archive, trying dist.ipfs.tech and then GitHub. The file's SHA-512 must equal the compiled hash. A mismatch deletes the partial file and is `verify_failed`.
+4. Download the archive, trying dist.ipfs.tech and then GitHub. Each attempt has 45 seconds. An origin that does not finish is treated as not answering, and the other origin is tried. The file's SHA-512 must equal the compiled hash. A mismatch deletes the partial file and is `verify_failed`.
 5. Only then extract and run `ipfs version --number` (or `ipfs version` if that flag is rejected). The printed version must be `0.43.1`. Any other output deletes the extracted binary and is `verify_failed`.
 
 For a later version inside the supported range there is no compiled hash and no signature, so one origin is not enough:
 
 1. Both sidecars must be fetched and their hashes must be equal. A missing sidecar, a mismatch, or a hash that is not 128 hex characters is `verify_failed`. If both connections fail, the result is `offline`.
-2. The archive must hash to that shared value.
+2. The archive is downloaded the same way, one origin at a time, 45 seconds each. It must hash to that shared value.
 3. The extracted binary's `version --number` must equal the version that was requested.
 
 A download larger than 256 MiB is rejected before the rest is read. The extracted binary has the same cap.
