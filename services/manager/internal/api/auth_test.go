@@ -236,7 +236,7 @@ func TestSecureCookieFollowsProxyOnlyWhenTrusted(t *testing.T) {
 		t.Fatalf("setup %d %s", rr.Code, rr.Body.Bytes())
 	}
 	plain := cookieNamed(rr.Result().Cookies(), auth.SessionCookieName)
-	if plain == nil || plain.Secure {
+	if plain == nil || plain.Secure || !plain.HttpOnly || plain.SameSite != http.SameSiteStrictMode || plain.Path != "/" {
 		t.Fatalf("plain cookie %#v", plain)
 	}
 
@@ -257,20 +257,77 @@ func TestSecureCookieFollowsProxyOnlyWhenTrusted(t *testing.T) {
 		t.Fatalf("untrusted proxy cookie %#v", cookie)
 	}
 
-	trusted, trustedMux, _ := authMux(t, true)
-	_ = trusted
-	tBody, tCookies := statusBody(t, trustedMux, "127.0.0.1:9")
-	created := postAuth(trustedMux, "/api/auth/setup", "127.0.0.1:9", "panel.local", []*http.Cookie{cookieNamed(tCookies, auth.CSRFCookieName)}, tBody["csrfToken"].(string),
-		`{"username":"ada","password":"correct horse battery"}`, false)
-	if created.Code != http.StatusCreated {
-		t.Fatalf("trusted setup %d %s", created.Code, created.Body.Bytes())
+	trustedMuxBuf := &bytes.Buffer{}
+	trustedSvc, err := auth.New(t.TempDir(), "", auth.Options{
+		Params:     auth.TestingParams(),
+		TrustProxy: true,
+		Logger:     slog.New(slog.NewTextHandler(trustedMuxBuf, nil)),
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
+	_ = trustedSvc
+	sup, err := node.New(node.Config{
+		ManagerAddr: "127.0.0.1:8080", RepoPath: t.TempDir(), KuboBin: t.TempDir() + "/missing-ipfs",
+		InitTimeout: time.Second, ConfigTimeout: time.Second, IDTimeout: time.Second,
+		ReadyBudget: time.Second, ShutdownTimeout: time.Second, StopKillAfter: time.Second, PollInterval: 10 * time.Millisecond,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		_ = sup.Shutdown(ctx)
+	})
+	trustedMux := NewMux(sup, trustedSvc)
+	// A loopback peer with the proxy flag and no forwarded client is not the operator.
+	tBody, tCookies := statusBody(t, trustedMux, "127.0.0.1:9")
+	if tBody["setupTokenRequired"] != true {
+		t.Fatalf("proxy without forwarded client: %#v", tBody)
+	}
+	missingFwd := postAuth(trustedMux, "/api/auth/setup", "127.0.0.1:9", "panel.local", []*http.Cookie{cookieNamed(tCookies, auth.CSRFCookieName)}, tBody["csrfToken"].(string),
+		`{"username":"ada","password":"correct horse battery"}`, false)
+	if missingFwd.Code != http.StatusForbidden {
+		t.Fatalf("setup via proxy without forwarded address %d %s", missingFwd.Code, missingFwd.Body.Bytes())
+	}
+	local := httptest.NewRequest(http.MethodPost, "/api/auth/setup", strings.NewReader(`{"username":"ada","password":"correct horse battery"}`))
+	local.RemoteAddr = "127.0.0.1:9"
+	local.Host = "panel.local"
+	local.Header.Set("Content-Type", "application/json")
+	local.Header.Set("X-Forwarded-For", "127.0.0.1")
+	local.Header.Set(auth.CSRFHeader, tBody["csrfToken"].(string))
+	local.AddCookie(cookieNamed(tCookies, auth.CSRFCookieName))
+	created := httptest.NewRecorder()
+	trustedMux.ServeHTTP(created, local)
+	if created.Code != http.StatusCreated {
+		t.Fatalf("local through proxy %d %s", created.Code, created.Body.Bytes())
+	}
+	// A peer that is not a trusted proxy cannot turn on Secure by sending the header.
 	sBody, sCookies := statusBody(t, trustedMux, "10.1.0.5:9")
+	outsider := httptest.NewRequest(http.MethodPost, "/api/auth/login", strings.NewReader(`{"username":"ada","password":"correct horse battery"}`))
+	outsider.RemoteAddr = "10.1.0.5:9"
+	outsider.Host = "panel.example"
+	outsider.Header.Set("Content-Type", "application/json")
+	outsider.Header.Set("X-Forwarded-Proto", "https")
+	outsider.Header.Set("X-Forwarded-For", "198.51.100.8")
+	outsider.Header.Set(auth.CSRFHeader, sBody["csrfToken"].(string))
+	outsider.AddCookie(cookieNamed(sCookies, auth.CSRFCookieName))
+	outsiderRR := httptest.NewRecorder()
+	trustedMux.ServeHTTP(outsiderRR, outsider)
+	if outsiderRR.Code != http.StatusOK {
+		t.Fatalf("outsider login %d %s", outsiderRR.Code, outsiderRR.Body.Bytes())
+	}
+	if cookie := cookieNamed(outsiderRR.Result().Cookies(), auth.SessionCookieName); cookie == nil || cookie.Secure || cookie.Path != "/" {
+		t.Fatalf("untrusted peer cookie %#v", cookie)
+	}
+	sBody, sCookies = statusBody(t, trustedMux, "127.0.0.1:9")
 	proxied := httptest.NewRequest(http.MethodPost, "/api/auth/login", strings.NewReader(`{"username":"ada","password":"correct horse battery"}`))
-	proxied.RemoteAddr = "10.1.0.5:9"
+	proxied.RemoteAddr = "127.0.0.1:9"
 	proxied.Host = "panel.example"
 	proxied.Header.Set("Content-Type", "application/json")
 	proxied.Header.Set("X-Forwarded-Proto", "https")
+	proxied.Header.Set("X-Forwarded-For", "198.51.100.8")
 	proxied.Header.Set(auth.CSRFHeader, sBody["csrfToken"].(string))
 	proxied.AddCookie(cookieNamed(sCookies, auth.CSRFCookieName))
 	proxiedRR := httptest.NewRecorder()
@@ -278,8 +335,11 @@ func TestSecureCookieFollowsProxyOnlyWhenTrusted(t *testing.T) {
 	if proxiedRR.Code != http.StatusOK {
 		t.Fatalf("proxied login %d %s", proxiedRR.Code, proxiedRR.Body.Bytes())
 	}
-	if cookie := cookieNamed(proxiedRR.Result().Cookies(), auth.SessionCookieName); cookie == nil || !cookie.Secure {
+	if cookie := cookieNamed(proxiedRR.Result().Cookies(), auth.SessionCookieName); cookie == nil || !cookie.Secure || !cookie.HttpOnly || cookie.SameSite != http.SameSiteStrictMode || cookie.Path != "/" {
 		t.Fatalf("trusted proxy cookie %#v", cookie)
+	}
+	if !strings.Contains(trustedMuxBuf.String(), "ip=198.51.100.8") || !strings.Contains(trustedMuxBuf.String(), "remote=true") {
+		t.Fatalf("audit ip\n%s", trustedMuxBuf.String())
 	}
 	_ = token
 	_ = io.EOF

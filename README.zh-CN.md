@@ -10,7 +10,7 @@ IPFS 值得用。Kubo 默认的用法不太值得折腾。你拿到的是命令�
 
 **winx.run** 是门户。**这个仓库才是产品。**
 
-浏览器不和 Kubo RPC 说话（一般是 `127.0.0.1:5001`）。那个端口留在机器上。对外的是我们自己的 manager。它会先确认你是谁，再去启动或停止 Kubo。默认只听本机回环地址。在读过[认证](docs/design/auth.zh-CN.md)之前，别把它暴露出去。
+浏览器不和 Kubo RPC 说话（一般是 `127.0.0.1:5001`）。那个端口留在机器上。对外的是我们自己的 manager。它会先确认你是谁，再去启动或停止 Kubo。默认只听本机回环地址。从另一台机器打开它，见[远控](docs/design/remote.zh-CN.md)：用 TLS，或者在你信任的网络上用 `-insecure`。在读过那一篇和[认证](docs/design/auth.zh-CN.md)之前，别把它暴露出去。
 
 ## 目录
 
@@ -40,7 +40,17 @@ go run ./cmd/manager
 curl -s http://127.0.0.1:8080/health
 ```
 
-你应该看到 `{"status":"ok","service":"manager"}`。这个检查只说明 manager 这个进程在，不说明 Kubo 在不在。没设 `MANAGER_ADDR` 时，manager 听在 `127.0.0.1:8080`。可选参数：`-addr`、`-repo`、`-data`、`-kubo-bin`、`-trust-proxy`。传了参数就覆盖对应的环境变量。
+你应该看到 `{"status":"ok","service":"manager"}`。这个检查只说明 manager 这个进程在，不说明 Kubo 在不在。没设 `MANAGER_ADDR` 时，manager 听在 `127.0.0.1:8080`。可选参数：`-addr`、`-repo`、`-data`、`-kubo-bin`、`-trust-proxy`、`-tls`、`-tls-cert`、`-tls-key`、`-tls-hosts`、`-hosts`、`-insecure`、`-trusted-proxies`、`-web`。传了参数就覆盖对应的环境变量。
+
+要从另一台机器打开面板，先构建界面，再用 TLS 监听。Kubo 的 API 留在这台电脑上。
+
+```bash
+cd apps/web && npm run build
+cd ../services/manager && go run ./cmd/manager \
+  -addr 0.0.0.0:8443 -tls auto -web ../../apps/web/dist
+```
+
+进程会打印 `ipfs-panel tls fingerprint:`。登录之前在浏览器里对一下。不是回环的监听地址，除非你传了 `-tls auto`、一对证书和密钥，或者 `-insecure`，否则不会启动。`-insecure` 让密码以明文传输。只在你信任的网络上用它。也可以让这台电脑上的反向代理终结 TLS：管理器留在 `127.0.0.1:8080`，加上 `-trust-proxy` 和 `-hosts name.example`，并让代理送上 `X-Forwarded-For` 和 `X-Forwarded-Proto`。规则在[远控](docs/design/remote.zh-CN.md)。
 
 第一次打开面板时，它会让你创建管理员账号。密码用 argon2id 哈希，存在 `<data>/auth.json`（权限 `0600`），和 Kubo 仓库并列，不在仓库里面。默认数据目录是 `$XDG_DATA_HOME/ipfs-panel`，没设 `XDG_DATA_HOME` 时是 `~/.local/share/ipfs-panel`。之后面板会要求登录。没有会话的 `/api` 请求是 `401`。`GET /health` 仍然开放。
 
@@ -108,6 +118,7 @@ go build -o /dev/null ./cmd/manager
 - [计划](docs/PLAN.zh-CN.md)
 - [设计系统](docs/DESIGN-SYSTEM.zh-CN.md)
 - [认证](docs/design/auth.zh-CN.md)
+- [远控](docs/design/remote.zh-CN.md)
 - [文件](docs/design/files.zh-CN.md)
 - [固定](docs/design/pins.zh-CN.md)
 - [探索](docs/design/explore.zh-CN.md)

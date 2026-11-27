@@ -10,7 +10,7 @@
 
 Kubo（Go 版 IPFS 节点）的面板。`apps/web` 是界面（Vue 3、Vite、TypeScript）。`services/manager` 是 API 网关（Go，标准库）。浏览器从不直接跟 Kubo RPC 说话；manager 去说，走 loopback，而且先做认证。
 
-`docs/VISION.zh-CN.md` 说明这是什么、以及拒绝变成什么。`docs/ROADMAP.zh-CN.md` 给已经落地的切片编号。约定的顺序在 `docs/PLAN.md`（中文配对是 `docs/PLAN.zh-CN.md`）。安装和升级 Kubo 已经在。v0.2.0 等用户明确要求再发。那之后的下一刀功能是管理器的远控。
+`docs/VISION.zh-CN.md` 说明这是什么、以及拒绝变成什么。`docs/ROADMAP.zh-CN.md` 给已经落地的切片编号。约定的顺序在 `docs/PLAN.md`（中文配对是 `docs/PLAN.zh-CN.md`）。管理器的远控已经在。v0.2.0 等用户明确要求再发。那之后的下一刀功能是桌面端。
 
 ## 决定争议的三个文件
 

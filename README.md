@@ -10,7 +10,7 @@ This repo is a panel for Kubo. Open it on the machine that runs the node, or ope
 
 **winx.run** is the portal. **This repository is the product.**
 
-The browser never talks to Kubo RPC (usually `127.0.0.1:5001`). That port stays on the machine. Our own manager is the API. It checks who you are before it starts or stops Kubo. It binds to loopback unless you override it. Do not publish it until you have read [Auth](docs/design/auth.md).
+The browser never talks to Kubo RPC (usually `127.0.0.1:5001`). That port stays on the machine. Our own manager is the API. It checks who you are before it starts or stops Kubo. It binds to loopback unless you override it. Opening it from another machine is [Remote control](docs/design/remote.md): TLS, or `-insecure` on a network you trust. Do not publish it until you have read that and [Auth](docs/design/auth.md).
 
 ## Layout
 
@@ -40,7 +40,17 @@ go run ./cmd/manager
 curl -s http://127.0.0.1:8080/health
 ```
 
-You should see `{"status":"ok","service":"manager"}`. That check is the manager process, not Kubo. With `MANAGER_ADDR` unset, the manager listens on `127.0.0.1:8080`. Optional flags: `-addr`, `-repo`, `-data`, `-kubo-bin`, and `-trust-proxy`. Each one overrides the matching environment variable when you pass it.
+You should see `{"status":"ok","service":"manager"}`. That check is the manager process, not Kubo. With `MANAGER_ADDR` unset, the manager listens on `127.0.0.1:8080`. Optional flags: `-addr`, `-repo`, `-data`, `-kubo-bin`, `-trust-proxy`, `-tls`, `-tls-cert`, `-tls-key`, `-tls-hosts`, `-hosts`, `-insecure`, `-trusted-proxies`, and `-web`. Each one overrides the matching environment variable when you pass it.
+
+To open the panel from another machine, build the UI and listen with TLS. Kubo's API stays on this computer.
+
+```bash
+cd apps/web && npm run build
+cd ../services/manager && go run ./cmd/manager \
+  -addr 0.0.0.0:8443 -tls auto -web ../../apps/web/dist
+```
+
+The process prints `ipfs-panel tls fingerprint:`. Compare it in the browser before you sign in. A listen address that is not loopback does not start unless you pass `-tls auto`, a certificate and key, or `-insecure`. `-insecure` sends the password in cleartext. Use it only on a network you trust. A reverse proxy on this computer can terminate TLS instead: leave the manager on `127.0.0.1:8080`, pass `-trust-proxy` and `-hosts name.example`, and have the proxy send `X-Forwarded-For` and `X-Forwarded-Proto`. The rules are in [Remote control](docs/design/remote.md).
 
 The first time you open the panel, it asks you to create the admin account. The password is hashed with argon2id and stored in `<data>/auth.json` (mode `0600`), next to the Kubo repo, not inside it. The default data directory is `$XDG_DATA_HOME/ipfs-panel`, or `~/.local/share/ipfs-panel`. After that, the panel asks you to sign in. A request to `/api` without a session is `401`. `GET /health` stays open.
 
@@ -108,6 +118,7 @@ The shell, the tokens, and the rules for new screens are in [Design system](docs
 - [Plan](docs/PLAN.md)
 - [Design system](docs/DESIGN-SYSTEM.md)
 - [Auth](docs/design/auth.md)
+- [Remote control](docs/design/remote.md)
 - [Files](docs/design/files.md)
 - [Pins](docs/design/pins.md)
 - [Explore](docs/design/explore.md)

@@ -40,6 +40,7 @@ Status as of 2026-11-25. "Shipped" means it is on `main` / v0.1.1. "On `develop`
 | Peers list and a one-time dial | On `develop` | No map. The one-time dial does not write `Peering.Peers`. |
 | Permanent peering | On `develop` | Keep connected on the peers page. Live `swarm peering` plus `Peering.Peers`, with a backup. |
 | Install and upgrade Kubo | On `develop` | Download and verify a pinned release. Upgrade inside `>=0.43.1 <0.45.0`. A binary the operator supplied is not replaced. |
+| Remote control of the manager | On `develop` | Loopback by default. A non-loopback listen needs TLS or `-insecure`. Kubo RPC stays loopback. |
 | Released-Kubo integration tests | On `develop` | CI pins Kubo v0.43.1. Pull requests into `develop` run them. |
 | winx visual language | On `develop` | shadcn-vue + Tailwind + Motion. Do not restyle; fix real defects only. |
 | Expert raw config editor | On `develop` | Settings → Advanced. Strip `PrivKey`. Lock `Addresses.API`. Diff, then save. A backup can be restored. |
@@ -52,14 +53,14 @@ The table order is the delivery order. Do not start the next slice before the pr
 | Order | Feature | Why now | Done when |
 | --- | --- | --- | --- |
 | 1 | Release v0.2.0 | `develop` already has a large set of capabilities that `main` (v0.1.1) does not ship, including Kubo install and permanent peering. | A pull request from `develop` into `main`, a tag, and linux / macOS / Windows binaries with checksums. |
-| 2 | Remote control of the manager | The manager listens on loopback by default, so a browser cannot manage a node installed on a server. | The manager can bind to a LAN or public address, still using the existing login and CSRF. Kubo RPC stays off the public interface. |
+| 2 | Remote control of the manager | Done. A browser on another machine can open the manager. | Landed. The spec is [Remote control](design/remote.md). Kubo RPC stays off the public interface. |
 | 3 | Desktop app | The same UI, packaged as an installable local app. Choose the shell in that slice; do not pick it early. | A person can open the local panel like an ordinary app. It still talks to the local manager. |
 | 4 | IPNS keys | Expert webui parity, after install and remote control. | Generate, list, publish, and resolve names. Private keys never reach the browser. |
 | 5 | Remote pinning | Hand content to a remote pinning service. Not the beginner path. | Configure a service and a secret, submit a pin, and see its status. Secrets do not land in frontend code. |
 | 6 | Diagnostics | Retrieval check and DHT provide, so an operator can tell whether content can be found. | A beginner can understand one check. An expert can see enough detail. |
 | 7 | A second node | After one node can be installed and reached remotely. This is not a cluster console. | The same panel can manage two Kubo nodes. Existing APIs are not redesigned from scratch. |
 
-Permanent peering is done. The spec is [Permanent peering](design/peering.md). Installing and upgrading Kubo is done. The spec is [Install and upgrade Kubo](design/kubo-install.md).
+Permanent peering is done. The spec is [Permanent peering](design/peering.md). Installing and upgrading Kubo is done. The spec is [Install and upgrade Kubo](design/kubo-install.md). Remote control of the manager is done. The spec is [Remote control](design/remote.md).
 
 ### 1. Release v0.2.0
 
@@ -67,11 +68,7 @@ This is a release, not a feature slice. Do not start it unless the user has expl
 
 ### 2. Remote control of the manager
 
-What is exposed remotely is the manager, not Kubo's port 5001. The existing login has to be solid enough before the listen address moves off loopback.
-
-- Write the design first: bind address, TLS, reverse proxies, firewalls, and a warning on the first bind that is not loopback.
-- Kubo RPC stays loopback-only. Enforce that in the program, not only in the docs.
-- The same web UI. Do not invent a second remote skin.
+This has landed. The spec is [Remote control](design/remote.md). What is exposed remotely is the manager, not Kubo's port 5001. The default listen stays loopback. A non-loopback listen needs TLS, or `-insecure` on a network the operator trusts. A reverse proxy is opt-in. The same web UI is served from the manager when `-web` is set.
 
 ### 3 through 7. Desktop, IPNS, remote pinning, diagnostics, and a second node
 

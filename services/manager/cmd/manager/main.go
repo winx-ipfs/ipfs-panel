@@ -14,6 +14,7 @@ import (
 
 	"path/filepath"
 
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/access"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/api"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/auth"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/kuboinstall"
@@ -57,6 +58,23 @@ func main() {
 	slog.SetDefault(logger)
 	cfg.Logger = logger
 	cfg.KuboLog = logStore.KuboWriter()
+	prepared, err := access.Prepare(access.Options{
+		Addr:           cfg.ManagerAddr,
+		DataDir:        cfg.DataDir,
+		TLS:            cfg.TLS,
+		CertFile:       cfg.TLSCert,
+		KeyFile:        cfg.TLSKey,
+		TLSHosts:       access.SplitList(cfg.TLSHosts),
+		Hosts:          access.SplitList(cfg.Hosts),
+		Insecure:       cfg.Insecure,
+		TrustProxy:     cfg.TrustProxy,
+		TrustedProxies: access.SplitList(cfg.TrustedProxies),
+		WebDir:         cfg.WebDir,
+	})
+	if err != nil {
+		logger.Error("listen", "err", err)
+		os.Exit(2)
+	}
 	// Resolved on every start, so an upgrade is the next daemon without a
 	// manager restart. An explicit -kubo-bin still wins inside the supervisor.
 	cfg.ManagedBin = func() string {
@@ -70,9 +88,11 @@ func main() {
 	}
 
 	accounts, err := auth.New(cfg.DataDir, cfg.RepoPath, auth.Options{
-		Params:     auth.DefaultParams(),
-		TrustProxy: cfg.TrustProxy,
-		Logger:     logger,
+		Params:          auth.DefaultParams(),
+		TrustProxy:      cfg.TrustProxy,
+		Logger:          logger,
+		IdleTimeout:     prepared.Idle,
+		AbsoluteTimeout: prepared.Absolute,
 	})
 	if err != nil {
 		logger.Error("auth", "err", err)
@@ -88,16 +108,49 @@ func main() {
 		logger.Warn("one-time setup token; treat this line as a secret", "setup_token", token)
 	}
 
+	if err := prepared.Listen(); err != nil {
+		logger.Error("listen", "err", err)
+		ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+		_ = sup.Shutdown(ctx)
+		cancel()
+		os.Exit(1)
+	}
+	handler := api.WithWeb(api.NewMuxConfigured(sup, accounts, logStore, prepared.Snapshot), prepared.Web)
+	handler = api.WithTrustedProxies(handler, access.SplitList(cfg.TrustedProxies))
+	handler = prepared.Guard(handler)
 	server := &http.Server{
-		Addr:              cfg.ManagerAddr,
-		Handler:           api.NewMuxWithLogs(sup, accounts, logStore),
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	errCh := make(chan error, 1)
 	go func() {
-		logger.Info("manager listening", "addr", cfg.ManagerAddr, "data", cfg.DataDir)
-		errCh <- server.ListenAndServe()
+		logger.Info("manager listening",
+			"addr", prepared.Bound(),
+			"data", cfg.DataDir,
+			"tls", prepared.TLSMode,
+			"remote", prepared.Remote,
+			"insecure", prepared.Insecure,
+			"trust_proxy", prepared.TrustProxy,
+		)
+		if prepared.Fingerprint != "" {
+			if _, err := fmt.Fprintf(os.Stdout, "ipfs-panel tls fingerprint: %s\n", prepared.Fingerprint); err != nil {
+				logger.Error("fingerprint", "err", err)
+			}
+			logger.Info("tls certificate", "fingerprint", prepared.Fingerprint, "mode", prepared.TLSMode, "renewed", prepared.Renewed)
+		}
+		if prepared.Expired {
+			logger.Warn("tls certificate is expired")
+		}
+		if prepared.Insecure {
+			line := fmt.Sprintf("ipfs-panel warning: listening on %s without TLS. Passwords and sessions travel in cleartext.\n", prepared.Bound())
+			_, _ = fmt.Fprint(os.Stdout, line)
+			logger.Warn("remote listen without TLS", "addr", prepared.Bound())
+		}
+		if prepared.InsecureIgnored(cfg.Insecure) {
+			logger.Info("insecure ignored because TLS is enabled")
+		}
+		errCh <- server.Serve(prepared.Listener())
 	}()
 
 	sig := make(chan os.Signal, 1)

@@ -22,21 +22,41 @@ const (
 )
 
 type session struct {
+	id       string
 	username string
 	csrf     string
 	created  time.Time
 	seen     time.Time
+	ip       string
+}
+
+// SessionView is one live session the settings page can show.
+// It does not include the cookie or the CSRF secret.
+type SessionView struct {
+	ID      string
+	Current bool
+	Created time.Time
+	Seen    time.Time
+	IP      string
 }
 
 // SessionStore keeps opaque sessions in memory. A restart drops them.
 type SessionStore struct {
-	mu    sync.Mutex
-	now   func() time.Time
-	items map[[32]byte]session
+	mu       sync.Mutex
+	now      func() time.Time
+	idle     time.Duration
+	absolute time.Duration
+	items    map[[32]byte]session
 }
 
-func newSessionStore(now func() time.Time) *SessionStore {
-	return &SessionStore{now: now, items: map[[32]byte]session{}}
+func newSessionStore(now func() time.Time, idle, absolute time.Duration) *SessionStore {
+	if idle <= 0 {
+		idle = IdleTimeout
+	}
+	if absolute <= 0 {
+		absolute = AbsoluteTimeout
+	}
+	return &SessionStore{now: now, idle: idle, absolute: absolute, items: map[[32]byte]session{}}
 }
 
 func (s *SessionStore) setNow(now func() time.Time) {
@@ -50,7 +70,8 @@ func tokenKey(raw string) [32]byte {
 }
 
 // Create returns the raw cookie value and the session CSRF secret.
-func (s *SessionStore) Create(username string) (string, string, error) {
+// ip is the client address stored for the session list.
+func (s *SessionStore) Create(username, ip string) (string, string, error) {
 	raw, err := NewToken()
 	if err != nil {
 		return "", "", err
@@ -59,10 +80,14 @@ func (s *SessionStore) Create(username string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
+	id, err := NewToken()
+	if err != nil {
+		return "", "", err
+	}
 	now := s.now()
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.items[tokenKey(raw)] = session{username: username, csrf: csrf, created: now, seen: now}
+	s.items[tokenKey(raw)] = session{id: id, username: username, csrf: csrf, created: now, seen: now, ip: ip}
 	return raw, csrf, nil
 }
 
@@ -79,7 +104,7 @@ func (s *SessionStore) Lookup(raw string) (string, string, bool) {
 		return "", "", false
 	}
 	now := s.now()
-	if !sessionLive(item, now) {
+	if !s.live(item, now) {
 		delete(s.items, key)
 		return "", "", false
 	}
@@ -88,14 +113,116 @@ func (s *SessionStore) Lookup(raw string) (string, string, bool) {
 	return item.username, item.csrf, true
 }
 
-func sessionLive(item session, now time.Time) bool {
-	if now.Sub(item.created) > AbsoluteTimeout {
+// Touch records the client address of a request that already presented a live session.
+func (s *SessionStore) Touch(raw, ip string) {
+	if raw == "" || ip == "" {
+		return
+	}
+	key := tokenKey(raw)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	item, ok := s.items[key]
+	if !ok {
+		return
+	}
+	item.ip = ip
+	s.items[key] = item
+}
+
+// List returns the live sessions. The one matching raw is marked current.
+func (s *SessionStore) List(raw string) []SessionView {
+	key := tokenKey(raw)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	now := s.now()
+	out := []SessionView{}
+	for id, item := range s.items {
+		if !s.live(item, now) {
+			delete(s.items, id)
+			continue
+		}
+		out = append(out, SessionView{
+			ID:      item.id,
+			Current: raw != "" && id == key,
+			Created: item.created.UTC(),
+			Seen:    item.seen.UTC(),
+			IP:      item.ip,
+		})
+	}
+	sortSessions(out)
+	return out
+}
+
+// RevokeID drops the session with id. current is true when it was the caller's.
+func (s *SessionStore) RevokeID(raw, id string) (username string, current bool, ok bool) {
+	if raw == "" || id == "" {
+		return "", false, false
+	}
+	key := tokenKey(raw)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	caller, exists := s.items[key]
+	if !exists {
+		return "", false, false
+	}
+	for other, item := range s.items {
+		if item.id != id {
+			continue
+		}
+		delete(s.items, other)
+		return caller.username, other == key, true
+	}
+	return "", false, false
+}
+
+// RevokeOthers drops every session except the caller's.
+func (s *SessionStore) RevokeOthers(raw string) (username string, n int, ok bool) {
+	if raw == "" {
+		return "", 0, false
+	}
+	key := tokenKey(raw)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	caller, exists := s.items[key]
+	if !exists {
+		return "", 0, false
+	}
+	for other := range s.items {
+		if other == key {
+			continue
+		}
+		delete(s.items, other)
+		n++
+	}
+	return caller.username, n, true
+}
+
+func (s *SessionStore) live(item session, now time.Time) bool {
+	if now.Sub(item.created) > s.absolute {
 		return false
 	}
-	if now.Sub(item.seen) > IdleTimeout {
+	if now.Sub(item.seen) > s.idle {
 		return false
 	}
 	return true
+}
+
+func sortSessions(items []SessionView) {
+	// Current first, then most recently seen. A stable insertion keeps tests quiet.
+	for i := 1; i < len(items); i++ {
+		j := i
+		for j > 0 && sessionLess(items[j], items[j-1]) {
+			items[j], items[j-1] = items[j-1], items[j]
+			j--
+		}
+	}
+}
+
+func sessionLess(a, b SessionView) bool {
+	if a.Current != b.Current {
+		return a.Current
+	}
+	return a.Seen.After(b.Seen)
 }
 
 // Delete removes one session. The username is returned for the audit line.
@@ -132,7 +259,7 @@ func (s *SessionStore) RotateCSRF(raw string) (string, bool) {
 		return "", false
 	}
 	now := s.now()
-	if !sessionLive(item, now) {
+	if !s.live(item, now) {
 		delete(s.items, key)
 		return "", false
 	}

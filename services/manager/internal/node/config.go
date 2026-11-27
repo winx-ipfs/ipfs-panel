@@ -22,9 +22,17 @@ type Config struct {
 	// ManagedBin, when set, is the panel-installed binary used when KuboBin
 	// is empty. It is called on every start so an upgrade is picked up
 	// without restarting the manager. Nil keeps the PATH lookup.
-	ManagedBin func() string
-	TrustProxy bool
-	Logger     *slog.Logger
+	ManagedBin     func() string
+	TrustProxy     bool
+	TLS            string
+	TLSCert        string
+	TLSKey         string
+	TLSHosts       string
+	Hosts          string
+	Insecure       bool
+	TrustedProxies string
+	WebDir         string
+	Logger         *slog.Logger
 	// KuboLog receives stdout and stderr of a daemon this manager starts.
 	// Nil discards stdout and keeps only the stderr tail used for error detail.
 	KuboLog io.Writer
@@ -117,6 +125,14 @@ func DefaultRepoPath() (string, error) {
 //	-data         IPFS_PANEL_DATA           default DefaultDataDir
 //	-kubo-bin     IPFS_PANEL_KUBO_BIN       default empty (ipfs on PATH)
 //	-trust-proxy              IPFS_PANEL_TRUST_PROXY              default false
+//	-tls                      IPFS_PANEL_TLS                      default off (off or auto)
+//	-tls-cert                 IPFS_PANEL_TLS_CERT                 operator certificate, with -tls-key
+//	-tls-key                  IPFS_PANEL_TLS_KEY                  operator key, with -tls-cert
+//	-tls-hosts                IPFS_PANEL_TLS_HOSTS                extra names on the automatic certificate
+//	-hosts                    IPFS_PANEL_HOSTS                    extra Host names a remote listener accepts
+//	-insecure                 IPFS_PANEL_INSECURE                 allow a remote listen without TLS
+//	-trusted-proxies          IPFS_PANEL_TRUSTED_PROXIES          extra proxy IPs or CIDRs
+//	-web                      IPFS_PANEL_WEB                      directory of the built panel
 //	-max-file-bytes           IPFS_PANEL_MAX_FILE_BYTES           default 512 MiB
 //	-files-timeout            IPFS_PANEL_FILES_TIMEOUT            default 20s
 //	-files-transfer-timeout   IPFS_PANEL_FILES_TRANSFER_TIMEOUT   default 10m
@@ -142,6 +158,10 @@ func LoadConfig(args []string) (Config, error) {
 	if addrDefault == "" {
 		addrDefault = "127.0.0.1:8080"
 	}
+	tlsDefault := strings.TrimSpace(os.Getenv("IPFS_PANEL_TLS"))
+	if tlsDefault == "" {
+		tlsDefault = "off"
+	}
 
 	fs := flag.NewFlagSet("manager", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
@@ -150,6 +170,14 @@ func LoadConfig(args []string) (Config, error) {
 	data := fs.String("data", dataDefault, "manager data directory (env IPFS_PANEL_DATA)")
 	bin := fs.String("kubo-bin", os.Getenv("IPFS_PANEL_KUBO_BIN"), "ipfs binary (env IPFS_PANEL_KUBO_BIN); empty searches PATH")
 	trust := fs.Bool("trust-proxy", envBool(os.Getenv("IPFS_PANEL_TRUST_PROXY")), "trust X-Forwarded-Proto and X-Forwarded-For from a reverse proxy (env IPFS_PANEL_TRUST_PROXY)")
+	tlsMode := fs.String("tls", tlsDefault, "tls mode: off or auto (env IPFS_PANEL_TLS)")
+	tlsCert := fs.String("tls-cert", os.Getenv("IPFS_PANEL_TLS_CERT"), "PEM certificate for TLS (env IPFS_PANEL_TLS_CERT)")
+	tlsKey := fs.String("tls-key", os.Getenv("IPFS_PANEL_TLS_KEY"), "PEM private key for TLS (env IPFS_PANEL_TLS_KEY)")
+	tlsHosts := fs.String("tls-hosts", os.Getenv("IPFS_PANEL_TLS_HOSTS"), "comma-separated names for the automatic certificate (env IPFS_PANEL_TLS_HOSTS)")
+	hosts := fs.String("hosts", os.Getenv("IPFS_PANEL_HOSTS"), "comma-separated Host names a remote listener accepts (env IPFS_PANEL_HOSTS)")
+	insecure := fs.Bool("insecure", envBool(os.Getenv("IPFS_PANEL_INSECURE")), "allow a non-loopback listen without TLS; passwords travel in cleartext (env IPFS_PANEL_INSECURE)")
+	proxies := fs.String("trusted-proxies", os.Getenv("IPFS_PANEL_TRUSTED_PROXIES"), "comma-separated proxy IPs or CIDRs, in addition to loopback (env IPFS_PANEL_TRUSTED_PROXIES)")
+	webDir := fs.String("web", os.Getenv("IPFS_PANEL_WEB"), "directory of the built panel (env IPFS_PANEL_WEB)")
 	maxDefault, err := envPositiveInt("IPFS_PANEL_MAX_FILE_BYTES")
 	if err != nil {
 		return Config{}, err
@@ -182,6 +210,14 @@ func LoadConfig(args []string) (Config, error) {
 		DataDir:              *data,
 		KuboBin:              *bin,
 		TrustProxy:           *trust,
+		TLS:                  *tlsMode,
+		TLSCert:              *tlsCert,
+		TLSKey:               *tlsKey,
+		TLSHosts:             *tlsHosts,
+		Hosts:                *hosts,
+		Insecure:             *insecure,
+		TrustedProxies:       *proxies,
+		WebDir:               *webDir,
 		MaxFileBytes:         *maxBytes,
 		FilesTimeout:         *opTimeout,
 		FilesTransferTimeout: *transferTimeout,

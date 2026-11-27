@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/access"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/auth"
 )
 
@@ -32,7 +33,7 @@ func (h *authHTTP) setupStatus(w http.ResponseWriter, r *http.Request) {
 		writeProblem(w, &statusError{code: http.StatusInternalServerError, msg: "unavailable"})
 		return
 	}
-	setCSRFCookie(w, r, token, h.svc.TrustProxy())
+	setCSRFCookie(w, r, token, h.svc.TrustProxy(), h.svc.AbsoluteTimeout())
 	required, err := h.svc.SetupRequired()
 	if err != nil {
 		writeProblem(w, &statusError{code: http.StatusInternalServerError, msg: "unavailable"})
@@ -40,7 +41,7 @@ func (h *authHTTP) setupStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"setupRequired":      required,
-		"setupTokenRequired": required && !auth.IsLoopback(r.RemoteAddr),
+		"setupTokenRequired": required && !setupLoopback(r, h.svc.TrustProxy()),
 		"csrfToken":          token,
 	})
 }
@@ -59,13 +60,14 @@ func (h *authHTTP) setup(w http.ResponseWriter, r *http.Request) {
 		writeProblem(w, err)
 		return
 	}
-	res, err := h.svc.Setup(body.Username, body.Password, r.RemoteAddr, body.SetupToken)
+	loop := setupLoopback(r, h.svc.TrustProxy())
+	res, err := h.svc.SetupFrom(body.Username, body.Password, clientIP(r, h.svc.TrustProxy()), loop, body.SetupToken)
 	if err != nil {
 		writeAuthErr(w, err)
 		return
 	}
-	setSessionCookie(w, r, res.Session, h.svc.TrustProxy())
-	setCSRFCookie(w, r, res.CSRF, h.svc.TrustProxy())
+	setSessionCookie(w, r, res.Session, h.svc.TrustProxy(), h.svc.AbsoluteTimeout())
+	setCSRFCookie(w, r, res.CSRF, h.svc.TrustProxy(), h.svc.AbsoluteTimeout())
 	writeJSON(w, http.StatusCreated, map[string]string{
 		"username":  res.Username,
 		"csrfToken": res.CSRF,
@@ -90,8 +92,8 @@ func (h *authHTTP) login(w http.ResponseWriter, r *http.Request) {
 		writeAuthErr(w, err)
 		return
 	}
-	setSessionCookie(w, r, res.Session, h.svc.TrustProxy())
-	setCSRFCookie(w, r, res.CSRF, h.svc.TrustProxy())
+	setSessionCookie(w, r, res.Session, h.svc.TrustProxy(), h.svc.AbsoluteTimeout())
+	setCSRFCookie(w, r, res.CSRF, h.svc.TrustProxy(), h.svc.AbsoluteTimeout())
 	writeJSON(w, http.StatusOK, map[string]string{
 		"username":  res.Username,
 		"csrfToken": res.CSRF,
@@ -104,7 +106,7 @@ func (h *authHTTP) session(w http.ResponseWriter, r *http.Request) {
 		writeProblem(w, &statusError{code: http.StatusUnauthorized, msg: "unauthorized"})
 		return
 	}
-	setCSRFCookie(w, r, p.csrf, h.svc.TrustProxy())
+	setCSRFCookie(w, r, p.csrf, h.svc.TrustProxy(), h.svc.AbsoluteTimeout())
 	writeJSON(w, http.StatusOK, map[string]string{
 		"username":  p.username,
 		"csrfToken": p.csrf,
@@ -143,11 +145,25 @@ func (h *authHTTP) password(w http.ResponseWriter, r *http.Request) {
 		writeAuthErr(w, err)
 		return
 	}
-	setCSRFCookie(w, r, res.CSRF, h.svc.TrustProxy())
+	setCSRFCookie(w, r, res.CSRF, h.svc.TrustProxy(), h.svc.AbsoluteTimeout())
 	writeJSON(w, http.StatusOK, map[string]string{
 		"username":  res.Username,
 		"csrfToken": res.CSRF,
 	})
+}
+
+// setupLoopback is the first-run decision. A direct loopback peer is the
+// operator, unless a trusted proxy sits on that peer and the forwarded client
+// is somewhere else. A missing forwarded address then requires the token.
+func setupLoopback(r *http.Request, trust bool) bool {
+	if !auth.IsLoopback(r.RemoteAddr) {
+		return false
+	}
+	if !trust || !access.ProxyPeer(r.RemoteAddr, netsFrom(r)) {
+		return true
+	}
+	ip := access.RightmostForwarded(r.Header.Get("X-Forwarded-For"))
+	return ip != "" && auth.IsLoopback(ip)
 }
 
 func protect(svc *auth.Service, next http.Handler) http.Handler {
@@ -173,6 +189,7 @@ func protect(svc *auth.Service, next http.Handler) http.Handler {
 				return
 			}
 		}
+		svc.TouchSession(raw, clientIP(r, svc.TrustProxy()))
 		ctx := context.WithValue(r.Context(), principalKey{}, principal{raw: raw, username: username, csrf: csrf})
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

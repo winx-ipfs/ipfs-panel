@@ -2,6 +2,7 @@
 import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { passwordAcceptable } from '@/auth/strength'
+import AccessPanel from '@/components/AccessPanel.vue'
 import Card from '@/components/Card.vue'
 import Button from '@/components/Button.vue'
 import InlineText from '@/components/InlineText.vue'
@@ -38,6 +39,7 @@ const passwordError = ref('')
 
 const tabs = computed(() => [
   { id: 'general', label: t('settingsGeneral') },
+  { id: 'access', label: t('settingsAccess') },
   { id: 'account', label: t('accountTab') },
   { id: 'about', label: t('settingsAbout') },
   { id: 'advanced', label: t('settingsAdvanced') },
@@ -128,6 +130,9 @@ function choose(next: ThemePreference) {
             </div>
           </Card>
         </div>
+      </template>
+      <template #access>
+        <AccessPanel v-if="tab === 'access'" />
       </template>
       <template #account>
         <Card>

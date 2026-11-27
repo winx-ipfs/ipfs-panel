@@ -23,6 +23,7 @@ import './styles/pins.css'
 import './styles/scenes.css'
 import './styles/config.css'
 import './styles/logs.css'
+import './styles/access.css'
 
 const app = createApp(App)
 

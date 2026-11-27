@@ -35,7 +35,7 @@ Kubo's own HTTP API, usually `127.0.0.1:5001`, stays on the loopback interface. 
 
 The browser talks to `services/manager`. That process is our API gateway. It checks the session, then calls only the Kubo operations the panel knows how to explain: start and stop, and the file actions. It is not a pass-through of the raw RPC.
 
-Right now the manager listens on `127.0.0.1:8080` unless `MANAGER_ADDR` is set. It answers `GET /health` for itself. `GET /api/node` plus start, stop, and restart, and the files routes, need the session from [Auth](design/auth.md). Do not publish the manager until you have read that. The files routes never hand the browser Kubo's RPC address.
+Right now the manager listens on `127.0.0.1:8080` unless `MANAGER_ADDR` is set. It answers `GET /health` for itself. `GET /api/node` plus start, stop, and restart, and the files routes, need the session from [Auth](design/auth.md). Opening it from another machine is [Remote control](design/remote.md): TLS, or an explicit cleartext flag. Do not publish the manager until you have read that. The files routes never hand the browser Kubo's RPC address.
 
 ## Scenes first, raw config later
 

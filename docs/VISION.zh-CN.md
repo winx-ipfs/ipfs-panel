@@ -35,7 +35,7 @@ Kubo 自己的 HTTP API 一般在 `127.0.0.1:5001`，就留在回环地址上。
 
 浏览器访问的是 `services/manager`。这个进程是我们的 API 网关。它先检查会话，然后只去叫面板讲得清的那些 Kubo 操作：启动和停止，以及文件相关的动作。它不是原始 RPC 的透传。
 
-现在 manager 默认听 `127.0.0.1:8080`，除非设置了 `MANAGER_ADDR`。它用 `GET /health` 说明自己还在。`GET /api/node`、启动、停止、重启，以及文件路由，都需要[认证](design/auth.zh-CN.md)里的会话。在读过那一篇之前，别把 manager 公布出去。文件路由不会把 Kubo 的 RPC 地址交给浏览器。
+现在 manager 默认听 `127.0.0.1:8080`，除非设置了 `MANAGER_ADDR`。它用 `GET /health` 说明自己还在。`GET /api/node`、启动、停止、重启，以及文件路由，都需要[认证](design/auth.zh-CN.md)里的会话。从另一台机器打开它是[远控](design/remote.zh-CN.md)：用 TLS，或者一个明确的明文参数。在读过那一篇之前，别把 manager 公布出去。文件路由不会把 Kubo 的 RPC 地址交给浏览器。
 
 ## 先场景，原始配置以后再说
 

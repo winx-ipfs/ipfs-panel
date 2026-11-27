@@ -32,6 +32,8 @@ var (
 	ErrPasswordUnchanged = errors.New("password_unchanged")
 	// ErrRateLimited is also wrapped by RateLimitError.
 	ErrRateLimited = errors.New("rate_limited")
+	// ErrSessionNotFound means the revoke id is not a live session.
+	ErrSessionNotFound = errors.New("not_found")
 )
 
 // RateLimitError is a login or password-change refusal with a wait.
@@ -52,11 +54,15 @@ type Result struct {
 }
 
 // Options configures a Service. Zero Params is rejected; use DefaultParams.
+// Zero idle and absolute lifetimes use the loopback defaults. A remote listen
+// passes the shorter values from package access.
 type Options struct {
-	Params     Params
-	TrustProxy bool
-	Logger     *slog.Logger
-	Now        func() time.Time
+	Params          Params
+	TrustProxy      bool
+	Logger          *slog.Logger
+	Now             func() time.Time
+	IdleTimeout     time.Duration
+	AbsoluteTimeout time.Duration
 }
 
 // Service is the admin account, its sessions, and the one-time setup token.
@@ -111,7 +117,7 @@ func New(dataDir, repo string, opt Options) (*Service, error) {
 	}
 	svc := &Service{
 		store:    store,
-		sessions: newSessionStore(now),
+		sessions: newSessionStore(now, opt.IdleTimeout, opt.AbsoluteTimeout),
 		limiter:  newLimiter(now),
 		params:   params,
 		dummy:    dummy,
@@ -175,7 +181,12 @@ func (s *Service) TakeSetupToken() (string, bool) {
 
 // Setup creates the admin when the peer is loopback or token matches.
 func (s *Service) Setup(username, password, remoteAddr, token string) (Result, error) {
-	ip := hostOnly(remoteAddr)
+	return s.SetupFrom(username, password, hostOnly(remoteAddr), IsLoopback(remoteAddr), token)
+}
+
+// SetupFrom is Setup with the loopback decision already made.
+// The HTTP layer uses it so a trusted proxy is not treated as the operator.
+func (s *Service) SetupFrom(username, password, ip string, loopback bool, token string) (Result, error) {
 	required, err := s.SetupRequired()
 	if err != nil {
 		return Result{}, err
@@ -184,7 +195,6 @@ func (s *Service) Setup(username, password, remoteAddr, token string) (Result, e
 		s.audit("setup", "exists", username, ip)
 		return Result{}, ErrAlreadySetup
 	}
-	loopback := IsLoopback(remoteAddr)
 	if !loopback && !s.tokenMatches(token) {
 		s.audit("setup", "forbidden", username, ip)
 		return Result{}, ErrSetupForbidden
@@ -211,7 +221,7 @@ func (s *Service) Setup(username, password, remoteAddr, token string) (Result, e
 		}
 		return Result{}, err
 	}
-	raw, csrf, err := s.sessions.Create(username)
+	raw, csrf, err := s.sessions.Create(username, ip)
 	if err != nil {
 		return Result{}, err
 	}
@@ -264,7 +274,7 @@ func (s *Service) Login(username, password, ip string) (Result, error) {
 		return Result{}, ErrInvalidCredentials
 	}
 	s.limiter.Success(ip, username)
-	raw, csrf, err := s.sessions.Create(admin.Username)
+	raw, csrf, err := s.sessions.Create(admin.Username, ip)
 	if err != nil {
 		return Result{}, err
 	}
@@ -275,6 +285,46 @@ func (s *Service) Login(username, password, ip string) (Result, error) {
 // LookupSession slides the idle clock when the cookie is still valid.
 func (s *Service) LookupSession(raw string) (string, string, bool) {
 	return s.sessions.Lookup(raw)
+}
+
+// TouchSession records the client IP of a request that presented this cookie.
+func (s *Service) TouchSession(raw, ip string) {
+	s.sessions.Touch(raw, ip)
+}
+
+// Sessions lists live sessions. The caller's cookie is marked current.
+func (s *Service) Sessions(raw string) []SessionView {
+	return s.sessions.List(raw)
+}
+
+// RevokeSession drops one session by its list id.
+func (s *Service) RevokeSession(raw, id, ip string) (bool, error) {
+	username, current, ok := s.sessions.RevokeID(raw, id)
+	if !ok {
+		return false, ErrSessionNotFound
+	}
+	s.auditExtra("session_revoke", "success", username, ip, "current", current)
+	return current, nil
+}
+
+// RevokeOtherSessions drops every session except the caller's.
+func (s *Service) RevokeOtherSessions(raw, ip string) error {
+	username, n, ok := s.sessions.RevokeOthers(raw)
+	if !ok {
+		return ErrSessionNotFound
+	}
+	s.auditExtra("session_revoke_others", "success", username, ip, "dropped", n)
+	return nil
+}
+
+// AbsoluteTimeout is the cookie Max-Age for sessions created by this service.
+func (s *Service) AbsoluteTimeout() time.Duration {
+	s.sessions.mu.Lock()
+	defer s.sessions.mu.Unlock()
+	if s.sessions.absolute <= 0 {
+		return AbsoluteTimeout
+	}
+	return s.sessions.absolute
 }
 
 // Logout drops the session and writes an audit line when it existed.
@@ -358,12 +408,18 @@ func tokenMatchesHash(hash []byte, token string) bool {
 }
 
 func (s *Service) audit(event, result, username, ip string) {
-	s.log.Info("audit",
+	s.auditExtra(event, result, username, ip)
+}
+
+func (s *Service) auditExtra(event, result, username, ip string, extra ...any) {
+	args := []any{
 		"event", event,
 		"result", result,
 		"username", username,
 		"ip", ip,
-	)
+		"remote", ip == "" || !IsLoopback(ip),
+	}
+	s.log.Info("audit", append(args, extra...)...)
 }
 
 // ValidateUsername checks the admin name. It is case-sensitive at login.

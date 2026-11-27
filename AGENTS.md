@@ -10,7 +10,7 @@ Mechanical rules belong in CI, because a rule that is only prose gets skipped. T
 
 A panel for Kubo, the Go IPFS node. `apps/web` is the UI (Vue 3, Vite, TypeScript). `services/manager` is the API gateway (Go, standard library). The browser never talks to Kubo RPC; the manager does, on loopback, and it authenticates first.
 
-`docs/VISION.md` says what this is and what it refuses to become. `docs/ROADMAP.md` numbers the slices that have landed. `docs/PLAN.md` is the agreed sequence. Installing and upgrading Kubo is in. v0.2.0 waits for an explicit release request. The next feature slice after that is remote control of the manager.
+`docs/VISION.md` says what this is and what it refuses to become. `docs/ROADMAP.md` numbers the slices that have landed. `docs/PLAN.md` is the agreed sequence. Remote control of the manager is in. v0.2.0 waits for an explicit release request. The next feature slice after that is the desktop app.
 
 ## The three files that decide arguments
 

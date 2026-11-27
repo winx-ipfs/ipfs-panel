@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/access"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/auth"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/explore"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/logs"
@@ -28,6 +29,7 @@ type parts struct {
 	config  *configHTTP
 	logs    *logsHTTP
 	kubo    *kuboHTTP
+	access  *accessHTTP
 }
 
 // NewMux is the manager HTTP API.
@@ -48,12 +50,23 @@ func NewMuxWithLogs(sup *node.Supervisor, svc *auth.Service, store *logs.Store) 
 	})
 }
 
+// NewMuxConfigured is NewMuxWithLogs plus the access snapshot the settings page reads.
+func NewMuxConfigured(sup *node.Supervisor, svc *auth.Service, store *logs.Store, snap func() access.Snapshot) http.Handler {
+	return newMux(parts{
+		sup:    sup,
+		auth:   svc,
+		logs:   &logsHTTP{sup: sup, store: store, trust: svc.TrustProxy()},
+		access: &accessHTTP{svc: svc, snap: snap},
+	})
+}
+
 func newMux(p parts) http.Handler {
 	sup, svc := p.sup, p.auth
 	filesHandler, pinsHandler := p.files, p.pins
 	exploreHandler, peersHandler := p.explore, p.peers
 	peeringHandler, configHandler, logsHandler := p.peering, p.config, p.logs
 	kuboHandler := p.kubo
+	accessHandler := p.access
 	maxBytes, op, transfer := sup.FileLimits()
 	if filesHandler == nil {
 		filesHandler = &filesHTTP{
@@ -116,6 +129,11 @@ func newMux(p parts) http.Handler {
 			kuboHandler.trust = svc.TrustProxy()
 		}
 	}
+	if accessHandler == nil {
+		accessHandler = &accessHTTP{svc: svc}
+	} else if accessHandler.svc == nil {
+		accessHandler.svc = svc
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", health)
 	accounts := &authHTTP{svc: svc}
@@ -140,7 +158,7 @@ func newMux(p parts) http.Handler {
 	mux.HandleFunc("GET /api/scenes/preview", nodes.scenesPreview)
 	mux.HandleFunc("POST /api/scenes/apply", nodes.scenesApply)
 	mux.HandleFunc("POST /api/scenes/revert", nodes.scenesRevert)
-	mount(mux, filesHandler, pinsHandler, exploreHandler, peersHandler, peeringHandler, configHandler, logsHandler, kuboHandler)
+	mount(mux, filesHandler, pinsHandler, exploreHandler, peersHandler, peeringHandler, configHandler, logsHandler, kuboHandler, accessHandler)
 	return protect(svc, mux)
 }
 
