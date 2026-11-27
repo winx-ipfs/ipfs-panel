@@ -110,7 +110,13 @@ jobs:
       - name: Test
         run: npm test
       - name: Install the browser the UI checks drive
-        run: npx playwright install --with-deps chromium
+        # Ubuntu 26.04 runner images ship a Microsoft apt source that answers
+        # 403. apt-get update then fails, and Playwright never installs Chromium.
+        # Removing that source does not remove the libraries the browser needs.
+        run: |
+          sudo grep -l packages.microsoft.com /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null \
+            | sudo xargs -r rm -f
+          npx playwright install --with-deps chromium
       - name: Row menus are clickable
         run: npm run check-menus
       - name: Build
