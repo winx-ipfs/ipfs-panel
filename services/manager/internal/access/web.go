@@ -2,6 +2,7 @@ package access
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -45,25 +46,55 @@ func (s spa) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	rel := path.Clean("/" + r.URL.Path)
-	target := filepath.Join(s.root, filepath.FromSlash(rel))
-	rootWithSep := s.root + string(os.PathSeparator)
-	if target != s.root && !strings.HasPrefix(target, rootWithSep) {
+	// http.Dir cleans the URL path and refuses a name that leaves the root.
+	// The request path is never joined and passed to os.Open from here.
+	name := path.Clean("/" + r.URL.Path)
+	if file, info, ok := openFile(http.Dir(s.root), name); ok {
+		defer func() { _ = file.Close() }()
+		if strings.HasPrefix(name, "/assets/") {
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		}
+		http.ServeContent(w, r, info.Name(), info.ModTime(), file)
+		return
+	}
+	if path.Ext(name) != "" {
 		http.NotFound(w, r)
 		return
 	}
-	info, err := os.Stat(target)
-	if err == nil && !info.IsDir() {
-		if strings.HasPrefix(rel, "/assets/") {
-			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
-		}
-		http.ServeFile(w, r, target)
+	index, err := os.Open(s.index)
+	if err != nil {
+		http.NotFound(w, r)
 		return
 	}
-	if path.Ext(rel) != "" {
+	defer func() { _ = index.Close() }()
+	info, err := index.Stat()
+	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 	w.Header().Set("Cache-Control", "no-cache")
-	http.ServeFile(w, r, s.index)
+	http.ServeContent(w, r, "index.html", info.ModTime(), index)
+}
+
+// openFile returns a regular file inside dir. Directories and missing names
+// are not files. dir is http.Dir so the URL path cannot escape it.
+func openFile(dir http.Dir, name string) (io.ReadSeekCloser, os.FileInfo, bool) {
+	if strings.ContainsRune(name, filepath.Separator) && filepath.Separator != '/' {
+		return nil, nil, false
+	}
+	opened, err := dir.Open(name)
+	if err != nil {
+		return nil, nil, false
+	}
+	info, err := opened.Stat()
+	if err != nil || info.IsDir() {
+		_ = opened.Close()
+		return nil, nil, false
+	}
+	file, ok := opened.(io.ReadSeekCloser)
+	if !ok {
+		_ = opened.Close()
+		return nil, nil, false
+	}
+	return file, info, true
 }
