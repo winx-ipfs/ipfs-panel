@@ -16,6 +16,7 @@ import (
 
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/api"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/auth"
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/kuboinstall"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/logs"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/node"
 )
@@ -56,6 +57,11 @@ func main() {
 	slog.SetDefault(logger)
 	cfg.Logger = logger
 	cfg.KuboLog = logStore.KuboWriter()
+	// Resolved on every start, so an upgrade is the next daemon without a
+	// manager restart. An explicit -kubo-bin still wins inside the supervisor.
+	cfg.ManagedBin = func() string {
+		return kuboinstall.CurrentPath(cfg.DataDir)
+	}
 
 	sup, err := node.New(cfg)
 	if err != nil {

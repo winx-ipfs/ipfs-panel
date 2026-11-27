@@ -75,7 +75,7 @@ The manager sets the child's `IPFS_PATH` to `IPFS_PANEL_REPO`. If the manager's 
 
 The manager creates `IPFS_PANEL_REPO` if it is missing. If the directory cannot be created or is not writable, the state is `failed` with code `repo_not_writable`.
 
-This slice does not install Kubo. A missing binary is `failed` with code `binary_not_found`.
+Installing and upgrading the binary is [Install and upgrade Kubo](design/kubo-install.md). A missing binary is still `failed` with code `binary_not_found` when a start is attempted and nothing can be executed.
 
 ## Ports
 
@@ -222,12 +222,12 @@ The page does not show ports, a gateway link, a Kubo RPC link, or a text field f
 | `starting` | The node is starting. | none |
 | `up` | The node is running. | Stop, Restart |
 | `stopping` | The node is stopping. | none |
-| `failed`, see codes below | one sentence for that code | Start, except `repo_busy` which has no Start, and `binary_not_found` which shows Retry instead of Start |
+| `failed`, see codes below | one sentence for that code | Start, except `repo_busy` which has no Start. `binary_not_found` with source `missing` shows Install. With source `flag` it shows Retry |
 | manager request failed | The panel cannot reach the manager on this machine. | Retry |
 
 `repo_busy` has no Start button because another Kubo already holds the folder. Start would fail the same way again.
 
-`binary_not_found` shows Retry as the primary button, and a secondary link, "How to install Kubo", to `https://docs.ipfs.tech/install/command-line/` (a new tab). Retry posts start, so a person who just installed Kubo can try again. Start is not the label: starting cannot succeed until the `ipfs` command exists.
+When the Kubo status source is `missing`, the primary button is Install Kubo, not Start and not Retry. The page follows [Install and upgrade Kubo](design/kubo-install.md). A quiet link, "Install Kubo yourself", still opens `https://docs.ipfs.tech/install/command-line/` in a new tab. When the source is `flag` and that file cannot be executed, the button stays Retry: the panel does not download a replacement for a binary the operator chose.
 
 A backtick pair in a sentence marks inline code. The panel renders the inside as a code chip. The backtick characters are not shown. `error.detail` is never parsed this way.
 
@@ -274,7 +274,7 @@ The dev server proxies `/api` and `/health` to `http://127.0.0.1:8080` (see `app
 
 | Code | When | What the manager does |
 | --- | --- | --- |
-| `binary_not_found` | The binary from `IPFS_PANEL_KUBO_BIN` or `PATH` cannot be executed. | `failed`. No process. |
+| `binary_not_found` | The explicit binary, the panel-installed binary, or `ipfs` on `PATH` cannot be executed. Resolution order is in [Install and upgrade Kubo](design/kubo-install.md). | `failed`. No process. |
 | `repo_not_writable` | The panel repo cannot be created or written. | `failed`. No process. |
 | `init_failed` | `ipfs init` exits non-zero, or exceeds 60s. | `failed`. Leave the directory in place. |
 | `api_not_loopback` | Any API address is not loopback. | Do not start. `failed`. |
@@ -320,7 +320,7 @@ Later slices, not this one:
 
 - Login and sessions. When login exists, these routes take the same session check. The JSON in this document stays.
 - Adding, reading, and listing files. MFS. Pins and unpin.
-- Installing or upgrading the Kubo binary.
+- Installing or upgrading the Kubo binary. That is [Install and upgrade Kubo](design/kubo-install.md).
 - Swarm listen edits, bootstrap, peering, a raw config editor. Scenes are specified in [Scenes](design/scenes.md).
 - A log page, repo size. Peer count and bandwidth rates are on the connection card, above.
 - A second node, or a Kubo on another machine.

@@ -47,6 +47,22 @@ func run(ctx context.Context, bin string, args []string, repo string) cmdOut {
 	return cmdOut{stdout: stdout.buf, stderr: stderr.String(), err: err}
 }
 
+// kuboBinary resolves the binary for this start. An explicit path wins.
+// Otherwise a panel-installed binary wins over whatever is on PATH, so an
+// install is what the next start runs. PATH remains the expert's binary
+// when the panel has not installed one.
+func (s *Supervisor) kuboBinary() (string, *codedError) {
+	if s.cfg.KuboBin != "" {
+		return resolveBin(s.cfg.KuboBin)
+	}
+	if s.cfg.ManagedBin != nil {
+		if path := strings.TrimSpace(s.cfg.ManagedBin()); path != "" {
+			return resolveBin(path)
+		}
+	}
+	return resolveBin("")
+}
+
 func resolveBin(explicit string) (string, *codedError) {
 	if explicit != "" {
 		info, err := os.Stat(explicit)

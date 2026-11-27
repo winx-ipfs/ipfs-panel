@@ -48,7 +48,7 @@ jobs:
           set -eu
           log="${RUNNER_TEMP}/kubo-integration.txt"
           set -o pipefail
-          go test -count=1 -timeout 15m -v -run 'TestRealKubo' ./internal/node/ | tee "$log"
+          go test -count=1 -timeout 15m -v -run 'TestRealKubo' ./internal/node/ ./internal/kuboinstall/ | tee "$log"
           if grep -q -- '--- SKIP:' "$log"; then
             echo "integration test skipped; the harness must run"
             exit 1
@@ -63,5 +63,9 @@ jobs:
           fi
           if ! grep -q -- '--- PASS: TestRealKuboPeering' "$log"; then
             echo "TestRealKuboPeering did not pass"
+            exit 1
+          fi
+          if ! grep -q -- '--- PASS: TestRealKuboInstall' "$log"; then
+            echo "TestRealKuboInstall did not pass"
             exit 1
           fi

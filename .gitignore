@@ -46,6 +46,11 @@ __pycache__/
 /bin/
 /vendor/
 
+# Kubo binaries the manager downloads. They belong in the data directory,
+# which is outside the repo by default. Ignore the directory name so a
+# data directory placed inside a checkout cannot be committed.
+kubo-bin/
+
 # Local reference material: cloned upstream sources for study, never committed.
 # Anchored to the repo root so a future docs/reference/ is not silently ignored.
 /reference/

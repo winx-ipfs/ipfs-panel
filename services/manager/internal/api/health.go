@@ -27,6 +27,7 @@ type parts struct {
 	peering *peeringHTTP
 	config  *configHTTP
 	logs    *logsHTTP
+	kubo    *kuboHTTP
 }
 
 // NewMux is the manager HTTP API.
@@ -52,6 +53,7 @@ func newMux(p parts) http.Handler {
 	filesHandler, pinsHandler := p.files, p.pins
 	exploreHandler, peersHandler := p.explore, p.peers
 	peeringHandler, configHandler, logsHandler := p.peering, p.config, p.logs
+	kuboHandler := p.kubo
 	maxBytes, op, transfer := sup.FileLimits()
 	if filesHandler == nil {
 		filesHandler = &filesHTTP{
@@ -106,6 +108,14 @@ func newMux(p parts) http.Handler {
 	} else if logsHandler.sup == nil {
 		logsHandler.sup = sup
 	}
+	if kuboHandler == nil {
+		kuboHandler = &kuboHTTP{sup: sup, trust: svc.TrustProxy()}
+	} else if kuboHandler.sup == nil {
+		kuboHandler.sup = sup
+		if !kuboHandler.trust {
+			kuboHandler.trust = svc.TrustProxy()
+		}
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", health)
 	accounts := &authHTTP{svc: svc}
@@ -130,7 +140,7 @@ func newMux(p parts) http.Handler {
 	mux.HandleFunc("GET /api/scenes/preview", nodes.scenesPreview)
 	mux.HandleFunc("POST /api/scenes/apply", nodes.scenesApply)
 	mux.HandleFunc("POST /api/scenes/revert", nodes.scenesRevert)
-	mount(mux, filesHandler, pinsHandler, exploreHandler, peersHandler, peeringHandler, configHandler, logsHandler)
+	mount(mux, filesHandler, pinsHandler, exploreHandler, peersHandler, peeringHandler, configHandler, logsHandler, kuboHandler)
 	return protect(svc, mux)
 }
 

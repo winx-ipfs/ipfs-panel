@@ -75,7 +75,7 @@ manager 把子进程的 `IPFS_PATH` 设成 `IPFS_PANEL_REPO`。就算 manager �
 
 `IPFS_PANEL_REPO` 不存在时，manager 创建它。创建不了或不能写，状态是 `failed`，代码 `repo_not_writable`。
 
-这一片不负责安装 Kubo。找不到二进制就是 `failed`，代码 `binary_not_found`。
+安装和升级二进制是[安装与升级 Kubo](design/kubo-install.zh-CN.md)。尝试启动时如果没有可执行的文件，找不到二进制仍然是 `failed`，代码 `binary_not_found`。
 
 ## 端口
 
@@ -222,12 +222,12 @@ POST 的规则：
 | `starting` | 节点正在启动。 | 无 |
 | `up` | 节点正在运行。 | 停止、重启 |
 | `stopping` | 节点正在停止。 | 无 |
-| `failed`，见下面的代码 | 对应该代码的一句 | 启动；`repo_busy` 没有启动按钮；`binary_not_found` 显示的是重试，不是启动 |
+| `failed`，见下面的代码 | 对应该代码的一句 | 启动；`repo_busy` 没有启动按钮。来源是 `missing` 的 `binary_not_found` 显示安装。来源是 `flag` 时显示重试 |
 | 请求 manager 失败 | 面板连不上这台机器上的管理服务。 | 重试 |
 
 `repo_busy` 不放「启动」。文件夹已经被另一个 Kubo 占用，再点一次还是同样的失败。
 
-`binary_not_found` 的主按钮是「重试」，旁边是次要链接「如何安装 Kubo」，指向 `https://docs.ipfs.tech/install/command-line/`（新标签页）。重试发出的是启动，这样刚装好 Kubo 的人可以再试一次。按钮不写「启动」：在有 `ipfs` 这条命令之前，启动不会成功。
+Kubo 状态的来源是 `missing` 时，主按钮是「安装 Kubo」，不是启动，也不是重试。页面按[安装与升级 Kubo](design/kubo-install.zh-CN.md) 做。一个安静的链接「自己安装 Kubo」仍然在新标签页打开 `https://docs.ipfs.tech/install/command-line/`。来源是 `flag` 而那个文件执行不了时，按钮仍是重试：操作者指定了二进制，面板不为它下载替代品。
 
 句子里的一对反引号表示行内代码。面板把里面的词画成代码芯片。反引号本身不显示。`error.detail` 不按这个规则解析。
 
@@ -274,7 +274,7 @@ POST 的规则：
 
 | 代码 | 何时 | manager 做什么 |
 | --- | --- | --- |
-| `binary_not_found` | `IPFS_PANEL_KUBO_BIN` 或 `PATH` 里的二进制执行不了。 | `failed`。没有进程。 |
+| `binary_not_found` | 显式指定的二进制、面板安装的二进制，或 `PATH` 上的 `ipfs` 执行不了。查找顺序在[安装与升级 Kubo](design/kubo-install.zh-CN.md)。 | `failed`。没有进程。 |
 | `repo_not_writable` | 面板仓库建不出来或不能写。 | `failed`。没有进程。 |
 | `init_failed` | `ipfs init` 非零退出，或超过 60 秒。 | `failed`。目录留在原地。 |
 | `api_not_loopback` | 有 API 地址不是回环。 | 不启动。`failed`。 |
@@ -320,7 +320,7 @@ Kubo API 留在回环。网关留在回环。任一检查失败，manager 就拒
 
 - 登录和会话。有登录之后，这些路由走同一套会话检查。本文的 JSON 保持不变。
 - 添加、读取、列出文件。MFS。pin 和取消 pin。
-- 安装或升级 Kubo 二进制。
+- 安装或升级 Kubo 二进制。那是[安装与升级 Kubo](design/kubo-install.zh-CN.md)。
 - 改 swarm 监听、bootstrap、对等连接、原始配置编辑器。场景的规格在[场景](design/scenes.zh-CN.md)。
 - 日志页、仓库大小。对等节点数和带宽速率在连接卡片上，见上。
 - 第二个节点，或另一台机器上的 Kubo。
