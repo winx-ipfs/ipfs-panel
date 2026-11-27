@@ -302,7 +302,7 @@ A crash while `up` becomes `failed` / `daemon_exited` on the next probe. The 5s 
 
 ## Security
 
-The manager's default listen address stays `127.0.0.1:8080`. Publishing the manager is still a decision, not the default: `/api` now requires a session, and `MANAGER_ADDR` can still be pointed at a public interface. Do not do that unless you mean to, and read [Auth](design/auth.md) first.
+The manager's default listen address stays `127.0.0.1:8080`. Publishing the manager is still a decision, not the default. A non-loopback listen needs TLS or `-insecure`, as [Remote control](design/remote.md) specifies. `/api` requires a session. Do not publish the manager unless you mean to, and read that file and [Auth](design/auth.md) first.
 
 The Kubo API stays on loopback. The gateway stays on loopback. The manager refuses to start the daemon when either check fails. The implementation writes those addresses only in the moment after `ipfs init` created the repo. A later edit that opens them up is a reason to refuse, not a reason to start and hope.
 

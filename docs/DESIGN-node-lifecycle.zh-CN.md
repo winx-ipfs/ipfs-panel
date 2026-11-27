@@ -302,7 +302,7 @@ Kubo 状态的来源是 `missing` 时，主按钮是「安装 Kubo」，不是�
 
 ## 安全
 
-manager 的默认监听地址仍是 `127.0.0.1:8080`。把 manager 公布出去仍然不是默认：`/api` 现在需要会话，而且 `MANAGER_ADDR` 仍然可以被指到公网网卡。除非你就是要这么做，否则不要那样设置，并且先读[认证](design/auth.zh-CN.md)。
+manager 的默认监听地址仍是 `127.0.0.1:8080`。把 manager 公布出去仍然不是默认。不是回环的监听需要 TLS 或 `-insecure`，见[远控](design/remote.zh-CN.md)。`/api` 需要会话。除非你就是要这么做，否则不要那样设置，并且先读那一篇和[认证](design/auth.zh-CN.md)。
 
 Kubo API 留在回环。网关留在回环。任一检查失败，manager 就拒绝启动 daemon。只有在 `ipfs init` 刚刚创建仓库的那一刻，实现才去写这两个地址。之后若有人把它们改成对外，这是拒绝启动的理由，不是“先跑起来再说”的理由。
 

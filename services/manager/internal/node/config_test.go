@@ -12,6 +12,14 @@ func TestLoadConfigDefaults(t *testing.T) {
 	t.Setenv("IPFS_PANEL_DATA", "")
 	t.Setenv("IPFS_PANEL_KUBO_BIN", "")
 	t.Setenv("IPFS_PANEL_TRUST_PROXY", "")
+	t.Setenv("IPFS_PANEL_TLS", "")
+	t.Setenv("IPFS_PANEL_TLS_CERT", "")
+	t.Setenv("IPFS_PANEL_TLS_KEY", "")
+	t.Setenv("IPFS_PANEL_TLS_HOSTS", "")
+	t.Setenv("IPFS_PANEL_HOSTS", "")
+	t.Setenv("IPFS_PANEL_INSECURE", "")
+	t.Setenv("IPFS_PANEL_TRUSTED_PROXIES", "")
+	t.Setenv("IPFS_PANEL_WEB", "")
 	t.Setenv("XDG_DATA_HOME", "")
 
 	cfg, err := LoadConfig(nil)
@@ -38,8 +46,8 @@ func TestLoadConfigDefaults(t *testing.T) {
 	if cfg.DataDir != data {
 		t.Fatalf("data %s want %s", cfg.DataDir, data)
 	}
-	if cfg.TrustProxy {
-		t.Fatal("trust proxy default")
+	if cfg.TrustProxy || cfg.Insecure || cfg.TLS != "off" || cfg.WebDir != "" || cfg.TrustedProxies != "" {
+		t.Fatalf("remote defaults %+v", cfg)
 	}
 }
 

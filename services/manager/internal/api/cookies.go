@@ -8,7 +8,9 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/access"
 	"github.com/winx-ipfs/ipfs-panel/services/manager/internal/auth"
 )
 
@@ -56,32 +58,38 @@ func secureCookie(r *http.Request, trustProxy bool) bool {
 	if r.TLS != nil {
 		return true
 	}
-	proto := ""
-	if trustProxy {
-		proto = r.Header.Get("X-Forwarded-Proto")
+	if !trustProxy || !access.ProxyPeer(r.RemoteAddr, netsFrom(r)) {
+		return false
 	}
-	first, _, _ := strings.Cut(proto, ",")
+	first, _, _ := strings.Cut(r.Header.Get("X-Forwarded-Proto"), ",")
 	return strings.EqualFold(strings.TrimSpace(first), "https")
 }
 
-func setSessionCookie(w http.ResponseWriter, r *http.Request, raw string, trustProxy bool) {
+func cookieLifetime(d time.Duration) int {
+	if d <= 0 {
+		d = auth.AbsoluteTimeout
+	}
+	return int(d.Seconds())
+}
+
+func setSessionCookie(w http.ResponseWriter, r *http.Request, raw string, trustProxy bool, lifetime time.Duration) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     auth.SessionCookieName,
 		Value:    raw,
 		Path:     "/",
-		MaxAge:   int(auth.AbsoluteTimeout.Seconds()),
+		MaxAge:   cookieLifetime(lifetime),
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 		Secure:   secureCookie(r, trustProxy),
 	})
 }
 
-func setCSRFCookie(w http.ResponseWriter, r *http.Request, token string, trustProxy bool) {
+func setCSRFCookie(w http.ResponseWriter, r *http.Request, token string, trustProxy bool, lifetime time.Duration) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     auth.CSRFCookieName,
 		Value:    token,
 		Path:     "/",
-		MaxAge:   int(auth.AbsoluteTimeout.Seconds()),
+		MaxAge:   cookieLifetime(lifetime),
 		HttpOnly: false,
 		SameSite: http.SameSiteStrictMode,
 		Secure:   secureCookie(r, trustProxy),
@@ -137,18 +145,14 @@ func originOK(r *http.Request) bool {
 }
 
 func clientIP(r *http.Request, trustProxy bool) string {
-	if trustProxy {
-		if fwd := r.Header.Get("X-Forwarded-For"); fwd != "" {
-			parts := strings.Split(fwd, ",")
-			ip := strings.TrimSpace(parts[len(parts)-1])
-			if net.ParseIP(ip) != nil {
-				return ip
-			}
-		}
-	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		return r.RemoteAddr
+		host = r.RemoteAddr
+	}
+	if trustProxy && access.ProxyPeer(r.RemoteAddr, netsFrom(r)) {
+		if ip := access.RightmostForwarded(r.Header.Get("X-Forwarded-For")); ip != "" {
+			return ip
+		}
 	}
 	return host
 }
